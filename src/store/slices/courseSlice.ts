@@ -7,6 +7,7 @@ export interface Course {
   instructor: string;
   price: number;
   thumbnail?: string;
+  videoUrl?: string;
   createdAt: string;
 }
 
