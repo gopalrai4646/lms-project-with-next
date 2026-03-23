@@ -4,19 +4,27 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
 
-const menuItems = [
+const userMenuItems = [
   { name: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { name: 'My Courses', href: '/courses', icon: '📚' },
-  { name: 'Assignments', href: '/assignments', icon: '📝' },
-  { name: 'Messages', href: '/messages', icon: '✉️' },
+  { name: 'Courses', href: '/courses', icon: '📚' },
+  { name: 'Training Plans', href: '/training-plans', icon: '📋' },
+  { name: 'Account Settings', href: '/settings', icon: '⚙️' },
+];
+
+const adminMenuItems = [
+  { name: 'Admin Dashboard', href: '/admin', icon: '📊' },
+  { name: 'Manage Courses', href: '/admin/courses', icon: '🛠️' },
+  { name: 'Users', href: '/admin/users', icon: '👥' },
   { name: 'Settings', href: '/settings', icon: '⚙️' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, role } = useAppSelector((state) => state.auth);
 
   if (!user) return null;
+
+  const menuItems = role === 'admin' ? adminMenuItems : userMenuItems;
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200 p-4 transition-all duration-300">

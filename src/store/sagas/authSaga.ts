@@ -16,6 +16,8 @@ import {
   loginRequest, 
   signupRequest,
   googleLoginRequest,
+  updateProfileRequest,
+  updateProfileSuccess,
   forgotPasswordRequest, 
   authSuccess, 
   authFailure, 
@@ -115,6 +117,23 @@ function* handleGoogleLogin(): any {
   }
 }
 
+function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): any {
+  try {
+    const { displayName } = action.payload;
+    const currentUser: User = auth.currentUser!;
+    
+    // Update Firebase Auth profile
+    yield call(updateProfile, currentUser, { displayName });
+    
+    // Update Firestore user document
+    yield call(setDoc, doc(db, 'users', currentUser.uid), { displayName }, { merge: true });
+    
+    yield put(updateProfileSuccess({ displayName }));
+  } catch (error: any) {
+    yield put(authFailure(error.message));
+  }
+}
+
 function* handleForgotPassword(action: ReturnType<typeof forgotPasswordRequest>): any {
   try {
     const { email } = action.payload;
@@ -130,6 +149,7 @@ export function* watchAuth() {
   yield takeLatest(signupRequest.type, handleSignup);
   yield takeLatest(logoutRequest.type, handleLogout);
   yield takeLatest(googleLoginRequest.type, handleGoogleLogin);
+  yield takeLatest(updateProfileRequest.type, handleUpdateProfile);
   yield takeLatest(forgotPasswordRequest.type, handleForgotPassword);
 }
 
