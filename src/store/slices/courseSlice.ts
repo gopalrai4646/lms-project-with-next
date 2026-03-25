@@ -32,7 +32,9 @@ const courseSlice = createSlice({
       state.error = null;
     },
     fetchCoursesSuccess: (state, action: PayloadAction<Course[]>) => {
-      state.courses = action.payload;
+      // Filter out any duplicates by ID just in case
+      const uniqueCourses = action.payload.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+      state.courses = uniqueCourses;
       state.loading = false;
     },
     fetchCoursesFailure: (state, action: PayloadAction<string>) => {
@@ -43,7 +45,10 @@ const courseSlice = createSlice({
       state.loading = true;
     },
     createCourseSuccess: (state, action: PayloadAction<Course>) => {
-      state.courses.unshift(action.payload);
+      const exists = state.courses.some(c => c.id === action.payload.id);
+      if (!exists) {
+        state.courses.unshift(action.payload);
+      }
       state.loading = false;
     },
     updateCourseRequest: (state, _action: PayloadAction<Partial<Course> & { id: string }>) => {

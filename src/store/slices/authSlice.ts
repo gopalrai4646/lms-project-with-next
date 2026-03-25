@@ -5,6 +5,8 @@ interface AuthState {
     uid: string;
     email: string | null;
     displayName: string | null;
+    enrolledCourses?: string[];
+    savedCourses?: string[];
   } | null;
   role: 'student' | 'admin' | null;
   loading: boolean;
@@ -71,6 +73,32 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    enrollCourseRequest: (state, _action: PayloadAction<string>) => {
+      state.loading = true;
+    },
+    enrollCourseSuccess: (state, action: PayloadAction<string>) => {
+      if (state.user) {
+        if (!state.user.enrolledCourses) state.user.enrolledCourses = [];
+        if (!state.user.enrolledCourses.includes(action.payload)) {
+          state.user.enrolledCourses.push(action.payload);
+        }
+      }
+      state.loading = false;
+    },
+    saveCourseRequest: (state, _action: PayloadAction<string>) => {
+      // Optional: use a separate loading state if needed
+    },
+    saveCourseSuccess: (state, action: PayloadAction<string>) => {
+      if (state.user) {
+        if (!state.user.savedCourses) state.user.savedCourses = [];
+        const index = state.user.savedCourses.indexOf(action.payload);
+        if (index === -1) {
+          state.user.savedCourses.push(action.payload);
+        } else {
+          state.user.savedCourses.splice(index, 1); // Toggle save
+        }
+      }
     }
   },
 });
@@ -86,7 +114,11 @@ export const {
   authFailure, 
   logoutRequest, 
   logoutSuccess,
-  clearError
+  clearError,
+  enrollCourseRequest,
+  enrollCourseSuccess,
+  saveCourseRequest,
+  saveCourseSuccess
 } = authSlice.actions;
 
 export default authSlice.reducer;

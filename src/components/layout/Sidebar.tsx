@@ -5,26 +5,31 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
 
-const userMenuItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { name: 'Courses', href: '/courses', icon: '📚' },
-  { name: 'Training Plans', href: '/training-plans', icon: '📋' },
-  { name: 'Account Settings', href: '/settings', icon: '⚙️' },
-];
-
-const adminMenuItems = [
-  { name: 'Admin Dashboard', href: '/admin', icon: '📊' },
-  { name: 'Manage Courses', href: '/admin/courses', icon: '🛠️' },
-  { name: 'Users', href: '/admin/users', icon: '👥' },
-  { name: 'Settings', href: '/settings', icon: '⚙️' },
-];
+import { translations } from '@/utils/translations';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, role } = useAppSelector((state) => state.auth);
+  const { language } = useAppSelector((state) => state.settings);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const t = translations[language].nav;
+
   if (!user) return null;
+
+  const userMenuItems = [
+    { name: t.dashboard, href: '/dashboard', icon: '🏠' },
+    { name: t.courses, href: '/courses', icon: '📚' },
+    { name: t.trainingPlans, href: '/training-plans', icon: '📋' },
+    { name: t.accountSettings, href: '/settings', icon: '⚙️' },
+  ];
+
+  const adminMenuItems = [
+    { name: t.adminDashboard, href: '/admin', icon: '📊' },
+    { name: t.manageCourses, href: '/admin/courses', icon: '🛠️' },
+    { name: t.users, href: '/admin/users', icon: '👥' },
+    { name: t.settings, href: '/settings', icon: '⚙️' },
+  ];
 
   const menuItems = role === 'admin' ? adminMenuItems : userMenuItems;
 
@@ -77,10 +82,10 @@ export default function Sidebar() {
         <div className="absolute bottom-8 left-4 right-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="p-4 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-3xl text-white shadow-xl shadow-indigo-100 overflow-hidden relative group/card">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full blur-2xl group-hover/card:bg-white/20 transition-all" />
-            <p className="text-[10px] font-black tracking-widest text-indigo-200 mb-1 uppercase">Pro Plan</p>
-            <p className="text-sm font-bold mb-4 leading-tight">Unlock all premium courses</p>
+            <p className="text-[10px] font-black tracking-widest text-indigo-200 mb-1 uppercase">{t.proPlan}</p>
+            <p className="text-sm font-bold mb-4 leading-tight">{t.unlockPremium}</p>
             <button className="w-full py-2.5 bg-white text-indigo-700 rounded-xl text-xs font-black hover:bg-indigo-50 transition-all shadow-sm active:scale-95">
-              Upgrade Now
+              {t.upgradeNow}
             </button>
           </div>
         </div>

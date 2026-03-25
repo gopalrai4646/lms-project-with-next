@@ -4,12 +4,14 @@ import {
   getDocs, 
   addDoc, 
   updateDoc, 
+  getDoc,
   deleteDoc, 
   doc, 
   serverTimestamp,
   query,
   orderBy
 } from 'firebase/firestore';
+import { extractPublicIdFromUrl } from '@/utils/cloudinary-utils';
 import { db } from '@/lib/firebase/config';
 import { 
   fetchCoursesRequest, 
@@ -70,9 +72,55 @@ function* handleUpdateCourse(action: ReturnType<typeof updateCourseRequest>): an
 function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): any {
   try {
     const id = action.payload;
-    yield call(deleteDoc, doc(db, 'courses', id));
+    
+    // 1. Fetch course details to get Cloudinary URLs
+    console.log(`Saga: Fetching course details for deletion: ${id}`);
+    const courseRef = doc(db, 'courses', id);
+    const courseSnap: any = yield call(getDoc, courseRef);
+    
+    if (courseSnap.exists()) {
+      const courseData = courseSnap.data();
+      const assetsToDelete: { publicId: string; resourceType: string }[] = [];
+
+      // Extract thumbnail public ID
+      if (courseData.thumbnail) {
+        const thumbPublicId = extractPublicIdFromUrl(courseData.thumbnail);
+        if (thumbPublicId) {
+          assetsToDelete.push({ publicId: thumbPublicId, resourceType: 'image' });
+        }
+      }
+
+      // Extract video public ID
+      if (courseData.videoUrl) {
+        const videoPublicId = extractPublicIdFromUrl(courseData.videoUrl);
+        if (videoPublicId) {
+          assetsToDelete.push({ publicId: videoPublicId, resourceType: 'video' });
+        }
+      }
+
+      // 2. Delete assets from Cloudinary via API route
+      for (const asset of assetsToDelete) {
+        try {
+          console.log(`Saga: Attempting to delete Cloudinary asset: ${asset.publicId}`);
+          yield call(fetch, '/api/cloudinary/delete', {
+            method: 'POST',
+            body: JSON.stringify(asset),
+            headers: { 'Content-Type': 'application/json' },
+          });
+        } catch (error) {
+          console.error(`Saga: Failed to delete Cloudinary asset ${asset.publicId}:`, error);
+          // Continue with course deletion even if some assets fail
+        }
+      }
+    }
+
+    // 3. Delete course document from Firestore
+    console.log(`Saga: Deleting course document from Firestore: ${id}`);
+    yield call(deleteDoc, courseRef);
     yield put(deleteCourseSuccess(id));
+    
   } catch (error: any) {
+    console.error(`Saga: Error in handleDeleteCourse:`, error.message);
     yield put(fetchCoursesFailure(error.message));
   }
 }

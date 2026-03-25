@@ -10,7 +10,7 @@ import {
   User,
   UserCredential
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
 import { 
   loginRequest, 
@@ -22,7 +22,11 @@ import {
   authSuccess, 
   authFailure, 
   logoutRequest, 
-  logoutSuccess 
+  logoutSuccess,
+  enrollCourseRequest,
+  enrollCourseSuccess,
+  saveCourseRequest,
+  saveCourseSuccess
 } from '../slices/authSlice';
 
 function* handleLogin(action: ReturnType<typeof loginRequest>): any {
@@ -31,11 +35,18 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     const userCredential: UserCredential = yield call(signInWithEmailAndPassword, auth, email, pass);
     const { uid, email: userEmail, displayName } = userCredential.user;
     
-    // Fetch role from Firestore
+    // Fetch role and course data from Firestore
     const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
-    const role = userDoc.exists() ? userDoc.data().role : null;
+    const userData = userDoc.exists() ? userDoc.data() : {};
+    const role = userData.role || null;
+    const enrolledCourses = userData.enrolledCourses || [];
+    const savedCourses = userData.savedCourses || [];
     
-    yield put(authSuccess({ user: { uid, email: userEmail, displayName }, role, isNewUser: false }));
+    yield put(authSuccess({ 
+      user: { uid, email: userEmail, displayName, enrolledCourses, savedCourses }, 
+      role, 
+      isNewUser: false 
+    }));
   } catch (error: any) {
     let message = 'An unexpected error occurred. Please try again.';
     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -57,7 +68,7 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
     const { uid, email: userEmail } = userCredential.user;
     
     // Save user profile to Firestore
-    yield call(setDoc, doc(db, 'users', uid), {
+    yield call(setDoc as any, doc(db, 'users', uid), {
       uid,
       email: userEmail,
       displayName: name,
@@ -65,7 +76,11 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
       createdAt: serverTimestamp(),
     });
 
-    yield put(authSuccess({ user: { uid, email: userEmail, displayName: name }, role, isNewUser: true }));
+    yield put(authSuccess({ 
+      user: { uid, email: userEmail, displayName: name, enrolledCourses: [], savedCourses: [] }, 
+      role, 
+      isNewUser: true 
+    }));
   } catch (error: any) {
     let message = 'Failed to create account. Please try again.';
     if (error.code === 'auth/email-already-in-use') {
@@ -95,11 +110,12 @@ function* handleGoogleLogin(): any {
     const { uid, email, displayName, metadata } = userCredential.user;
     const isNew = metadata.creationTime === metadata.lastSignInTime;
     
-    let role = null;
+    let role = 'student';
+    let enrolledCourses: string[] = [];
+    let savedCourses: string[] = [];
+
     if (isNew) {
-      // Default role for Google users is student
-      role = 'student';
-      yield call(setDoc, doc(db, 'users', uid), {
+      yield call(setDoc as any, doc(db, 'users', uid), {
         uid,
         email,
         displayName,
@@ -108,10 +124,19 @@ function* handleGoogleLogin(): any {
       });
     } else {
       const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
-      role = userDoc.exists() ? userDoc.data().role : 'student';
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        role = userData.role || 'student';
+        enrolledCourses = userData.enrolledCourses || [];
+        savedCourses = userData.savedCourses || [];
+      }
     }
 
-    yield put(authSuccess({ user: { uid, email, displayName }, role, isNewUser: isNew }));
+    yield put(authSuccess({ 
+      user: { uid, email, displayName, enrolledCourses, savedCourses }, 
+      role: role as any, 
+      isNewUser: isNew 
+    }));
   } catch (error: any) {
     yield put(authFailure(error.message));
   }
@@ -126,10 +151,63 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
     yield call(updateProfile, currentUser, { displayName });
     
     // Update Firestore user document
-    yield call(setDoc, doc(db, 'users', currentUser.uid), { displayName }, { merge: true });
+    yield call(setDoc as any, doc(db, 'users', currentUser.uid), { displayName }, { merge: true });
     
     yield put(updateProfileSuccess({ displayName }));
   } catch (error: any) {
+    yield put(authFailure(error.message));
+  }
+}
+
+function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): any {
+  try {
+    const courseId = action.payload;
+    console.log('Saga: Handling enroll course request for:', courseId);
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.error('Saga: No current user found for enrollment');
+      yield put(authFailure('You must be logged in to enroll in a course.'));
+      return;
+    }
+
+    const userRef = doc(db, 'users', currentUser.uid);
+    yield call(setDoc as any, userRef, {
+      enrolledCourses: arrayUnion(courseId)
+    }, { merge: true });
+    
+    console.log('Saga: Successfully enrolled in course:', courseId);
+    yield put(enrollCourseSuccess(courseId));
+  } catch (error: any) {
+    console.error('Saga: Error enrolling in course:', error.message);
+    yield put(authFailure(error.message));
+  }
+}
+
+function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
+  try {
+    const courseId = action.payload;
+    console.log('Saga: Handling save course request for:', courseId);
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.error('Saga: No current user found for saving');
+      yield put(authFailure('You must be logged in to save a course.'));
+      return;
+    }
+
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userDoc: any = yield call(getDoc, userRef);
+    const savedCourses = userDoc.exists() ? userDoc.data().savedCourses || [] : [];
+    
+    const isSaved = savedCourses.includes(courseId);
+    
+    yield call(setDoc as any, userRef, {
+      savedCourses: isSaved ? arrayRemove(courseId) : arrayUnion(courseId)
+    }, { merge: true });
+    
+    console.log('Saga: Successfully toggled save for course:', courseId);
+    yield put(saveCourseSuccess(courseId));
+  } catch (error: any) {
+    console.error('Saga: Error saving course:', error.message);
     yield put(authFailure(error.message));
   }
 }
@@ -151,6 +229,8 @@ export function* watchAuth() {
   yield takeLatest(googleLoginRequest.type, handleGoogleLogin);
   yield takeLatest(updateProfileRequest.type, handleUpdateProfile);
   yield takeLatest(forgotPasswordRequest.type, handleForgotPassword);
+  yield takeLatest(enrollCourseRequest.type, handleEnrollCourse);
+  yield takeLatest(saveCourseRequest.type, handleSaveCourse);
 }
 
 export function* authSaga() {
