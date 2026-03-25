@@ -5,8 +5,7 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-extrabold text-slate-900">Admin Console</h1>
         <p className="text-slate-500 mt-1">Manage users, courses, and system settings.</p>
       </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: 'Total Users', value: '1,280', icon: '👥', color: 'bg-indigo-500' },
           { label: 'Active Courses', value: '42', icon: '📚', color: 'bg-emerald-500' },

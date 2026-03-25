@@ -4,13 +4,16 @@ import { all } from 'redux-saga/effects';
 import authReducer from './slices/authSlice';
 import settingsReducer from './slices/settingsSlice';
 import courseReducer from './slices/courseSlice';
+import userReducer from './slices/userSlice';
 import { authSaga } from './sagas/authSaga';
 import { courseSaga } from './sagas/courseSaga';
+import { userSaga } from './sagas/userSaga';
 
 function* rootSaga() {
   yield all([
     authSaga(),
     courseSaga(),
+    userSaga(),
   ]);
 }
 
@@ -21,6 +24,7 @@ export const store = configureStore({
     auth: authReducer,
     settings: settingsReducer,
     courses: courseReducer,
+    users: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false, serializableCheck: false }).concat(sagaMiddleware),

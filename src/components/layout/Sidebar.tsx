@@ -3,15 +3,23 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
 
 import { translations } from '@/utils/translations';
+import { setMobileMenuOpen } from '@/store/slices/settingsSlice';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
   const { user, role } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
+  const { language, isMobileMenuOpen } = useAppSelector((state) => state.settings);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleLinkClick = () => {
+    if (window.innerWidth < 768) {
+      dispatch(setMobileMenuOpen(false));
+    }
+  };
 
   const t = translations[language].nav;
 
@@ -34,16 +42,25 @@ export default function Sidebar() {
   const menuItems = role === 'admin' ? adminMenuItems : userMenuItems;
 
   return (
-    <aside 
-      className={`fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 transition-all duration-500 ease-in-out z-40 group/sidebar ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
-    >
-      {/* Toggle Button */}
-      <button 
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-4 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-xs shadow-sm hover:bg-slate-50 transition-all z-50 text-slate-400 hover:text-indigo-600"
+    <>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => dispatch(setMobileMenuOpen(false))}
+        />
+      )}
+      
+      <aside 
+        className={`fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 ${
+          isCollapsed ? 'md:w-20' : 'md:w-64'
+        } ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >
+        {/* Toggle Button */}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden md:flex absolute -right-3 top-4 w-6 h-6 bg-white border border-slate-200 rounded-full items-center justify-center text-xs shadow-sm hover:bg-slate-50 transition-all z-50 text-slate-400 hover:text-indigo-600"
+        >
         {isCollapsed ? '→' : '←'}
       </button>
 
@@ -54,6 +71,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleLinkClick}
               title={isCollapsed ? item.name : ''}
               className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group/item relative overflow-hidden ${
                 isActive
@@ -91,5 +109,6 @@ export default function Sidebar() {
         </div>
       )}
     </aside>
+    </>
   );
 }

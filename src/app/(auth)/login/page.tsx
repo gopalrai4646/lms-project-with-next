@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 p-8">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 p-6 md:p-8">
         <div className="text-center mb-10">
           <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
             <span className="text-white font-bold text-2xl">L</span>
@@ -63,7 +63,7 @@ export default function LoginPage() {
           <div>
             <div className="flex justify-between mb-2">
               <label className="block text-sm font-semibold text-slate-700">Password</label>
-              <Link href="/forgot-password" size="sm" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">Forgot Password?</Link>
+              <Link href="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">Forgot Password?</Link>
             </div>
             <input 
               type="password" 

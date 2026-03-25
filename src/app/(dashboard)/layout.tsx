@@ -10,8 +10,8 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       <Sidebar />
-      <main className="pl-64 pt-16 min-h-screen">
-        <div className="p-8 max-w-7xl mx-auto">
+      <main className="pl-0 md:pl-64 pt-16 min-h-screen transition-all">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

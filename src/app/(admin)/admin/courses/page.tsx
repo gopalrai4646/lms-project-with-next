@@ -21,7 +21,7 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex justify-between items-center">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">Manage Courses</h1>
           <p className="text-slate-500 mt-1">Create, update, and manage your learning curriculum</p>
@@ -41,25 +41,27 @@ export default function AdminCoursesPage() {
       )}
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-100">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left min-w-[800px]">
+            <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
               <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Course Info</th>
               <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Instructor</th>
               <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Price</th>
+              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Users</th>
               <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading && courses.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-medium italic">
+                <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium italic">
                   Loading courses...
                 </td>
               </tr>
             ) : courses.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-medium italic">
+                <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium italic">
                   No courses found. Start by creating one!
                 </td>
               </tr>
@@ -82,6 +84,9 @@ export default function AdminCoursesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-bold text-indigo-600">${course.price}</span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">{course.enrolledUsers?.length || 0}</span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -106,6 +111,7 @@ export default function AdminCoursesPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

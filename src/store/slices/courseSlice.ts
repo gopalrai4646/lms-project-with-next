@@ -8,6 +8,7 @@ export interface Course {
   price: number;
   thumbnail?: string;
   videoUrl?: string;
+  enrolledUsers?: string[];
   createdAt: string;
 }
 
@@ -70,6 +71,17 @@ const courseSlice = createSlice({
     },
     clearCourseError: (state) => {
       state.error = null;
+    },
+    enrollUserInCourseSuccess: (state, action: PayloadAction<{ courseId: string; userId: string }>) => {
+      const course = state.courses.find(c => c.id === action.payload.courseId);
+      if (course) {
+        if (!course.enrolledUsers) {
+          course.enrolledUsers = [];
+        }
+        if (!course.enrolledUsers.includes(action.payload.userId)) {
+          course.enrolledUsers.push(action.payload.userId);
+        }
+      }
     }
   },
 });
@@ -84,7 +96,8 @@ export const {
   updateCourseSuccess,
   deleteCourseRequest,
   deleteCourseSuccess,
-  clearCourseError
+  clearCourseError,
+  enrollUserInCourseSuccess
 } = courseSlice.actions;
 
 export default courseSlice.reducer;

@@ -4,18 +4,18 @@ export type Language = 'en' | 'de' | 'fr';
 
 interface SettingsState {
   language: Language;
+  isMobileMenuOpen: boolean;
 }
 
 const getInitialLanguage = (): Language => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('app_language') as Language;
-    if (['en', 'de', 'fr'].includes(saved)) return saved;
-  }
+  // Always return 'en' initially to prevent SSR hydration mismatches.
+  // The saved language is restored via a client-side useEffect.
   return 'en';
 };
 
 const initialState: SettingsState = {
   language: getInitialLanguage(),
+  isMobileMenuOpen: false,
 };
 
 const settingsSlice = createSlice({
@@ -28,8 +28,14 @@ const settingsSlice = createSlice({
         localStorage.setItem('app_language', action.payload);
       }
     },
+    toggleMobileMenu: (state) => {
+      state.isMobileMenuOpen = !state.isMobileMenuOpen;
+    },
+    setMobileMenuOpen: (state, action: PayloadAction<boolean>) => {
+      state.isMobileMenuOpen = action.payload;
+    },
   },
 });
 
-export const { setLanguage } = settingsSlice.actions;
+export const { setLanguage, toggleMobileMenu, setMobileMenuOpen } = settingsSlice.actions;
 export default settingsSlice.reducer;

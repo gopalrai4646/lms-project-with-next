@@ -28,6 +28,7 @@ import {
   saveCourseRequest,
   saveCourseSuccess
 } from '../slices/authSlice';
+import { enrollUserInCourseSuccess } from '../slices/courseSlice';
 
 function* handleLogin(action: ReturnType<typeof loginRequest>): any {
   try {
@@ -174,6 +175,13 @@ function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): an
     yield call(setDoc as any, userRef, {
       enrolledCourses: arrayUnion(courseId)
     }, { merge: true });
+    
+    const courseRef = doc(db, 'courses', courseId);
+    yield call(setDoc as any, courseRef, {
+      enrolledUsers: arrayUnion(currentUser.uid)
+    }, { merge: true });
+    
+    yield put(enrollUserInCourseSuccess({ courseId, userId: currentUser.uid }));
     
     console.log('Saga: Successfully enrolled in course:', courseId);
     yield put(enrollCourseSuccess(courseId));
