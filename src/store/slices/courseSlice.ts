@@ -1,5 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export interface VideoItem {
+  title: string;
+  url: string;
+  order: number;
+}
+
 export interface Course {
   id: string;
   title: string;
@@ -7,7 +13,8 @@ export interface Course {
   instructor: string;
   price: number;
   thumbnail?: string;
-  videoUrl?: string;
+  videoUrl?: string; // kept for backward compatibility
+  videos?: VideoItem[];
   enrolledUsers?: string[];
   createdAt: string;
 }

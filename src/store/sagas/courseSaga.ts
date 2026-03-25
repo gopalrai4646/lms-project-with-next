@@ -90,8 +90,20 @@ function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): an
         }
       }
 
-      // Extract video public ID
-      if (courseData.videoUrl) {
+      // Extract video public IDs from videos array
+      if (courseData.videos && Array.isArray(courseData.videos)) {
+        for (const video of courseData.videos) {
+          if (video.url) {
+            const videoPublicId = extractPublicIdFromUrl(video.url);
+            if (videoPublicId) {
+              assetsToDelete.push({ publicId: videoPublicId, resourceType: 'video' });
+            }
+          }
+        }
+      }
+
+      // Fallback: single videoUrl (legacy courses)
+      if (courseData.videoUrl && (!courseData.videos || courseData.videos.length === 0)) {
         const videoPublicId = extractPublicIdFromUrl(courseData.videoUrl);
         if (videoPublicId) {
           assetsToDelete.push({ publicId: videoPublicId, resourceType: 'video' });
