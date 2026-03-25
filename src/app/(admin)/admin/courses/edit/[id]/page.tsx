@@ -12,8 +12,9 @@ interface VideoEntry {
   file: File | null;
   uploading: boolean;
   uploaded: boolean;
-  url: string; // existing URL or newly uploaded URL
+  url: string;
   isExisting: boolean;
+  duration?: number;
 }
 
 export default function EditCoursePage() {
@@ -41,8 +42,8 @@ export default function EditCoursePage() {
         setFormData({ title: course.title, description: course.description, instructor: course.instructor, price: course.price });
         
         if (course.videos && course.videos.length > 0) {
-          setVideoEntries(course.videos.sort((a, b) => a.order - b.order).map(v => ({
-            title: v.title, file: null, uploading: false, uploaded: true, url: v.url, isExisting: true
+          setVideoEntries([...course.videos].sort((a, b) => a.order - b.order).map(v => ({
+            title: v.title, file: null, uploading: false, uploaded: true, url: v.url, isExisting: true, duration: v.duration || 0
           })));
         } else if (course.videoUrl) {
           // Legacy single-video backward compat
@@ -78,13 +79,28 @@ export default function EditCoursePage() {
     setVideoEntries(prev => prev.map((entry, i) => i === index ? { ...entry, [field]: value } : entry));
   };
 
-  const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve(Math.round(video.duration));
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      updateVideoEntry(index, 'file', e.target.files[0]);
+      const file = e.target.files[0];
+      updateVideoEntry(index, 'file', file);
       updateVideoEntry(index, 'isExisting', false);
       updateVideoEntry(index, 'uploaded', false);
+      const duration = await getVideoDuration(file);
+      updateVideoEntry(index, 'duration', duration);
       if (!videoEntries[index].title) {
-        updateVideoEntry(index, 'title', e.target.files[0].name.replace(/\.[^/.]+$/, ''));
+        updateVideoEntry(index, 'title', file.name.replace(/\.[^/.]+$/, ''));
       }
     }
   };
@@ -103,22 +119,23 @@ export default function EditCoursePage() {
       for (let i = 0; i < videoEntries.length; i++) {
         const entry = videoEntries[i];
         if (entry.isExisting && !entry.file) {
-          // Keep existing video
-          finalVideos.push({ title: entry.title.trim(), url: entry.url, order: finalVideos.length });
+          finalVideos.push({ title: entry.title.trim(), url: entry.url, order: finalVideos.length, duration: entry.duration || 0 });
         } else if (entry.file) {
-          // Upload new video
           updateVideoEntry(i, 'uploading', true);
           const videoUrl = await uploadToCloudinary(entry.file);
           updateVideoEntry(i, 'uploading', false);
           updateVideoEntry(i, 'uploaded', true);
-          finalVideos.push({ title: entry.title.trim(), url: videoUrl, order: finalVideos.length });
+          finalVideos.push({ title: entry.title.trim(), url: videoUrl, order: finalVideos.length, duration: entry.duration || 0 });
         }
       }
+
+      const totalDuration = finalVideos.reduce((acc, v) => acc + (v.duration || 0), 0);
 
       dispatch(updateCourseRequest({
         id: courseId,
         ...formData,
         videos: finalVideos,
+        totalDuration,
         videoUrl: finalVideos[0]?.url,
       }));
 

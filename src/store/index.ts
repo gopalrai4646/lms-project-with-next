@@ -5,15 +5,18 @@ import authReducer from './slices/authSlice';
 import settingsReducer from './slices/settingsSlice';
 import courseReducer from './slices/courseSlice';
 import userReducer from './slices/userSlice';
+import progressReducer from './slices/progressSlice';
 import { authSaga } from './sagas/authSaga';
 import { courseSaga } from './sagas/courseSaga';
 import { userSaga } from './sagas/userSaga';
+import progressSaga from './sagas/progressSaga';
 
 function* rootSaga() {
   yield all([
     authSaga(),
     courseSaga(),
     userSaga(),
+    progressSaga(),
   ]);
 }
 
@@ -25,6 +28,7 @@ export const store = configureStore({
     settings: settingsReducer,
     courses: courseReducer,
     users: userReducer,
+    progress: progressReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false, serializableCheck: false }).concat(sagaMiddleware),

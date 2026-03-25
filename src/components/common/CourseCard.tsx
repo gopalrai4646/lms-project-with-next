@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Course } from '@/store/slices/courseSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -19,7 +20,45 @@ export default function CourseCard({ course }: CourseCardProps) {
   const isEnrolled = user?.enrolledCourses?.includes(course.id);
   const isSaved = user?.savedCourses?.includes(course.id);
 
+  const { progress } = useAppSelector((state) => state.progress);
+  const courseProgress = progress[course.id];
+
+  useEffect(() => {
+    if (isEnrolled && user?.uid && !courseProgress) {
+      dispatch({ type: 'progress/fetchProgressRequest', payload: { userId: user.uid, courseId: course.id } });
+    }
+  }, [isEnrolled, user?.uid, course.id, courseProgress, dispatch]);
+
   const videoCount = course.videos?.length || (course.videoUrl ? 1 : 0);
+
+  const calculateProgress = () => {
+    if (!courseProgress || videoCount === 0) return 0;
+    
+    const videoList = course.videos || [];
+    let totalDurationUnits = 0;
+    let totalWatchedUnits = 0;
+
+    videoList.forEach((video, index) => {
+      const vidId = `video_${index}`;
+      const duration = video.duration || 0;
+      const watched = courseProgress.watchedDurations?.[vidId] || 0;
+      const isCompleted = courseProgress.completedVideos?.includes(vidId);
+
+      if (duration > 0) {
+        totalDurationUnits += duration;
+        totalWatchedUnits += isCompleted ? duration : Math.min(watched, duration);
+      } else {
+        // Fallback: 100 units per video if duration is unknown
+        totalDurationUnits += 100;
+        totalWatchedUnits += isCompleted ? 100 : 0;
+      }
+    });
+
+    if (totalDurationUnits <= 0) return 0;
+    return Math.min(100, Math.round((totalWatchedUnits / totalDurationUnits) * 100));
+  };
+
+  const progressPercentage = calculateProgress();
 
   const handleEnroll = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -64,7 +103,22 @@ export default function CourseCard({ course }: CourseCardProps) {
           <span className="text-xs font-medium text-slate-400">{course.instructor}</span>
         </div>
         <h3 className="text-lg font-bold text-slate-900 line-clamp-2 mb-2">{course.title}</h3>
-        <p className="text-sm text-slate-500 line-clamp-2 mb-6 flex-1">{course.description}</p>
+        <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">{course.description}</p>
+
+        {isEnrolled && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Your Progress</span>
+              <span className="text-xs font-bold text-indigo-600">{progressPercentage}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           {isEnrolled && videoCount > 0 && (

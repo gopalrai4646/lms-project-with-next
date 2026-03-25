@@ -1,0 +1,86 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+export interface UserProgress {
+  courseId: string;
+  watchedDurations: { [videoId: string]: number };
+  completedVideos: string[];
+  lastUpdated: string;
+}
+
+interface ProgressState {
+  progress: { [courseId: string]: UserProgress };
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: ProgressState = {
+  progress: {},
+  loading: false,
+  error: null,
+};
+
+const progressSlice = createSlice({
+  name: 'progress',
+  initialState,
+  reducers: {
+    fetchProgressRequest: (state, _action: PayloadAction<{ userId: string; courseId: string }>) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchProgressSuccess: (state, action: PayloadAction<UserProgress>) => {
+      const { courseId, watchedDurations, completedVideos, lastUpdated } = action.payload;
+      state.progress[courseId] = {
+        courseId,
+        watchedDurations: watchedDurations || {},
+        completedVideos: completedVideos || [],
+        lastUpdated: lastUpdated || new Date().toISOString(),
+      };
+      state.loading = false;
+    },
+    fetchProgressFailure: (state, action: PayloadAction<string>) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    updateProgressRequest: (state, _action: PayloadAction<{ userId: string; courseId: string; videoId: string; watchedDuration: number; isCompleted: boolean }>) => {
+      // Handled by saga for Firestore sync, but we can optimistically update state if needed
+    },
+    updateLocalProgress: (state, action: PayloadAction<{ courseId: string; videoId: string; watchedDuration: number; isCompleted: boolean }>) => {
+      const { courseId, videoId, watchedDuration, isCompleted } = action.payload;
+      if (!state.progress[courseId]) {
+        state.progress[courseId] = {
+          courseId,
+          watchedDurations: {},
+          completedVideos: [],
+          lastUpdated: new Date().toISOString(),
+        };
+      }
+      
+      const currentProgress = state.progress[courseId];
+      
+      // Defensive initialization for existing records
+      if (!currentProgress.watchedDurations) currentProgress.watchedDurations = {};
+      if (!currentProgress.completedVideos) currentProgress.completedVideos = [];
+
+      // Only update if the new duration is greater to avoid rewinding progress
+      if (!currentProgress.watchedDurations[videoId] || watchedDuration > currentProgress.watchedDurations[videoId]) {
+        currentProgress.watchedDurations[videoId] = watchedDuration;
+      }
+      
+      if (isCompleted && !currentProgress.completedVideos.includes(videoId)) {
+        currentProgress.completedVideos.push(videoId);
+      }
+      
+      currentProgress.lastUpdated = new Date().toISOString();
+    },
+  },
+});
+
+export const {
+  fetchProgressRequest,
+  fetchProgressSuccess,
+  fetchProgressFailure,
+  updateProgressRequest,
+  updateLocalProgress,
+} = progressSlice.actions;
+
+export default progressSlice.reducer;

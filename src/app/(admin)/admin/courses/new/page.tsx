@@ -12,6 +12,7 @@ interface VideoEntry {
   uploading: boolean;
   uploaded: boolean;
   url: string;
+  duration?: number;
 }
 
 export default function NewCoursePage() {
@@ -34,7 +35,7 @@ export default function NewCoursePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const addVideoEntry = () => {
-    setVideoEntries(prev => [...prev, { title: '', file: null, uploading: false, uploaded: false, url: '' }]);
+    setVideoEntries(prev => [...prev, { title: '', file: null, uploading: false, uploaded: false, url: '', duration: 0 }]);
   };
 
   const removeVideoEntry = (index: number) => {
@@ -56,11 +57,29 @@ export default function NewCoursePage() {
     setVideoEntries(prev => prev.map((entry, i) => i === index ? { ...entry, [field]: value } : entry));
   };
 
-  const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve(Math.round(video.duration));
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      updateVideoEntry(index, 'file', e.target.files[0]);
+      const file = e.target.files[0];
+      updateVideoEntry(index, 'file', file);
+      
+      // Extract duration
+      const duration = await getVideoDuration(file);
+      updateVideoEntry(index, 'duration', duration);
+
       if (!videoEntries[index].title) {
-        updateVideoEntry(index, 'title', e.target.files[0].name.replace(/\.[^/.]+$/, ''));
+        updateVideoEntry(index, 'title', file.name.replace(/\.[^/.]+$/, ''));
       }
       setUploadError(null);
     }
@@ -99,12 +118,16 @@ export default function NewCoursePage() {
           title: entry.title.trim(),
           url: videoUrl,
           order: uploadedVideos.length,
+          duration: entry.duration || 0,
         });
       }
+
+      const totalDuration = uploadedVideos.reduce((acc, v) => acc + (v.duration || 0), 0);
 
       dispatch(createCourseRequest({
         ...formData,
         videos: uploadedVideos,
+        totalDuration,
         videoUrl: uploadedVideos[0]?.url, // backward compat
       }));
 

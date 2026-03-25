@@ -1,21 +1,21 @@
 import { call, put, takeLatest, all } from 'redux-saga/effects';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
   getDoc,
-  deleteDoc, 
-  doc, 
+  deleteDoc,
+  doc,
   serverTimestamp,
   query,
   orderBy
 } from 'firebase/firestore';
 import { extractPublicIdFromUrl } from '@/utils/cloudinary-utils';
 import { db } from '@/lib/firebase/config';
-import { 
-  fetchCoursesRequest, 
-  fetchCoursesSuccess, 
+import {
+  fetchCoursesRequest,
+  fetchCoursesSuccess,
   fetchCoursesFailure,
   createCourseRequest,
   createCourseSuccess,
@@ -47,10 +47,10 @@ function* handleCreateCourse(action: ReturnType<typeof createCourseRequest>): an
       createdAt: serverTimestamp(),
     };
     const docRef = yield call(addDoc, collection(db, 'courses'), courseData);
-    yield put(createCourseSuccess({ 
-      id: docRef.id, 
-      ...action.payload, 
-      createdAt: new Date().toISOString() 
+    yield put(createCourseSuccess({
+      id: docRef.id,
+      ...action.payload,
+      createdAt: new Date().toISOString()
     }));
   } catch (error: any) {
     yield put(fetchCoursesFailure(error.message));
@@ -72,12 +72,12 @@ function* handleUpdateCourse(action: ReturnType<typeof updateCourseRequest>): an
 function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): any {
   try {
     const id = action.payload;
-    
+
     // 1. Fetch course details to get Cloudinary URLs
     console.log(`Saga: Fetching course details for deletion: ${id}`);
     const courseRef = doc(db, 'courses', id);
     const courseSnap: any = yield call(getDoc, courseRef);
-    
+
     if (courseSnap.exists()) {
       const courseData = courseSnap.data();
       const assetsToDelete: { publicId: string; resourceType: string }[] = [];
@@ -130,7 +130,7 @@ function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): an
     console.log(`Saga: Deleting course document from Firestore: ${id}`);
     yield call(deleteDoc, courseRef);
     yield put(deleteCourseSuccess(id));
-    
+
   } catch (error: any) {
     console.error(`Saga: Error in handleDeleteCourse:`, error.message);
     yield put(fetchCoursesFailure(error.message));

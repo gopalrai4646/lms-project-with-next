@@ -4,6 +4,7 @@ export interface VideoItem {
   title: string;
   url: string;
   order: number;
+  duration?: number; // duration in seconds
 }
 
 export interface Course {
@@ -15,6 +16,7 @@ export interface Course {
   thumbnail?: string;
   videoUrl?: string; // kept for backward compatibility
   videos?: VideoItem[];
+  totalDuration?: number; // sum of video durations
   enrolledUsers?: string[];
   createdAt: string;
 }
