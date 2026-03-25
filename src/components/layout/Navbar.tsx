@@ -53,12 +53,6 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-4 md:gap-6">
-        <div className="hidden lg:flex items-center gap-6">
-          <Link href="/dashboard" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium text-sm">{t.dashboard}</Link>
-          <Link href="/courses" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium text-sm">{t.courses}</Link>
-        </div>
-
-        <div className="h-8 w-[1px] bg-slate-200 hidden lg:block"></div>
         
         {/* Language Switcher */}
         <div className="flex items-center gap-2">

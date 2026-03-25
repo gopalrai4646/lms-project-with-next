@@ -73,7 +73,7 @@ export default function Sidebar() {
               href={item.href}
               onClick={handleLinkClick}
               title={isCollapsed ? item.name : ''}
-              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group/item relative overflow-hidden ${
+              className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3.5 rounded-2xl transition-all duration-300 group/item relative overflow-hidden ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 font-bold'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
@@ -96,18 +96,7 @@ export default function Sidebar() {
         })}
       </div>
       
-      {!isCollapsed && (
-        <div className="absolute bottom-8 left-4 right-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="p-4 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-3xl text-white shadow-xl shadow-indigo-100 overflow-hidden relative group/card">
-            <div className="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full blur-2xl group-hover/card:bg-white/20 transition-all" />
-            <p className="text-[10px] font-black tracking-widest text-indigo-200 mb-1 uppercase">{t.proPlan}</p>
-            <p className="text-sm font-bold mb-4 leading-tight">{t.unlockPremium}</p>
-            <button className="w-full py-2.5 bg-white text-indigo-700 rounded-xl text-xs font-black hover:bg-indigo-50 transition-all shadow-sm active:scale-95">
-              {t.upgradeNow}
-            </button>
-          </div>
-        </div>
-      )}
+
     </aside>
     </>
   );
