@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { translations } from '@/utils/translations';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
@@ -12,6 +12,10 @@ export default function DashboardPage() {
   const { language } = useAppSelector((state) => state.settings);
   const { courses, loading: coursesLoading } = useAppSelector((state) => state.courses);
   const t = translations[language].dashboard;
+
+  const [showAllEnrolled, setShowAllEnrolled] = useState(false);
+  const [showAllDiscover, setShowAllDiscover] = useState(false);
+  const [showAllSaved, setShowAllSaved] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());
@@ -55,10 +59,17 @@ export default function DashboardPage() {
         <section>
           <div className="flex justify-between items-end mb-6">
             <h2 className="text-2xl font-bold text-slate-900">{t.myCourses}</h2>
-            <button className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">{t.viewAll}</button>
+            {enrolledCourses.length > 3 && (
+              <button 
+                onClick={() => setShowAllEnrolled(!showAllEnrolled)}
+                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+              >
+                {showAllEnrolled ? 'Show Less' : t.viewAll}
+              </button>
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {enrolledCourses.map((course) => (
+            {(showAllEnrolled ? enrolledCourses : enrolledCourses.slice(0, 3)).map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
@@ -69,7 +80,14 @@ export default function DashboardPage() {
       <section>
         <div className="flex justify-between items-end mb-6">
           <h2 className="text-2xl font-bold text-slate-900">{t.discover}</h2>
-          <button className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">{t.viewAll}</button>
+          {discoverCourses.length > 3 && (
+            <button 
+              onClick={() => setShowAllDiscover(!showAllDiscover)}
+              className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+            >
+              {showAllDiscover ? 'Show Less' : t.viewAll}
+            </button>
+          )}
         </div>
         {coursesLoading && courses.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -79,7 +97,7 @@ export default function DashboardPage() {
           </div>
         ) : discoverCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {discoverCourses.map((course) => (
+            {(showAllDiscover ? discoverCourses : discoverCourses.slice(0, 3)).map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
@@ -95,9 +113,17 @@ export default function DashboardPage() {
         <section>
           <div className="flex justify-between items-end mb-6">
             <h2 className="text-2xl font-bold text-slate-900">{t.savedCourses}</h2>
+            {savedCourses.length > 3 && (
+              <button 
+                onClick={() => setShowAllSaved(!showAllSaved)}
+                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+              >
+                {showAllSaved ? 'Show Less' : t.viewAll}
+              </button>
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedCourses.map((course) => (
+            {(showAllSaved ? savedCourses : savedCourses.slice(0, 3)).map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
