@@ -7,6 +7,7 @@ import {
   sendPasswordResetEmail, 
   signOut,
   updateProfile,
+  updatePassword,
   User,
   UserCredential
 } from 'firebase/auth';
@@ -18,6 +19,8 @@ import {
   googleLoginRequest,
   updateProfileRequest,
   updateProfileSuccess,
+  updatePasswordRequest,
+  updatePasswordSuccess,
   forgotPasswordRequest, 
   authSuccess, 
   authFailure, 
@@ -143,6 +146,22 @@ function* handleGoogleLogin(): any {
   }
 }
 
+function* handleUpdatePassword(action: ReturnType<typeof updatePasswordRequest>): any {
+  try {
+    const { password } = action.payload;
+    const currentUser: User = auth.currentUser!;
+    
+    yield call(updatePassword, currentUser, password);
+    yield put(updatePasswordSuccess());
+  } catch (error: any) {
+    let message = error.message;
+    if (error.code === 'auth/requires-recent-login') {
+      message = 'For security reasons, please log out and log back in before changing your password.';
+    }
+    yield put(authFailure(message));
+  }
+}
+
 function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): any {
   try {
     const { displayName } = action.payload;
@@ -236,6 +255,7 @@ export function* watchAuth() {
   yield takeLatest(logoutRequest.type, handleLogout);
   yield takeLatest(googleLoginRequest.type, handleGoogleLogin);
   yield takeLatest(updateProfileRequest.type, handleUpdateProfile);
+  yield takeLatest(updatePasswordRequest.type, handleUpdatePassword);
   yield takeLatest(forgotPasswordRequest.type, handleForgotPassword);
   yield takeLatest(enrollCourseRequest.type, handleEnrollCourse);
   yield takeLatest(saveCourseRequest.type, handleSaveCourse);

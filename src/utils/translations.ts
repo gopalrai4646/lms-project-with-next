@@ -48,6 +48,11 @@ export const translations = {
       createAccount: "Create Account",
       alreadyHaveAccount: "Already have an account?",
       dontHaveAccount: "Don't have an account?",
+      changePassword: "Change Password",
+      newPassword: "New Password",
+      confirmPassword: "Confirm New Password",
+      passwordMismatch: "Passwords do not match.",
+      passwordUpdated: "Password updated successfully!",
     }
   },
   de: {
@@ -99,6 +104,11 @@ export const translations = {
       createAccount: "Konto erstellen",
       alreadyHaveAccount: "Haben Sie bereits ein Konto?",
       dontHaveAccount: "Haben Sie kein Konto?",
+      changePassword: "Passwort ändern",
+      newPassword: "Neues Passwort",
+      confirmPassword: "Neues Passwort bestätigen",
+      passwordMismatch: "Passwörter stimmen nicht überein.",
+      passwordUpdated: "Passwort erfolgreich aktualisiert!",
     }
   },
   fr: {
@@ -150,6 +160,11 @@ export const translations = {
       createAccount: "Créer un compte",
       alreadyHaveAccount: "Vous avez déjà un compte ?",
       dontHaveAccount: "Vous n'avez pas de compte ?",
+      changePassword: "Changer le mot de passe",
+      newPassword: "Nouveau mot de passe",
+      confirmPassword: "Confirmer le nouveau mot de passe",
+      passwordMismatch: "Les mots de passe ne correspondent pas.",
+      passwordUpdated: "Mot de passe mis à jour avec succès !",
     }
   }
 };

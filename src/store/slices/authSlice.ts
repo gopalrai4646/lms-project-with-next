@@ -42,6 +42,14 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
+    updatePasswordRequest: (state, _action: PayloadAction<{ password: string }>) => {
+      state.loading = true;
+      state.error = null;
+    },
+    updatePasswordSuccess: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
     updateProfileSuccess: (state, action: PayloadAction<{ displayName: string }>) => {
       if (state.user) {
         state.user.displayName = action.payload.displayName;
@@ -109,6 +117,8 @@ export const {
   googleLoginRequest,
   updateProfileRequest,
   updateProfileSuccess,
+  updatePasswordRequest,
+  updatePasswordSuccess,
   forgotPasswordRequest, 
   authSuccess, 
   authFailure, 
