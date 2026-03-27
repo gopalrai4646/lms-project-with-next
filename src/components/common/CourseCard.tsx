@@ -48,7 +48,6 @@ export default function CourseCard({ course }: CourseCardProps) {
         totalDurationUnits += duration;
         totalWatchedUnits += isCompleted ? duration : Math.min(watched, duration);
       } else {
-        // Fallback: 100 units per video if duration is unknown
         totalDurationUnits += 100;
         totalWatchedUnits += isCompleted ? 100 : 0;
       }
@@ -91,14 +90,14 @@ export default function CourseCard({ course }: CourseCardProps) {
         </button>
         {videoCount > 0 && (
           <span className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/70 text-white text-xs font-bold rounded-lg backdrop-blur-sm">
-            🎥 {videoCount} video{videoCount !== 1 ? 's' : ''}
+            🎥 {videoCount} {videoCount !== 1 ? 'videos' : 'video'}
           </span>
         )}
       </div>
       <div className="p-6 flex flex-col flex-1">
         <div className="flex justify-between items-start mb-3">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full uppercase tracking-wider">
-            {course.price > 0 ? `$${course.price}` : 'Free'}
+            {course.price > 0 ? `$${course.price}` : t.free}
           </span>
           <span className="text-xs font-medium text-slate-400">{course.instructor}</span>
         </div>
@@ -108,7 +107,7 @@ export default function CourseCard({ course }: CourseCardProps) {
         {isEnrolled && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Your Progress</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.yourProgress}</span>
               <span className="text-xs font-bold text-indigo-600">{progressPercentage}%</span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -127,7 +126,7 @@ export default function CourseCard({ course }: CourseCardProps) {
               className="w-full py-3 bg-emerald-600 text-white rounded-2xl font-bold transition-all hover:bg-emerald-700 shadow-lg  flex items-center justify-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <span>▶️</span> View Course
+              <span>▶️</span> {t.viewCourse}
             </Link>
           )}
 

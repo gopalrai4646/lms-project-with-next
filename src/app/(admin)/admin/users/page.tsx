@@ -5,11 +5,14 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchUsersRequest, User } from '@/store/slices/userSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import UserDetailsModal from '@/components/admin/UserDetailsModal';
+import { translations } from '@/utils/translations';
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
   const { users, loading, error } = useAppSelector(state => state.users);
   const { courses } = useAppSelector(state => state.courses);
+  const { language } = useAppSelector(state => state.settings);
+  const t = translations[language].admin;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
@@ -25,7 +28,7 @@ export default function AdminUsersPage() {
     }
   }, [dispatch, courses.length]);
 
-  const getCourseTitle = (id: string) => courses.find(c => c.id === id)?.title || 'Unknown Course';
+  const getCourseTitle = (id: string) => courses.find(c => c.id === id)?.title || t.unknownCourse;
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -42,7 +45,6 @@ export default function AdminUsersPage() {
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
   const currentUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  // Reset to page 1 if filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, courseFilter]);
@@ -51,8 +53,8 @@ export default function AdminUsersPage() {
     <div className="space-y-8">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Manage Users</h1>
-          <p className="text-slate-500 mt-1">View registered students and their enrollments</p>
+          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageUsers}</h1>
+          <p className="text-slate-500 mt-1">{t.manageUsersSubtitle}</p>
         </div>
       </header>
 
@@ -67,7 +69,7 @@ export default function AdminUsersPage() {
         <div className="flex-1 relative">
           <input 
             type="text" 
-            placeholder="Search by name or email..." 
+            placeholder={t.searchPlaceholder} 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-sm font-medium placeholder:text-slate-400"
@@ -80,7 +82,7 @@ export default function AdminUsersPage() {
             onChange={(e) => setCourseFilter(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-sm font-bold text-slate-700 bg-white"
           >
-            <option value="">All Courses</option>
+            <option value="">{t.allCourses}</option>
             {courses.map(course => (
               <option key={course.id} value={course.id}>{course.title}</option>
             ))}
@@ -93,20 +95,20 @@ export default function AdminUsersPage() {
           <table className="w-full text-left min-w-[800px]">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">User Profile</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Role</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Enrolled Courses</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.userProfile}</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.role}</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.enrolledCourses}</th>
+                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-medium italic">Loading users...</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-medium italic">{t.loadingUsers}</td>
                 </tr>
               ) : currentUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-medium italic">No users found matching your filters.</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-medium italic">{t.noUsersFound}</td>
                 </tr>
               ) : (
                 currentUsers.map((user) => (
@@ -117,7 +119,7 @@ export default function AdminUsersPage() {
                           {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900">{user.name || 'No Name'}</p>
+                          <p className="font-bold text-slate-900">{user.name || t.noName}</p>
                           <p className="text-xs text-slate-500 font-medium mt-0.5">{user.email}</p>
                         </div>
                       </div>
@@ -137,12 +139,12 @@ export default function AdminUsersPage() {
                           ))}
                           {user.enrolledCourses.length > 2 && (
                             <span className="px-2 py-1 bg-slate-100 text-slate-500 text-xs font-semibold rounded-md cursor-help" title={user.enrolledCourses.slice(2).map(getCourseTitle).join(', ')}>
-                              +{user.enrolledCourses.length - 2} more
+                              +{user.enrolledCourses.length - 2} {t.more}
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">No enrollments</span>
+                        <span className="text-xs text-slate-400 italic">{t.noEnrollments}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -150,7 +152,7 @@ export default function AdminUsersPage() {
                         onClick={() => setSelectedUser(user)}
                         className="px-4 py-2 bg-slate-50/50 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-sm font-bold rounded-xl transition-all shadow-sm"
                       >
-                        View Details
+                        {t.viewDetails}
                       </button>
                     </td>
                   </tr>
@@ -160,10 +162,10 @@ export default function AdminUsersPage() {
           </table>
         </div>
         
-        {/* Pagination Console */}
+        {/* Pagination */}
         <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
           <p className="text-sm font-medium text-slate-500">
-            Showing <span className="font-bold text-slate-900">{filteredUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to <span className="font-bold text-slate-900">{Math.min(currentPage * itemsPerPage, filteredUsers.length)}</span> of <span className="font-bold text-slate-900">{filteredUsers.length}</span>
+            {t.showing} <span className="font-bold text-slate-900">{filteredUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> {t.to} <span className="font-bold text-slate-900">{Math.min(currentPage * itemsPerPage, filteredUsers.length)}</span> {t.of} <span className="font-bold text-slate-900">{filteredUsers.length}</span>
           </p>
           <div className="flex items-center gap-2">
             <button 
@@ -171,7 +173,7 @@ export default function AdminUsersPage() {
               disabled={currentPage === 1}
               className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
             >
-              Prev
+              {t.prev}
             </button>
             <div className="flex items-center justify-center min-w-[40px] text-sm font-bold text-slate-900">
               {currentPage} / {totalPages}
@@ -181,7 +183,7 @@ export default function AdminUsersPage() {
               disabled={currentPage === totalPages}
               className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
             >
-              Next
+              {t.next}
             </button>
           </div>
         </div>

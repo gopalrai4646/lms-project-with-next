@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createCourseRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
+import { translations } from '@/utils/translations';
 
 interface VideoEntry {
   title: string;
@@ -19,6 +20,8 @@ export default function NewCoursePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.courses);
+  const { language } = useAppSelector((state) => state.settings);
+  const t = translations[language].admin;
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const [formData, setFormData] = useState({
@@ -74,7 +77,6 @@ export default function NewCoursePage() {
       const file = e.target.files[0];
       updateVideoEntry(index, 'file', file);
       
-      // Extract duration
       const duration = await getVideoDuration(file);
       updateVideoEntry(index, 'duration', duration);
 
@@ -90,11 +92,11 @@ export default function NewCoursePage() {
 
     const validEntries = videoEntries.filter(v => v.file);
     if (validEntries.length === 0) {
-      setUploadError('Please add at least one video file');
+      setUploadError(t.addAtLeastOneVideo);
       return;
     }
     if (videoEntries.some(v => v.file && !v.title.trim())) {
-      setUploadError('Please give each video a title');
+      setUploadError(t.giveEachVideoTitle);
       return;
     }
 
@@ -102,7 +104,6 @@ export default function NewCoursePage() {
       setSubmitting(true);
       setUploadError(null);
 
-      // Upload all videos sequentially
       const uploadedVideos = [];
       for (let i = 0; i < videoEntries.length; i++) {
         const entry = videoEntries[i];
@@ -128,12 +129,12 @@ export default function NewCoursePage() {
         ...formData,
         videos: uploadedVideos,
         totalDuration,
-        videoUrl: uploadedVideos[0]?.url, // backward compat
+        videoUrl: uploadedVideos[0]?.url,
       }));
 
       router.push('/admin/courses');
     } catch (err: any) {
-      setUploadError(err.message || 'Failed to upload videos');
+      setUploadError(err.message || t.failedToUploadVideos);
     } finally {
       setSubmitting(false);
     }
@@ -142,8 +143,8 @@ export default function NewCoursePage() {
   return (
     <div className="max-w-3xl mx-auto py-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Create New Course</h1>
-        <p className="text-slate-500">Add course details and upload videos</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{t.createNewCourse}</h1>
+        <p className="text-slate-500">{t.uploadVideoDetails}</p>
       </header>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden p-6 md:p-8">
@@ -156,43 +157,43 @@ export default function NewCoursePage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Course Title</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.courseTitleLabel}</label>
               <input
                 type="text"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder="e.g. Advanced React Patterns"
+                placeholder={t.courseTitlePlaceholder}
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Description</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.descriptionLabel}</label>
               <textarea
                 required
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder="Describe what students will learn..."
+                placeholder={t.descriptionPlaceholder}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Instructor Name</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.instructorNameLabel}</label>
               <input
                 type="text"
                 required
                 value={formData.instructor}
                 onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder="e.g. John Doe"
+                placeholder={t.instructorNamePlaceholder}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Price ($)</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.priceLabel}</label>
               <input
                 type="number"
                 required
@@ -207,13 +208,13 @@ export default function NewCoursePage() {
           {/* Multi-Video Upload Section */}
           <div className="border-t border-slate-100 pt-6">
             <div className="flex items-center justify-between mb-4">
-              <label className="text-sm font-semibold text-slate-700">Course Videos</label>
+              <label className="text-sm font-semibold text-slate-700">{t.courseVideos}</label>
               <button
                 type="button"
                 onClick={addVideoEntry}
                 className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-bold rounded-xl hover:bg-indigo-100 transition-all flex items-center gap-1"
               >
-                <span>+</span> Add Video
+                <span>+</span> {t.addVideo}
               </button>
             </div>
 
@@ -228,17 +229,17 @@ export default function NewCoursePage() {
                       type="text"
                       value={entry.title}
                       onChange={(e) => updateVideoEntry(index, 'title', e.target.value)}
-                      placeholder="Video title (e.g. Introduction)"
+                      placeholder={t.videoTitle}
                       className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none bg-white text-slate-900 placeholder:text-slate-400"
                     />
                     <div className="flex items-center gap-1">
                       <button type="button" onClick={() => moveVideo(index, 'up')} disabled={index === 0}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title="Move up">↑</button>
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveUp}>↑</button>
                       <button type="button" onClick={() => moveVideo(index, 'down')} disabled={index === videoEntries.length - 1}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title="Move down">↓</button>
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveDown}>↓</button>
                       {videoEntries.length > 1 && (
                         <button type="button" onClick={() => removeVideoEntry(index)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-white" title="Remove">✕</button>
+                          className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-white" title={t.remove}>✕</button>
                       )}
                     </div>
                   </div>
@@ -256,13 +257,13 @@ export default function NewCoursePage() {
                     />
                     <p className="text-sm font-medium text-slate-600">
                       {entry.uploading ? (
-                        <span className="text-indigo-600 animate-pulse">⏳ Uploading...</span>
+                        <span className="text-indigo-600 animate-pulse">⏳ {t.uploadingEllipsis}</span>
                       ) : entry.uploaded ? (
-                        <span className="text-emerald-600">✅ Uploaded successfully</span>
+                        <span className="text-emerald-600">✅ {t.videoAttached}</span>
                       ) : entry.file ? (
                         <span>🎥 {entry.file.name}</span>
                       ) : (
-                        <span className="text-slate-400">Click to select video file</span>
+                        <span className="text-slate-400">{t.clickToSelectVideo}</span>
                       )}
                     </p>
                   </div>
@@ -283,14 +284,14 @@ export default function NewCoursePage() {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               )}
-              {submitting ? 'Uploading Videos...' : loading ? 'Saving...' : 'Create Course'}
+              {submitting ? t.uploadingVideo : loading ? t.savingCourse : t.createCourseBtn}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
               className="px-8 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all w-full sm:w-auto"
             >
-              Cancel
+              {t.cancel}
             </button>
           </div>
         </form>

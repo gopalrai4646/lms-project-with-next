@@ -4,17 +4,20 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest, deleteCourseRequest } from '@/store/slices/courseSlice';
+import { translations } from '@/utils/translations';
 
 export default function AdminCoursesPage() {
   const dispatch = useAppDispatch();
   const { courses, loading, error } = useAppSelector((state) => state.courses);
+  const { language } = useAppSelector((state) => state.settings);
+  const t = translations[language].admin;
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());
   }, [dispatch]);
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
+    if (window.confirm(t.deleteConfirm)) {
       dispatch(deleteCourseRequest(id));
     }
   };
@@ -23,14 +26,14 @@ export default function AdminCoursesPage() {
     <div className="space-y-8">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Manage Courses</h1>
-          <p className="text-slate-500 mt-1">Create, update, and manage your learning curriculum</p>
+          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageCoursesTitle}</h1>
+          <p className="text-slate-500 mt-1">{t.manageCoursesSubtitle}</p>
         </div>
         <Link 
           href="/admin/courses/new" 
           className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] flex items-center gap-2"
         >
-          <span>➕</span> New Course
+          <span>➕</span> {t.newCourse}
         </Link>
       </header>
 
@@ -45,24 +48,24 @@ export default function AdminCoursesPage() {
           <table className="w-full text-left min-w-[800px]">
             <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Course Info</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Instructor</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Price</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Users</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.courseInfo}</th>
+              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.instructor}</th>
+              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.price}</th>
+              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.user}</th>
+              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading && courses.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium italic">
-                  Loading courses...
+                  {t.loadingCourses}
                 </td>
               </tr>
             ) : courses.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium italic">
-                  No courses found. Start by creating one!
+                  {t.noCoursesFound}
                 </td>
               </tr>
             ) : (
@@ -93,14 +96,14 @@ export default function AdminCoursesPage() {
                       <Link 
                         href={`/admin/courses/edit/${course.id}`}
                         className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                        title="Edit Course"
+                        title={t.editCourse}
                       >
                         ✏️
                       </Link>
                       <button 
                         onClick={() => handleDelete(course.id)}
                         className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                        title="Delete Course"
+                        title={t.deleteCourse}
                       >
                         🗑️
                       </button>

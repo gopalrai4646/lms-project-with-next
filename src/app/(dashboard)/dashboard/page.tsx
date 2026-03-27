@@ -19,7 +19,6 @@ export default function DashboardPage() {
 
   const firstName = user?.displayName?.split(' ')[0] || 'Learner';
 
-  // Categorize courses
   const enrolledCourses = courses.filter(c => user?.enrolledCourses?.includes(c.id));
   const savedCourses = courses.filter(c => user?.savedCourses?.includes(c.id));
   const discoverCourses = courses.filter(c => !user?.enrolledCourses?.includes(c.id));
@@ -86,7 +85,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200">
-            <p className="text-slate-400 font-medium">No new courses available to discover.</p>
+            <p className="text-slate-400 font-medium">{t.noNewCourses}</p>
           </div>
         )}
       </section>

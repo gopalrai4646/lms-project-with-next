@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchProgressRequest, updateProgressRequest } from '@/store/slices/progressSlice';
+import { translations } from '@/utils/translations';
 import Link from 'next/link';
 
 function formatDuration(seconds: number): string {
@@ -22,6 +23,8 @@ export default function CoursePlayerPage() {
   const { courses } = useAppSelector(state => state.courses);
   const { user } = useAppSelector(state => state.auth);
   const { progress } = useAppSelector(state => state.progress);
+  const { language } = useAppSelector(state => state.settings);
+  const t = translations[language].coursePlayer;
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSyncRef = useRef<number>(0);
 
@@ -30,7 +33,6 @@ export default function CoursePlayerPage() {
 
   const courseProgress = progress[courseId];
 
-  // Fetch courses and progress on mount
   useEffect(() => {
     if (courses.length === 0) dispatch(fetchCoursesRequest());
   }, [dispatch, courses.length]);
@@ -44,107 +46,66 @@ export default function CoursePlayerPage() {
   const course = courses.find(c => c.id === courseId);
   const isEnrolled = user?.enrolledCourses?.includes(courseId);
 
-  // Build video list
   const videoList = course?.videos && course.videos.length > 0
     ? [...course.videos].sort((a, b) => a.order - b.order)
     : course?.videoUrl
-      ? [{ title: 'Course Video', url: course.videoUrl, order: 0, duration: 0 }]
+      ? [{ title: t.courseContent, url: course.videoUrl, order: 0, duration: 0 }]
       : [];
 
   const activeVideo = videoList[activeVideoIndex];
 
-  // Generate stable video IDs from order
   const getVideoId = useCallback((index: number) => `video_${index}`, []);
 
-  // Throttled progress sync - dispatches every 3 seconds
   const handleTimeUpdate = useCallback(() => {
     if (!videoRef.current || !user?.uid || !courseId) return;
-
     const currentTime = videoRef.current.currentTime;
     const duration = videoRef.current.duration;
     const videoId = getVideoId(activeVideoIndex);
     const now = Date.now();
-
-    // Only sync every 3 seconds for a more "live" feel
-    if (now - lastSyncRef.current < 3000) {
-      return;
-    }
-    
+    if (now - lastSyncRef.current < 3000) return;
     lastSyncRef.current = now;
-
     const isCompleted = duration > 0 && currentTime >= duration - 1.5;
-
-    dispatch(updateProgressRequest({
-      userId: user.uid,
-      courseId,
-      videoId,
-      watchedDuration: Math.round(currentTime),
-      isCompleted,
-    }));
+    dispatch(updateProgressRequest({ userId: user.uid, courseId, videoId, watchedDuration: Math.round(currentTime), isCompleted }));
   }, [dispatch, user?.uid, courseId, activeVideoIndex, getVideoId]);
 
-  // Sync progress when video ends
   const handleVideoEnded = useCallback(() => {
     if (!videoRef.current || !user?.uid || !courseId) return;
     const videoId = getVideoId(activeVideoIndex);
-    
-    dispatch(updateProgressRequest({
-      userId: user.uid,
-      courseId,
-      videoId,
-      watchedDuration: Math.round(videoRef.current.duration),
-      isCompleted: true,
-    }));
+    dispatch(updateProgressRequest({ userId: user.uid, courseId, videoId, watchedDuration: Math.round(videoRef.current.duration), isCompleted: true }));
   }, [dispatch, user?.uid, courseId, activeVideoIndex, getVideoId]);
 
-  // Resume video from last watched position
   const handleLoadedMetadata = useCallback(() => {
     if (!videoRef.current || !courseProgress) return;
     const videoId = getVideoId(activeVideoIndex);
     const savedTime = courseProgress.watchedDurations?.[videoId];
-    
-    // Store detected duration in local state instead of mutating the frozen course object
     if (videoRef.current.duration > 0) {
       const roundedDuration = Math.round(videoRef.current.duration);
-      setDetectedDurations(prev => ({
-        ...prev,
-        [videoId]: roundedDuration
-      }));
+      setDetectedDurations(prev => ({ ...prev, [videoId]: roundedDuration }));
     }
-
     if (savedTime && savedTime > 0 && !courseProgress.completedVideos?.includes(videoId)) {
       videoRef.current.currentTime = savedTime;
     }
   }, [courseProgress, activeVideoIndex, getVideoId]);
 
-  // Calculate overall course completion percentage
   const calculateCourseProgress = (): number => {
     if (!courseProgress || videoList.length === 0) return 0;
-
     let totalDurationUnits = 0;
     let totalWatchedUnits = 0;
-
     videoList.forEach((video, index) => {
       const vidId = getVideoId(index);
       const dbDuration = video.duration || 0;
       const detectedDuration = detectedDurations[vidId] || 0;
       const effectiveDuration = dbDuration || detectedDuration;
-      
       const watched = courseProgress.watchedDurations?.[vidId] || 0;
       const isCompleted = courseProgress.completedVideos?.includes(vidId);
-
       if (effectiveDuration > 0) {
-        // Use duration-based calculation for this video
         totalDurationUnits += effectiveDuration;
-        // If completed, ensure we count full duration even if 'watched' is slightly off
         totalWatchedUnits += isCompleted ? effectiveDuration : Math.min(watched, effectiveDuration);
       } else {
-        // Fallback: treat video as 100 "units" of progress if duration is unknown
-        totalDurationUnits += 100; 
+        totalDurationUnits += 100;
         totalWatchedUnits += isCompleted ? 100 : 0;
       }
     });
-
     if (totalDurationUnits <= 0) return 0;
     return Math.min(100, Math.round((totalWatchedUnits / totalDurationUnits) * 100));
   };
@@ -169,7 +130,7 @@ export default function CoursePlayerPage() {
     return (
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center">
-          <p className="text-slate-500 font-medium">Loading course...</p>
+          <p className="text-slate-500 font-medium">{t.loadingCourse}</p>
         </div>
       </div>
     );
@@ -180,10 +141,10 @@ export default function CoursePlayerPage() {
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-12 text-center">
           <p className="text-2xl mb-2">🔒</p>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Enrollment Required</h2>
-          <p className="text-slate-600 mb-6">You need to enroll in this course to access the videos.</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">{t.enrollmentRequired}</h2>
+          <p className="text-slate-600 mb-6">{t.enrollmentMessage}</p>
           <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all">
-            Back to Dashboard
+            {t.backToDashboard}
           </Link>
         </div>
       </div>
@@ -192,18 +153,16 @@ export default function CoursePlayerPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
-      {/* Course Header with Progress */}
       <div className="mb-6">
         <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-indigo-600 font-medium mb-3 flex items-center gap-1 transition-colors">
-          ← Back
+          ← {t.back}
         </button>
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{course.title}</h1>
-        <p className="text-slate-500 mt-1 text-sm">By {course.instructor} • {videoList.length} video{videoList.length !== 1 ? 's' : ''}</p>
+        <p className="text-slate-500 mt-1 text-sm">{t.by} {course.instructor} • {videoList.length} {videoList.length !== 1 ? t.videos : t.video}</p>
         
-        {/* Overall Course Progress Bar */}
         <div className="mt-4 bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-bold text-slate-700">Course Progress</span>
+            <span className="text-sm font-bold text-slate-700">{t.courseProgress}</span>
             <span className={`text-sm font-extrabold ${coursePercentage === 100 ? 'text-emerald-600' : 'text-indigo-600'}`}>
               {coursePercentage}%
             </span>
@@ -215,7 +174,7 @@ export default function CoursePlayerPage() {
             />
           </div>
           {coursePercentage === 100 && (
-            <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1">🎉 Course Completed!</p>
+            <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1">🎉 {t.courseCompleted}</p>
           )}
         </div>
       </div>
@@ -223,11 +182,10 @@ export default function CoursePlayerPage() {
       {videoList.length === 0 ? (
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center">
           <p className="text-4xl mb-3">📭</p>
-          <p className="text-slate-500 font-medium">No videos have been added to this course yet.</p>
+          <p className="text-slate-500 font-medium">{t.noVideosYet}</p>
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Video Player */}
           <div className="flex-1">
             <div className="bg-black rounded-2xl overflow-hidden shadow-xl aspect-video">
               {activeVideo ? (
@@ -246,7 +204,7 @@ export default function CoursePlayerPage() {
                 </video>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white/50">
-                  Select a video to play
+                  {t.selectVideo}
                 </div>
               )}
             </div>
@@ -255,14 +213,13 @@ export default function CoursePlayerPage() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-slate-900">{activeVideo.title}</h2>
                   {isVideoCompleted(activeVideoIndex) && (
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">✓ Completed</span>
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">✓ {t.completed}</span>
                   )}
                 </div>
                 <p className="text-sm text-slate-500 mt-1">
-                  Video {activeVideoIndex + 1} of {videoList.length}
+                  {t.video} {activeVideoIndex + 1} / {videoList.length}
                   {activeVideo.duration ? ` • ${formatDuration(activeVideo.duration)}` : ''}
                 </p>
-                {/* Individual video progress */}
                 <div className="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div 
                     className={`h-full rounded-full transition-all ${isVideoCompleted(activeVideoIndex) ? 'bg-emerald-500' : 'bg-indigo-500'}`}
@@ -273,11 +230,10 @@ export default function CoursePlayerPage() {
             )}
           </div>
 
-          {/* Video Playlist Sidebar */}
           <div className="lg:w-80 shrink-0">
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 bg-slate-50">
-                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Course Content</h3>
+                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{t.courseContent}</h3>
               </div>
               <div className="divide-y divide-slate-50 max-h-[500px] overflow-y-auto">
                 {videoList.map((video, index) => {
@@ -292,18 +248,12 @@ export default function CoursePlayerPage() {
                       }`}
                     >
                       <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                        completed
-                          ? 'bg-emerald-500 text-white'
-                          : index === activeVideoIndex
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-100 text-slate-500'
+                        completed ? 'bg-emerald-500 text-white' : index === activeVideoIndex ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
                       }`}>
                         {completed ? '✓' : index === activeVideoIndex ? '▶' : index + 1}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className={`text-sm font-semibold truncate ${
-                          index === activeVideoIndex ? 'text-indigo-700' : 'text-slate-700'
-                        }`}>
+                        <p className={`text-sm font-semibold truncate ${index === activeVideoIndex ? 'text-indigo-700' : 'text-slate-700'}`}>
                           {video.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
@@ -314,7 +264,6 @@ export default function CoursePlayerPage() {
                             <span className="text-xs text-indigo-500 font-medium">{vidProgress}%</span>
                           )}
                         </div>
-                        {/* Mini progress bar */}
                         {vidProgress > 0 && (
                           <div className="mt-1.5 w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                             <div 
@@ -333,9 +282,8 @@ export default function CoursePlayerPage() {
         </div>
       )}
 
-      {/* Course Description */}
       <div className="mt-8 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h3 className="text-lg font-bold text-slate-900 mb-3">About this course</h3>
+        <h3 className="text-lg font-bold text-slate-900 mb-3">{t.aboutCourse}</h3>
         <p className="text-slate-600 leading-relaxed">{course.description}</p>
       </div>
     </div>

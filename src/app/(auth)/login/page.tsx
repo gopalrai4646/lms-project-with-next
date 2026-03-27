@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginRequest, googleLoginRequest, clearError } from '@/store/slices/authSlice';
+import { translations } from '@/utils/translations';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,8 @@ export default function LoginPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, loading, error } = useAppSelector((state) => state.auth);
+  const { language } = useAppSelector((state) => state.settings);
+  const t = translations[language].auth;
 
   useEffect(() => {
     if (user) {
@@ -38,8 +41,8 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
             <span className="text-white font-bold text-2xl">L</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Welcome Back</h1>
-          <p className="text-slate-500">Sign in to continue your learning journey</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{t.welcomeBack}</h1>
+          <p className="text-slate-500">{t.signInSubtitle}</p>
         </div>
 
         {error && (
@@ -50,7 +53,7 @@ export default function LoginPage() {
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">{t.email}</label>
             <input 
               type="email" 
               required
@@ -62,8 +65,8 @@ export default function LoginPage() {
           </div>
           <div>
             <div className="flex justify-between mb-2">
-              <label className="block text-sm font-semibold text-slate-700">Password</label>
-              <Link href="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">Forgot Password?</Link>
+              <label className="block text-sm font-semibold text-slate-700">{t.password}</label>
+              <Link href="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">{t.forgotPassword}</Link>
             </div>
             <input 
               type="password" 
@@ -83,7 +86,7 @@ export default function LoginPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-            ) : 'Sign In'}
+            ) : t.signInBtn}
           </button>
         </form>
 
@@ -93,7 +96,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-slate-100"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-slate-400 font-medium">Or continue with</span>
+              <span className="px-4 bg-white text-slate-400 font-medium">{t.orContinueWith}</span>
             </div>
           </div>
 
@@ -109,14 +112,14 @@ export default function LoginPage() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Sign in with Google
+            {t.signInWithGoogle}
           </button>
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-100 text-center">
           <p className="text-slate-500">
-            Don&apos;t have an account? 
-            <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-bold ml-1 transition-colors underline-offset-4 hover:underline">Sign up now</Link>
+            {t.dontHaveAccount} 
+            <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-bold ml-1 transition-colors underline-offset-4 hover:underline">{t.signUpNow}</Link>
           </p>
         </div>
       </div>

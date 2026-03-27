@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const [passSuccess, setPassSuccess] = useState(false);
 
   const t = translations[language].auth;
+  const ts = translations[language].settings;
 
   useEffect(() => {
     if (user?.displayName) {
@@ -40,7 +41,7 @@ export default function SettingsPage() {
     }
 
     if (newPassword.length < 6) {
-      setPassError('Password must be at least 6 characters.');
+      setPassError(t.passwordMinLength);
       return;
     }
 
@@ -58,14 +59,14 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto py-8 space-y-8">
       <header>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Account Settings</h1>
-        <p className="text-slate-500">Manage your profile and account preferences</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{ts.accountSettings}</h1>
+        <p className="text-slate-500">{ts.manageProfile}</p>
       </header>
 
       {/* Profile Information */}
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">Profile Information</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-6">{ts.profileInfo}</h2>
           
           {error && !passError && (
             <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-xl">
@@ -93,7 +94,7 @@ export default function SettingsPage() {
                 disabled
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-none"
               />
-              <p className="mt-2 text-xs text-slate-400 italic">Email cannot be changed for security reasons.</p>
+              <p className="mt-2 text-xs text-slate-400 italic">{ts.emailCannotChange}</p>
             </div>
 
             <div className="pt-4">
@@ -102,7 +103,7 @@ export default function SettingsPage() {
                 disabled={loading || name === user?.displayName}
                 className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {loading && name !== user?.displayName ? 'Saving...' : 'Save Changes'}
+                {loading && name !== user?.displayName ? ts.saving : ts.saveChanges}
               </button>
             </div>
           </form>
@@ -155,7 +156,7 @@ export default function SettingsPage() {
                 disabled={loading || !newPassword || !confirmPassword}
                 className="px-8 py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-100 hover:bg-slate-900 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading && newPassword ? 'Updating...' : t.changePassword}
+                {loading && newPassword ? ts.updating : t.changePassword}
               </button>
             </div>
           </form>
