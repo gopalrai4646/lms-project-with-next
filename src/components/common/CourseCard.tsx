@@ -74,73 +74,108 @@ export default function CourseCard({ course }: CourseCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 group cursor-pointer hover:shadow-md transition-all flex flex-col h-full">
-      <div className="h-48 bg-slate-100 flex items-center justify-center text-6xl group-hover:scale-105 transition-transform overflow-hidden relative">
-        {course.thumbnail ? (
-          <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-        ) : (
-          '📚'
-        )}
-        <button
-          onClick={handleSave}
-          className={`absolute top-4 right-4 p-2 rounded-full shadow-md transition-all ${isSaved ? 'bg-rose-500 text-white' : 'bg-white/80 text-slate-400 hover:text-rose-500 hover:bg-white'}`}
-          title={isSaved ? t.saved : t.save}
-        >
-          {isSaved ? '❤️' : '🤍'}
-        </button>
-        {videoCount > 0 && (
-          <span className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/70 text-white text-xs font-bold rounded-lg backdrop-blur-sm">
-            🎥 {videoCount} {videoCount !== 1 ? 'videos' : 'video'}
-          </span>
-        )}
-      </div>
-      <div className="p-6 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-3">
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full uppercase tracking-wider">
-            {course.price > 0 ? `$${course.price}` : t.free}
-          </span>
-          <span className="text-xs font-medium text-slate-400">{course.instructor}</span>
+    <div className="bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col border border-slate-100">
+      {/* Top half - Grey area */}
+      <div className="bg-[#f0f2f5] p-5 relative h-52 flex flex-col">
+        {/* Header icons */}
+        <div className="flex justify-between items-start z-10 relative">
+          <div className="bg-[#2d3142] text-white px-3 py-1.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm">
+            <span>🎬</span> {videoCount} {videoCount === 1 ? 'video' : 'videos'}
+          </div>
+          
+          <button
+            onClick={handleSave}
+            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all ${
+              isSaved ? 'bg-rose-500 text-white' : 'bg-white text-slate-500 hover:text-rose-500'
+            }`}
+            title={isSaved ? t.saved : t.save}
+          >
+            {isSaved ? '❤️' : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+            )}
+          </button>
         </div>
-        <h3 className="text-lg font-bold text-slate-900 line-clamp-2 mb-2">{course.title}</h3>
-        <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">{course.description}</p>
+
+        {/* Centered Thumbnail */}
+        <div className="absolute inset-0 flex items-center justify-center pt-8 group cursor-pointer">
+          <div className="relative">
+            {/* Tooltip */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#252525] text-white text-[11px] px-3 py-1.5 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+              Preview
+            </div>
+            
+            {course.thumbnail ? (
+              <img 
+                src={course.thumbnail} 
+                alt={course.title} 
+                className="w-[180px] h-[105px] object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-[180px] h-[105px] bg-white rounded shadow-md flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300 text-slate-300">
+                📚
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom half - White area */}
+      <div className="p-6 flex flex-col bg-white">
+        <div className="flex justify-between items-center mb-5">
+          <span className="px-3.5 py-1 bg-purple-50 text-purple-600 text-xs font-bold rounded-full tracking-wide">
+            {course.price > 0 ? `$${course.price}` : t.free?.toUpperCase() || 'FREE'}
+          </span>
+          <span className="text-sm font-medium text-slate-500">
+            {course.instructor || `${videoCount} video teacher`}
+          </span>
+        </div>
 
         {isEnrolled && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.yourProgress}</span>
-              <span className="text-xs font-bold text-indigo-600">{progressPercentage}%</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.yourProgress || 'YOUR PROGRESS'}</span>
+              <span className="text-xs font-bold text-[#6366f1]">{progressPercentage}%</span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                className="h-full bg-[#6366f1] rounded-full transition-all duration-500"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className={`space-y-3 ${isEnrolled ? '' : 'pt-2'}`}>
           {isEnrolled && videoCount > 0 && (
             <Link
               href={`/courses/${course.id}`}
-              className="w-full py-3 bg-emerald-600 text-white rounded-2xl font-bold transition-all hover:bg-emerald-700 shadow-lg  flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl font-bold transition-all hover:bg-emerald-700 shadow flex items-center justify-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <span>▶️</span> {t.viewCourse}
+              <span>▶️</span> {t.viewCourse || 'View Course'}
             </Link>
           )}
 
-          <button
-            onClick={handleEnroll}
-            disabled={isEnrolled || authLoading}
-            className={`w-full py-3 rounded-2xl font-bold transition-all active:scale-[0.98] ${
-              isEnrolled
-                ? 'bg-emerald-50 text-emerald-600 cursor-default'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100'
-            }`}
-          >
-            {isEnrolled ? `✓ ${t.enrolled}` : t.enroll}
-          </button>
+          {!isEnrolled && (
+            <button
+              onClick={handleEnroll}
+              disabled={authLoading}
+              className="w-full py-3.5 rounded-2xl font-semibold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200"
+            >
+              {t.enroll || 'Enroll Now'}
+            </button>
+          )}
+
+          {isEnrolled && videoCount === 0 && (
+            <button
+              disabled
+              className="w-full py-3.5 rounded-2xl font-semibold bg-slate-100 text-slate-400 cursor-not-allowed"
+            >
+              {t.enrolled || 'Enrolled'}
+            </button>
+          )}
         </div>
       </div>
     </div>

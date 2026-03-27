@@ -1,11 +1,13 @@
 import { call, put, takeLatest, all } from 'redux-saga/effects';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
   fetchUsersRequest,
   fetchUsersSuccess,
   fetchUsersFailure,
   User,
+  deleteUserRequest,
+  deleteUserSuccess,
 } from '../slices/userSlice';
 
 function* handleFetchUsers(): any {
@@ -26,13 +28,25 @@ function* handleFetchUsers(): any {
     });
     yield put(fetchUsersSuccess(users));
   } catch (error: any) {
-    console.error('Saga: Error fetching users', error.message);
+    yield put(fetchUsersFailure(error.message));
+  }
+}
+
+function* handleDeleteUser(action: ReturnType<typeof deleteUserRequest>): any {
+  try {
+    const userId = action.payload;
+    const userRef = doc(db, 'users', userId);
+    yield call(deleteDoc, userRef);
+    yield put(deleteUserSuccess(userId));
+  } catch (error: any) {
+    console.error('Saga: Error deleting user', error.message);
     yield put(fetchUsersFailure(error.message));
   }
 }
 
 export function* watchUsers() {
   yield takeLatest(fetchUsersRequest.type, handleFetchUsers);
+  yield takeLatest(deleteUserRequest.type, handleDeleteUser);
 }
 
 export function* userSaga() {

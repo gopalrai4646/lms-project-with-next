@@ -30,8 +30,21 @@ export default function EditCoursePage() {
 
   const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0 });
   const [videoEntries, setVideoEntries] = useState<VideoEntry[]>([]);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setThumbnailFile(file);
+      setThumbnailPreview(URL.createObjectURL(file));
+      setUploadError(null);
+    }
+  };
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -43,6 +56,10 @@ export default function EditCoursePage() {
       const course = courses.find(c => c.id === courseId);
       if (course) {
         setFormData({ title: course.title, description: course.description, instructor: course.instructor, price: course.price });
+        if (course.thumbnail) {
+          setThumbnailPreview(course.thumbnail);
+          setExistingThumbnail(course.thumbnail);
+        }
         
         if (course.videos && course.videos.length > 0) {
           setVideoEntries([...course.videos].sort((a, b) => a.order - b.order).map(v => ({
@@ -112,6 +129,7 @@ export default function EditCoursePage() {
     const hasContent = videoEntries.some(v => v.file || v.isExisting);
     if (!hasContent) { setUploadError(t.addAtLeastOneVideo); return; }
     if (videoEntries.some(v => (v.file || v.isExisting) && !v.title.trim())) { setUploadError(t.giveEachVideoTitle); return; }
+    if (!thumbnailFile && !existingThumbnail) { setUploadError('Please upload a course thumbnail.'); return; }
 
     try {
       setSubmitting(true);
@@ -133,9 +151,15 @@ export default function EditCoursePage() {
 
       const totalDuration = finalVideos.reduce((acc, v) => acc + (v.duration || 0), 0);
 
+      let thumbnailUrl = existingThumbnail;
+      if (thumbnailFile) {
+        thumbnailUrl = await uploadToCloudinary(thumbnailFile);
+      }
+
       dispatch(updateCourseRequest({
         id: courseId,
         ...formData,
+        thumbnail: thumbnailUrl || undefined,
         videos: finalVideos,
         totalDuration,
         videoUrl: finalVideos[0]?.url,
@@ -197,6 +221,36 @@ export default function EditCoursePage() {
               <input type="number" required min="0" value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900" />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Course Thumbnail</label>
+              <div 
+                onClick={() => thumbnailInputRef.current?.click()}
+                className="w-full border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center hover:border-indigo-400 hover:bg-slate-50 transition-all cursor-pointer relative overflow-hidden group min-h-[200px]"
+              >
+                <input
+                  type="file"
+                  ref={thumbnailInputRef}
+                  onChange={handleThumbnailChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {thumbnailPreview ? (
+                  <>
+                    <img src={thumbnailPreview} alt="Thumbnail preview" className="absolute inset-0 w-full h-full object-cover z-0" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <span className="text-white font-semibold flex items-center gap-2"><span>✏️</span> Change Thumbnail</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center z-10">
+                    <span className="text-4xl block mb-2">🖼️</span>
+                    <p className="text-sm font-medium text-slate-600">Click to upload thumbnail</p>
+                    <p className="text-xs text-slate-400 mt-1">Recommended size: 1280x720 (16:9)</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

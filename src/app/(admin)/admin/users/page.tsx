@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchUsersRequest, User } from '@/store/slices/userSlice';
+import { fetchUsersRequest, User, deleteUserRequest } from '@/store/slices/userSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import UserDetailsModal from '@/components/admin/UserDetailsModal';
 import { translations } from '@/utils/translations';
@@ -20,6 +20,12 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const itemsPerPage = 8;
+
+  const handleDelete = (userId: string) => {
+    if (window.confirm(t.deleteUserConfirm)) {
+      dispatch(deleteUserRequest(userId));
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchUsersRequest());
@@ -148,12 +154,21 @@ export default function AdminUsersPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => setSelectedUser(user)}
-                        className="px-4 py-2 bg-slate-50/50 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-sm font-bold rounded-xl transition-all shadow-sm"
-                      >
-                        {t.viewDetails}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => setSelectedUser(user)}
+                          className="px-4 py-2 bg-slate-50/50 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-sm font-bold rounded-xl transition-all shadow-sm"
+                        >
+                          {t.viewDetails}
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(user.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                          title={t.deleteUser}
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

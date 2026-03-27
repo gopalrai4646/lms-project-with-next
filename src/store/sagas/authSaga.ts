@@ -41,7 +41,13 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     
     // Fetch role and course data from Firestore
     const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
-    const userData = userDoc.exists() ? userDoc.data() : {};
+    
+    if (!userDoc.exists()) {
+      yield call(signOut, auth);
+      throw new Error('Your account has been deleted by an administrator.');
+    }
+
+    const userData = userDoc.data();
     const role = userData.role || null;
     const enrolledCourses = userData.enrolledCourses || [];
     const savedCourses = userData.savedCourses || [];
@@ -128,12 +134,15 @@ function* handleGoogleLogin(): any {
       });
     } else {
       const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        role = userData.role || 'student';
-        enrolledCourses = userData.enrolledCourses || [];
-        savedCourses = userData.savedCourses || [];
+      if (!userDoc.exists()) {
+        yield call(signOut, auth);
+        throw new Error('Your account has been deleted by an administrator.');
       }
+      
+      const userData = userDoc.data();
+      role = userData.role || 'student';
+      enrolledCourses = userData.enrolledCourses || [];
+      savedCourses = userData.savedCourses || [];
     }
 
     yield put(authSuccess({ 

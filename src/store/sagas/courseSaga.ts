@@ -9,7 +9,10 @@ import {
   doc,
   serverTimestamp,
   query,
-  orderBy
+  where,
+  orderBy,
+  writeBatch,
+  arrayRemove
 } from 'firebase/firestore';
 import { extractPublicIdFromUrl } from '@/utils/cloudinary-utils';
 import { db } from '@/lib/firebase/config';
@@ -129,6 +132,49 @@ function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): an
     // 3. Delete course document from Firestore
     console.log(`Saga: Deleting course document from Firestore: ${id}`);
     yield call(deleteDoc, courseRef);
+
+    // 4. Cleanup Users (enrolledCourses and savedCourses)
+    console.log(`Saga: Cleaning up user enrollments and saved courses for: ${id}`);
+    const usersRef = collection(db, 'users');
+    const enrolledQuery = query(usersRef, where('enrolledCourses', 'array-contains', id));
+    const savedQuery = query(usersRef, where('savedCourses', 'array-contains', id));
+
+    const [enrolledSnap, savedSnap]: [any, any] = yield all([
+      call(getDocs, enrolledQuery),
+      call(getDocs, savedQuery)
+    ]);
+
+    if (!enrolledSnap.empty || !savedSnap.empty) {
+      const userBatch = writeBatch(db);
+      enrolledSnap.forEach((userDoc: any) => {
+        userBatch.update(userDoc.ref, {
+          enrolledCourses: arrayRemove(id)
+        });
+      });
+      savedSnap.forEach((userDoc: any) => {
+        userBatch.update(userDoc.ref, {
+          savedCourses: arrayRemove(id)
+        });
+      });
+      yield call([userBatch, userBatch.commit]);
+      console.log(`Saga: Successfully cleaned up ${enrolledSnap.size + savedSnap.size} user records`);
+    }
+
+    // 5. Cleanup User Progress
+    console.log(`Saga: Cleaning up user progress for course: ${id}`);
+    const progressRef = collection(db, 'userProgress');
+    const progressQuery = query(progressRef, where('courseId', '==', id));
+    const progressSnap: any = yield call(getDocs, progressQuery);
+    
+    if (!progressSnap.empty) {
+      const progressBatch = writeBatch(db);
+      progressSnap.forEach((progDoc: any) => {
+        progressBatch.delete(progDoc.ref);
+      });
+      yield call([progressBatch, progressBatch.commit]);
+      console.log(`Saga: Successfully deleted ${progressSnap.size} progress records`);
+    }
+
     yield put(deleteCourseSuccess(id));
 
   } catch (error: any) {
