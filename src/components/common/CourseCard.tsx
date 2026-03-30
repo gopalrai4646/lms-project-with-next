@@ -123,12 +123,15 @@ export default function CourseCard({ course }: CourseCardProps) {
 
       {/* Bottom half - White area */}
       <div className="p-6 flex flex-col bg-white">
-        <div className="flex justify-between items-center mb-5">
-          <span className="px-3.5 py-1 bg-purple-50 text-purple-600 text-xs font-bold rounded-full tracking-wide">
-            {course.price > 0 ? `$${course.price}` : t.free?.toUpperCase() || 'FREE'}
+        <div className="flex items-center gap-2 mb-5 overflow-hidden">
+          <h3 className="text-sm font-bold text-slate-900 truncate min-w-0" title={course.title}>
+            {course.title}
+          </h3>
+          <span className="text-sm font-medium text-slate-400 whitespace-nowrap shrink-0">
+            • {course.instructor || `${videoCount} teacher`}
           </span>
-          <span className="text-sm font-medium text-slate-500">
-            {course.instructor || `${videoCount} video teacher`}
+          <span className="px-2.5 py-0.5 bg-purple-50 text-purple-600 text-sm font-bold rounded-full whitespace-nowrap shrink-0 ml-auto">
+            {course.price > 0 ? `$${course.price}` : t.free?.toUpperCase() || 'FREE'}
           </span>
         </div>
 

@@ -37,8 +37,25 @@ function* handleFetchUsers(): any {
 function* handleDeleteUser(action: ReturnType<typeof deleteUserRequest>): any {
   try {
     const userId = action.payload;
+
+    // 1. Delete from Firebase Authentication via API
+    console.log(`Saga: Calling Auth deletion API for user: ${userId}`);
+    const authResponse = yield call(fetch, '/api/admin/users/delete', {
+      method: 'POST',
+      body: JSON.stringify({ uid: userId }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!authResponse.ok) {
+      const errorData = yield call([authResponse, authResponse.json]);
+      throw new Error(errorData.error || 'Failed to delete user from Authentication');
+    }
+
+    // 2. Delete from Firestore
+    console.log(`Saga: Deleting user document from Firestore: ${userId}`);
     const userRef = doc(db, 'users', userId);
     yield call(deleteDoc, userRef);
+
     yield put(deleteUserSuccess(userId));
   } catch (error: any) {
     console.error('Saga: Error deleting user', error.message);
