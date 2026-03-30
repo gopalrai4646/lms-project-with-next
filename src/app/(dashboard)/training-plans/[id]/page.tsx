@@ -119,7 +119,8 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
       <section>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-             {adminT.curriculum || "Curriculum"} <span className="text-sm px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full">{planCourses.length}</span>
+             {adminT.curriculum || "Curriculum"}
+              {/* <span className="text-sm px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full">{planCourses.length}</span> */}
           </h2>
           <p className="text-slate-500 mt-2">{adminT.curriculumSubtitle || "Complete these courses in order to finish the training plan."}</p>
         </div>

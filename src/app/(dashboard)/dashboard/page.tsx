@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { translations } from '@/utils/translations';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import CourseCard from '@/components/common/CourseCard';
+import DonutChart from '@/components/charts/DonutChart';
+import BarChart from '@/components/charts/BarChart';
+import ProgressRing from '@/components/charts/ProgressRing';
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -13,7 +17,9 @@ export default function DashboardPage() {
   const { language } = useAppSelector((state) => state.settings);
   const { courses, loading: coursesLoading } = useAppSelector((state) => state.courses);
   const { trainingPlans, loading: trainingPlansLoading } = useAppSelector((state) => state.trainingPlans);
+  const { progress } = useAppSelector((state) => state.progress);
   const t = translations[language].dashboard;
+  const adminT = translations[language].admin;
 
   const [showAllEnrolled, setShowAllEnrolled] = useState(false);
   const [showAllDiscover, setShowAllDiscover] = useState(false);
@@ -27,54 +33,267 @@ export default function DashboardPage() {
     }
   }, [dispatch, user?.assignedTrainingPlans]);
 
+  // Fetch progress for all enrolled courses
+  useEffect(() => {
+    if (user?.uid && user?.enrolledCourses?.length) {
+      user.enrolledCourses.forEach(courseId => {
+        if (!progress[courseId]) {
+          dispatch({ type: 'progress/fetchProgressRequest', payload: { userId: user.uid, courseId } });
+        }
+      });
+    }
+  }, [dispatch, user?.uid, user?.enrolledCourses, progress]);
+
   const firstName = user?.displayName?.split(' ')[0] || 'Learner';
 
-  // Extract all course IDs the user should have access to from their training plans
+  // Training plan data
   const assignedPlanIds = user?.assignedTrainingPlans || [];
   const assignedPlans = trainingPlans.filter(tp => assignedPlanIds.includes(tp.id));
   const planCourseIds = new Set(assignedPlans.flatMap(tp => tp.courseIds || []));
 
-  // Determine which courses the user can see
+  // Course categories
   const availableCourses = courses.filter(c => 
     c.visibility !== 'private' || planCourseIds.has(c.id) || user?.enrolledCourses?.includes(c.id)
   );
-
   const enrolledCourses = courses.filter(c => user?.enrolledCourses?.includes(c.id));
   const savedCourses = availableCourses.filter(c => user?.savedCourses?.includes(c.id));
   const discoverCourses = availableCourses.filter(c => !user?.enrolledCourses?.includes(c.id));
 
-  return (
-    <div className="space-y-12 pb-12">
-      <header>
-        <h1 className="text-3xl font-extrabold text-slate-900">
-          {isNewUser ? `${t.hello}, ${firstName}! 👋` : `${t.welcome}, ${firstName}! 👋`}
-        </h1>
-        <p className="text-slate-500 mt-1">{t.subtitle}</p>
-      </header>
+  // Calculate progress for a course
+  const getCourseProgress = (course: any) => {
+    const courseProgress = progress[course.id];
+    const videoCount = course.videos?.length || 0;
+    if (!courseProgress || videoCount === 0) return 0;
+    
+    const videoList = course.videos || [];
+    let totalDuration = 0;
+    let totalWatched = 0;
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: t.stats.inProgress, value: enrolledCourses.length.toString(), icon: '📚', color: 'bg-blue-500' },
-          { label: t.savedCourses, value: savedCourses.length.toString(), icon: '❤️', color: 'bg-rose-500' },
-          { label: t.stats.hours, value: '24', icon: '⏱️', color: 'bg-amber-500' }
-        ].map((stat) => (
-          <div key={stat.label} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className={`${stat.color} w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-slate-100`}>
-              {stat.icon}
-            </div>
+    videoList.forEach((video: any, index: number) => {
+      const vidId = `video_${index}`;
+      const duration = video.duration || 0;
+      const watched = courseProgress.watchedDurations?.[vidId] || 0;
+      const isCompleted = courseProgress.completedVideos?.includes(vidId);
+
+      if (duration > 0) {
+        totalDuration += duration;
+        totalWatched += isCompleted ? duration : Math.min(watched, duration);
+      } else {
+        totalDuration += 100;
+        totalWatched += isCompleted ? 100 : 0;
+      }
+    });
+
+    if (totalDuration <= 0) return 0;
+    return Math.min(100, Math.round((totalWatched / totalDuration) * 100));
+  };
+
+  // Computed stats
+  const stats = useMemo(() => {
+    const completedCourses = enrolledCourses.filter(c => getCourseProgress(c) >= 100);
+    const inProgressCourses = enrolledCourses.filter(c => {
+      const p = getCourseProgress(c);
+      return p > 0 && p < 100;
+    });
+    
+    // Total learning time from video durations of enrolled courses
+    let totalSeconds = 0;
+    enrolledCourses.forEach(c => {
+      c.videos?.forEach(v => { totalSeconds += v.duration || 0; });
+    });
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const timeFormatted = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+    const completionRate = enrolledCourses.length > 0
+      ? Math.round((completedCourses.length / enrolledCourses.length) * 100)
+      : 0;
+
+    return {
+      enrolled: enrolledCourses.length,
+      completed: completedCourses.length,
+      inProgress: inProgressCourses.length,
+      timeFormatted,
+      completionRate,
+    };
+  }, [enrolledCourses, progress]);
+
+  // Weekly activity data (Derived from real progress data)
+  const weeklyData = useMemo(() => {
+    const result: { dateStr: string; label: string; value: number }[] = [];
+    const now = new Date();
+    
+    // Create buckets for the last 7 days ending today
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+      result.push({
+        dateStr: d.toDateString(),
+        label,
+        value: 0
+      });
+    }
+
+    // Tally activity from real Redux progress
+    Object.values(progress).forEach((courseProgress) => {
+      if (!courseProgress.lastUpdated) return;
+      
+      const progressDate = new Date(courseProgress.lastUpdated);
+      const ds = progressDate.toDateString();
+      
+      const dayBucket = result.find(r => r.dateStr === ds);
+      if (dayBucket) {
+        // We count 1 point to represent "active on this day"
+        // And if they completed videos, add those to the activity count
+        const completedVideosCount = courseProgress.completedVideos?.length || 0;
+        dayBucket.value += Math.max(1, completedVideosCount);
+      }
+    });
+
+    return result.map(r => ({ label: r.label, value: r.value }));
+  }, [progress]);
+
+  // Continue learning - courses in progress
+  const continueLearning = enrolledCourses
+    .map(c => ({ ...c, progress: getCourseProgress(c) }))
+    .filter(c => c.progress > 0 && c.progress < 100)
+    .sort((a, b) => b.progress - a.progress);
+
+  return (
+    <div className="space-y-10 pb-16">
+      {/* ─── Welcome Hero Banner ─── */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 p-8 md:p-10 text-white">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-              <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+              <p className="text-indigo-200 text-sm font-medium mb-1">
+                {new Date().toLocaleDateString(language === 'de' ? 'de-DE' : language === 'fr' ? 'fr-FR' : 'en-IN', 
+                  { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+                )}
+              </p>
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
+                {isNewUser ? `${t.hello}, ${firstName}! 👋` : `${t.welcome}, ${firstName}! 👋`}
+              </h1>
+              <p className="text-indigo-200 text-lg max-w-lg">{t.subtitle}</p>
             </div>
+            {continueLearning.length > 0 && (
+              <Link
+                href={`/courses/${continueLearning[0].id}`}
+                className="flex items-center gap-4 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/25 transition-all group shrink-0"
+              >
+                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                  <ProgressRing percentage={continueLearning[0].progress} size={48} strokeWidth={4} showLabel={false} />
+                </div>
+                <div>
+                  <p className="text-xs text-indigo-200 font-semibold uppercase tracking-wider">{t.continue || 'Continue Learning'}</p>
+                  <p className="font-bold text-white truncate max-w-[180px]">{continueLearning[0].title}</p>
+                  <p className="text-xs text-indigo-200">{continueLearning[0].progress}% complete</p>
+                </div>
+                <span className="text-2xl group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
+            )}
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Assigned Training Plans */}
+
+
+      {/* ─── Charts Section ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Donut Chart - Completion Overview */}
+        <div className="bg-white rounded-[28px] shadow-sm border border-slate-100 p-6 md:p-8">
+          <h3 className="text-lg font-bold text-slate-900 mb-1">{t.completionOverview || 'Completion Overview'}</h3>
+          <p className="text-sm text-slate-400 mb-6">{t.completionOverviewSub || 'Your overall course completion rate'}</p>
+          <div className="flex flex-col sm:flex-row items-center gap-8">
+            <DonutChart
+              percentage={stats.completionRate}
+              size={180}
+              strokeWidth={16}
+              label={t.completionRate || "Completed"}
+              sublabel={`${stats.completed} of ${stats.enrolled}`}
+            />
+            <div className="flex-1 space-y-4 w-full">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-100">
+                <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></div>
+                <span className="text-sm font-medium text-slate-700 flex-1">{t.stats?.completed || 'Completed'}</span>
+                <span className="text-sm font-bold text-emerald-600">{stats.completed}</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50 border border-indigo-100">
+                <div className="w-3 h-3 rounded-full bg-indigo-500 shrink-0"></div>
+                <span className="text-sm font-medium text-slate-700 flex-1">{t.stats?.inProgress || 'In Progress'}</span>
+                <span className="text-sm font-bold text-indigo-600">{stats.inProgress}</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                <div className="w-3 h-3 rounded-full bg-slate-300 shrink-0"></div>
+                <span className="text-sm font-medium text-slate-700 flex-1">{t.notStarted || 'Not Started'}</span>
+                <span className="text-sm font-bold text-slate-500">{stats.enrolled - stats.completed - stats.inProgress}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bar Chart - Weekly Activity */}
+        <div className="bg-white rounded-[28px] shadow-sm border border-slate-100 p-6 md:p-8">
+          <h3 className="text-lg font-bold text-slate-900 mb-1">{t.weeklyActivity || 'Weekly Activity'}</h3>
+          <p className="text-sm text-slate-400 mb-6">{t.weeklyActivitySub || 'Videos watched per day this week'}</p>
+          <BarChart
+            data={weeklyData}
+            height={180}
+            emptyLabel={t.noActivityYet || 'Enroll in a course to start tracking!'}
+          />
+        </div>
+      </div>
+
+      {/* ─── Continue Learning ─── */}
+      {continueLearning.length > 0 && (
+        <section>
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">{t.continue || 'Continue Learning'}</h2>
+              <p className="text-sm text-slate-500 mt-1">{t.continueSub || 'Pick up where you left off'}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {continueLearning.slice(0, 3).map((course) => (
+              <Link
+                key={course.id}
+                href={`/courses/${course.id}`}
+                className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all group flex"
+              >
+                <div className="w-28 shrink-0 bg-slate-100 flex items-center justify-center overflow-hidden">
+                  {course.thumbnail ? (
+                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <span className="text-3xl">📚</span>
+                  )}
+                </div>
+                <div className="p-5 flex-1 flex items-center gap-4 min-w-0">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">{course.title}</p>
+                    <p className="text-xs text-slate-500 mt-1">{course.instructor}</p>
+                    <div className="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+                        style={{ width: `${course.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                  <ProgressRing percentage={course.progress} size={48} strokeWidth={4} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── Assigned Training Plans ─── */}
       {assignedPlans.length > 0 && (
         <section>
           <div className="flex justify-between items-end mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">{translations[language]?.admin?.assignedTrainingPlans || 'Assigned Training Plans'}</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{adminT?.assignedTrainingPlans || 'Assigned Training Plans'}</h2>
             {assignedPlans.length > 3 && (
               <button 
                 onClick={() => setShowAllPlans(!showAllPlans)}
@@ -86,33 +305,35 @@ export default function DashboardPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(showAllPlans ? assignedPlans : assignedPlans.slice(0, 3)).map((plan) => (
-              <div key={plan.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all group flex flex-col">
-                <div className="relative aspect-[16/9] bg-slate-100 overflow-hidden">
-                  {plan.image ? (
-                    <img src={plan.image} alt={plan.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">📋</div>
-                  )}
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-bold rounded-full shadow-sm">
-                      {plan.courseIds?.length || 0} {translations[language]?.admin?.courses || 'Courses'}
+              <Link href={`/training-plans/${plan.id}`} key={plan.id} className="block group">
+                <div className="bg-white rounded-[28px] overflow-hidden shadow-sm border border-slate-100 group-hover:shadow-xl transition-all h-full flex flex-col">
+                  <div className="relative aspect-[16/9] bg-slate-100 overflow-hidden">
+                    {plan.image ? (
+                      <img src={plan.image} alt={plan.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">📋</div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-bold rounded-full shadow-sm">
+                        {plan.courseIds?.length || 0} {adminT?.courses || 'Courses'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">{plan.name}</h3>
+                    <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-1">{plan.description}</p>
+                    <span className="text-sm font-bold text-indigo-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
+                      View Plan <span>→</span>
                     </span>
                   </div>
                 </div>
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2">{plan.name}</h3>
-                  <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-1">{plan.description}</p>
-                  <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-2 rounded-xl text-center self-start">
-                    Assigned by Admin
-                  </p>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
       )}
 
-      {/* Enrolled Courses */}
+      {/* ─── My Courses ─── */}
       {enrolledCourses.length > 0 && (
         <section>
           <div className="flex justify-between items-end mb-6">
@@ -134,7 +355,7 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* Discover Courses */}
+      {/* ─── Discover Courses ─── */}
       <section>
         <div className="flex justify-between items-end mb-6">
           <h2 className="text-2xl font-bold text-slate-900">{t.discover}</h2>
@@ -166,7 +387,7 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {/* Saved Courses */}
+      {/* ─── Saved Courses ─── */}
       {savedCourses.length > 0 && (
         <section>
           <div className="flex justify-between items-end mb-6">
