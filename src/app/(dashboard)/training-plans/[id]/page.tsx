@@ -14,7 +14,7 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
   const dispatch = useAppDispatch();
   const { id } = use(params);
 
-  const { user, loading: authLoading } = useAppSelector((state) => state.auth);
+  const { user, role, loading: authLoading } = useAppSelector((state) => state.auth);
   const { language } = useAppSelector((state) => state.settings);
   const { trainingPlans, loading: planLoading } = useAppSelector((state) => state.trainingPlans);
   const { courses, loading: coursesLoading } = useAppSelector((state) => state.courses);
@@ -32,8 +32,8 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
     }
   }, [dispatch, trainingPlans.length, courses.length, initialized]);
 
-  // Ensure user has access
-  const hasAccess = user?.assignedTrainingPlans?.includes(id);
+  // Ensure user has access (Assigned to plan OR is Admin)
+  const hasAccess = user?.assignedTrainingPlans?.includes(id) || role === 'admin';
 
   if (!hasAccess && initialized && !planLoading) {
     return (

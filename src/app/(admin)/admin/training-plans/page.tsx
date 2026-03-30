@@ -2,11 +2,13 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest, deleteTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
 import { translations } from '@/utils/translations';
 
 export default function AdminTrainingPlansPage() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { trainingPlans, loading, error } = useAppSelector((state) => state.trainingPlans);
   const { language } = useAppSelector((state) => state.settings);
@@ -69,46 +71,57 @@ export default function AdminTrainingPlansPage() {
                 </tr>
               ) : (
                 trainingPlans.map((plan) => (
-                  <tr key={plan.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0">
-                          {plan.image ? (
-                            <img src={plan.image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xl">📋</div>
-                          )}
+                    <tr 
+                      key={plan.id} 
+                      className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                      onClick={() => router.push(`/training-plans/${plan.id}`)}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0">
+                            {plan.image ? (
+                              <img src={plan.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xl">📋</div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 leading-tight">{plan.name}</p>
+                            <p className="text-xs text-slate-400 mt-0.5 max-w-md truncate">{plan.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 leading-tight">{plan.name}</p>
-                          <p className="text-xs text-slate-400 mt-0.5 max-w-md truncate">{plan.description}</p>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
+                          {plan.courseIds?.length || 0}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Link 
+                            href={`/training-plans/${plan.id}`}
+                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                            title={t.viewDetails || "View"}
+                          >
+                            👁️
+                          </Link>
+                          <Link 
+                            href={`/admin/training-plans/edit/${plan.id}`}
+                            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                            title={t.editTrainingPlan || "Edit"}
+                          >
+                            ✏️
+                          </Link>
+                          <button 
+                            onClick={() => handleDelete(plan.id)}
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                            title={t.deleteTrainingPlan || "Delete"}
+                          >
+                            🗑️
+                          </button>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
-                        {plan.courseIds?.length || 0}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link 
-                          href={`/admin/training-plans/edit/${plan.id}`}
-                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                          title={t.editTrainingPlan || "Edit"}
-                        >
-                          ✏️
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(plan.id)}
-                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                          title={t.deleteTrainingPlan || "Delete"}
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
                 ))
               )}
             </tbody>
