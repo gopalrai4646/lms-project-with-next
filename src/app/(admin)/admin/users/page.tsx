@@ -17,7 +17,11 @@ export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  const selectedUser = useMemo(() => {
+    return selectedUserId ? users.find(u => u.id === selectedUserId) || null : null;
+  }, [users, selectedUserId]);
 
   const itemsPerPage = 8;
 
@@ -156,7 +160,7 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button 
-                          onClick={() => setSelectedUser(user)}
+                          onClick={() => setSelectedUserId(user.id)}
                           className="px-4 py-2 bg-slate-50/50 border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-sm font-bold rounded-xl transition-all shadow-sm"
                         >
                           {t.viewDetails}
@@ -208,7 +212,7 @@ export default function AdminUsersPage() {
         <UserDetailsModal 
           user={selectedUser} 
           courses={courses} 
-          onClose={() => setSelectedUser(null)} 
+          onClose={() => setSelectedUserId(null)} 
         />
       )}
     </div>

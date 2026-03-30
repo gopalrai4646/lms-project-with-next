@@ -7,6 +7,7 @@ interface AuthState {
     displayName: string | null;
     enrolledCourses?: string[];
     savedCourses?: string[];
+    assignedTrainingPlans?: string[];
   } | null;
   role: 'student' | 'admin' | null;
   loading: boolean;

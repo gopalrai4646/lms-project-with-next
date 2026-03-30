@@ -35,6 +35,7 @@ export default function Sidebar() {
   const adminMenuItems = [
     { name: t.adminDashboard, href: '/admin', icon: '📊' },
     { name: t.manageCourses, href: '/admin/courses', icon: '🛠️' },
+    { name: t.trainingPlans, href: '/admin/training-plans', icon: '📋' },
     { name: t.users, href: '/admin/users', icon: '👥' },
     { name: t.settings, href: '/settings', icon: '⚙️' },
   ];

@@ -16,13 +16,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch role from Firestore
           const { doc, getDoc } = await import('firebase/firestore');
           const userDoc = await getDoc(doc(db, 'users', user.uid));
-          const role = userDoc.exists() ? (userDoc.data().role as 'student' | 'admin') : null;
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          const role = userData.role as 'student' | 'admin' || null;
 
           dispatch(authSuccess({
             user: {
               uid: user.uid,
               email: user.email,
               displayName: user.displayName,
+              enrolledCourses: userData.enrolledCourses || [],
+              savedCourses: userData.savedCourses || [],
+              assignedTrainingPlans: userData.assignedTrainingPlans || [],
             },
             role,
             isNewUser: false,

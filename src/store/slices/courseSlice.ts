@@ -18,6 +18,7 @@ export interface Course {
   videos?: VideoItem[];
   totalDuration?: number; // sum of video durations
   enrolledUsers?: string[];
+  visibility?: 'public' | 'private'; // default: 'public'
   createdAt: string;
 }
 

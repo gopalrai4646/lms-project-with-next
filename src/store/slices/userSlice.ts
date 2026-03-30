@@ -7,6 +7,7 @@ export interface User {
   role: 'student' | 'admin';
   enrolledCourses?: string[];
   savedCourses?: string[];
+  assignedTrainingPlans?: string[];
   createdAt?: string;
 }
 
@@ -48,6 +49,18 @@ const userSlice = createSlice({
       state.users = state.users.filter(u => u.id !== action.payload);
       state.error = null;
     },
+    assignTrainingPlanRequest: (state, _action: PayloadAction<{ userId: string; trainingPlanIds: string[] }>) => {
+      state.loading = true;
+    },
+    assignTrainingPlanSuccess: (state, action: PayloadAction<{ userId: string; trainingPlanIds: string[] }>) => {
+      const user = state.users.find(u => u.id === action.payload.userId);
+      if (user) {
+        const existing = user.assignedTrainingPlans || [];
+        const merged = [...new Set([...existing, ...action.payload.trainingPlanIds])];
+        user.assignedTrainingPlans = merged;
+      }
+      state.loading = false;
+    },
   },
 });
 
@@ -57,6 +70,8 @@ export const {
   fetchUsersFailure,
   deleteUserRequest,
   deleteUserSuccess,
+  assignTrainingPlanRequest,
+  assignTrainingPlanSuccess,
 } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -1,5 +1,5 @@
 import { call, put, takeLatest, all } from 'redux-saga/effects';
-import { collection, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, deleteDoc, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
   fetchUsersRequest,
@@ -8,6 +8,8 @@ import {
   User,
   deleteUserRequest,
   deleteUserSuccess,
+  assignTrainingPlanRequest,
+  assignTrainingPlanSuccess,
 } from '../slices/userSlice';
 
 function* handleFetchUsers(): any {
@@ -44,9 +46,24 @@ function* handleDeleteUser(action: ReturnType<typeof deleteUserRequest>): any {
   }
 }
 
+function* handleAssignTrainingPlan(action: ReturnType<typeof assignTrainingPlanRequest>): any {
+  try {
+    const { userId, trainingPlanIds } = action.payload;
+    const userRef = doc(db, 'users', userId);
+    yield call(updateDoc, userRef as any, {
+      assignedTrainingPlans: arrayUnion(...trainingPlanIds),
+    } as any);
+    yield put(assignTrainingPlanSuccess({ userId, trainingPlanIds }));
+  } catch (error: any) {
+    console.error('Saga: Error assigning training plan', error.message);
+    yield put(fetchUsersFailure(error.message));
+  }
+}
+
 export function* watchUsers() {
   yield takeLatest(fetchUsersRequest.type, handleFetchUsers);
   yield takeLatest(deleteUserRequest.type, handleDeleteUser);
+  yield takeLatest(assignTrainingPlanRequest.type, handleAssignTrainingPlan);
 }
 
 export function* userSaga() {

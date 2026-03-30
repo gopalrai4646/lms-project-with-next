@@ -28,7 +28,7 @@ export default function EditCoursePage() {
   const t = translations[language].admin;
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
-  const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0 });
+  const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0, visibility: 'public' as 'public' | 'private' });
   const [videoEntries, setVideoEntries] = useState<VideoEntry[]>([]);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export default function EditCoursePage() {
     if (!initialized && courses.length > 0) {
       const course = courses.find(c => c.id === courseId);
       if (course) {
-        setFormData({ title: course.title, description: course.description, instructor: course.instructor, price: course.price });
+        setFormData({ title: course.title, description: course.description, instructor: course.instructor, price: course.price, visibility: course.visibility || 'public' });
         if (course.thumbnail) {
           setThumbnailPreview(course.thumbnail);
           setExistingThumbnail(course.thumbnail);
@@ -221,6 +221,18 @@ export default function EditCoursePage() {
               <input type="number" required min="0" value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.courseVisibility || "Visibility"}</label>
+              <select
+                value={formData.visibility}
+                onChange={(e) => setFormData({ ...formData, visibility: e.target.value as 'public' | 'private' })}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
+              >
+                <option value="public">{t.public || "Public (Visible to everyone)"}</option>
+                <option value="private">{t.private || "Private (Training Plans only)"}</option>
+              </select>
             </div>
 
             <div className="md:col-span-2">

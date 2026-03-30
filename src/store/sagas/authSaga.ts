@@ -51,9 +51,10 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     const role = userData.role || null;
     const enrolledCourses = userData.enrolledCourses || [];
     const savedCourses = userData.savedCourses || [];
+    const assignedTrainingPlans = userData.assignedTrainingPlans || [];
     
     yield put(authSuccess({ 
-      user: { uid, email: userEmail, displayName, enrolledCourses, savedCourses }, 
+      user: { uid, email: userEmail, displayName, enrolledCourses, savedCourses, assignedTrainingPlans }, 
       role, 
       isNewUser: false 
     }));
@@ -123,6 +124,7 @@ function* handleGoogleLogin(): any {
     let role = 'student';
     let enrolledCourses: string[] = [];
     let savedCourses: string[] = [];
+    let assignedTrainingPlans: string[] = [];
 
     if (isNew) {
       yield call(setDoc as any, doc(db, 'users', uid), {
@@ -143,10 +145,11 @@ function* handleGoogleLogin(): any {
       role = userData.role || 'student';
       enrolledCourses = userData.enrolledCourses || [];
       savedCourses = userData.savedCourses || [];
+      assignedTrainingPlans = userData.assignedTrainingPlans || [];
     }
 
     yield put(authSuccess({ 
-      user: { uid, email, displayName, enrolledCourses, savedCourses }, 
+      user: { uid, email, displayName, enrolledCourses, savedCourses, assignedTrainingPlans }, 
       role: role as any, 
       isNewUser: isNew 
     }));

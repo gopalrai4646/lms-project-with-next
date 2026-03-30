@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { translations } from '@/utils/translations';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
+import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import CourseCard from '@/components/common/CourseCard';
 
 export default function DashboardPage() {
@@ -11,21 +12,36 @@ export default function DashboardPage() {
   const { user, isNewUser } = useAppSelector((state) => state.auth);
   const { language } = useAppSelector((state) => state.settings);
   const { courses, loading: coursesLoading } = useAppSelector((state) => state.courses);
+  const { trainingPlans, loading: trainingPlansLoading } = useAppSelector((state) => state.trainingPlans);
   const t = translations[language].dashboard;
 
   const [showAllEnrolled, setShowAllEnrolled] = useState(false);
   const [showAllDiscover, setShowAllDiscover] = useState(false);
   const [showAllSaved, setShowAllSaved] = useState(false);
+  const [showAllPlans, setShowAllPlans] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());
-  }, [dispatch]);
+    if (user?.assignedTrainingPlans?.length) {
+      dispatch(fetchTrainingPlansRequest());
+    }
+  }, [dispatch, user?.assignedTrainingPlans]);
 
   const firstName = user?.displayName?.split(' ')[0] || 'Learner';
 
+  // Extract all course IDs the user should have access to from their training plans
+  const assignedPlanIds = user?.assignedTrainingPlans || [];
+  const assignedPlans = trainingPlans.filter(tp => assignedPlanIds.includes(tp.id));
+  const planCourseIds = new Set(assignedPlans.flatMap(tp => tp.courseIds || []));
+
+  // Determine which courses the user can see
+  const availableCourses = courses.filter(c => 
+    c.visibility !== 'private' || planCourseIds.has(c.id) || user?.enrolledCourses?.includes(c.id)
+  );
+
   const enrolledCourses = courses.filter(c => user?.enrolledCourses?.includes(c.id));
-  const savedCourses = courses.filter(c => user?.savedCourses?.includes(c.id));
-  const discoverCourses = courses.filter(c => !user?.enrolledCourses?.includes(c.id));
+  const savedCourses = availableCourses.filter(c => user?.savedCourses?.includes(c.id));
+  const discoverCourses = availableCourses.filter(c => !user?.enrolledCourses?.includes(c.id));
 
   return (
     <div className="space-y-12 pb-12">
@@ -53,6 +69,48 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Assigned Training Plans */}
+      {assignedPlans.length > 0 && (
+        <section>
+          <div className="flex justify-between items-end mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">{translations[language]?.admin?.assignedTrainingPlans || 'Assigned Training Plans'}</h2>
+            {assignedPlans.length > 3 && (
+              <button 
+                onClick={() => setShowAllPlans(!showAllPlans)}
+                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+              >
+                {showAllPlans ? 'Show Less' : t.viewAll}
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(showAllPlans ? assignedPlans : assignedPlans.slice(0, 3)).map((plan) => (
+              <div key={plan.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all group flex flex-col">
+                <div className="relative aspect-[16/9] bg-slate-100 overflow-hidden">
+                  {plan.image ? (
+                    <img src={plan.image} alt={plan.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl">📋</div>
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-bold rounded-full shadow-sm">
+                      {plan.courseIds?.length || 0} {translations[language]?.admin?.courses || 'Courses'}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2">{plan.name}</h3>
+                  <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-1">{plan.description}</p>
+                  <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-2 rounded-xl text-center self-start">
+                    Assigned by Admin
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Enrolled Courses */}
       {enrolledCourses.length > 0 && (
