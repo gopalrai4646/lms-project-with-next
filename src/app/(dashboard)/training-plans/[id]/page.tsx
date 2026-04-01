@@ -85,9 +85,6 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
 
   return (
     <div className="max-w-5xl mx-auto space-y-12 pb-16">
-      <Link href="/training-plans" className="text-sm font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-2 mb-6 w-fit transition-colors">
-        <span>←</span> Back to Training Plans
-      </Link>
 
       <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
         <div className="relative h-64 md:h-80 w-full bg-slate-100">

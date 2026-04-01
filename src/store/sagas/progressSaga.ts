@@ -73,8 +73,10 @@ function* handleUpdateProgress(action: ReturnType<typeof updateProgressRequest>)
     yield call((ref: any, data: any, options: any) => setDoc(ref, data, options), progressRef, { courseId }, { merge: true });
 
     // 2. Use updateDoc with dotted notation for correct nested map updates
+    const today = new Date().toISOString().split('T')[0];
     const updates: any = {
       [`watchedDurations.${videoId}`]: watchedDuration,
+      [`dailyActivity.${today}`]: arrayUnion(videoId),
       lastUpdated: new Date().toISOString(),
     };
 

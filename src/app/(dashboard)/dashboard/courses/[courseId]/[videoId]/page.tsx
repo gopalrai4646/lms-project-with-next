@@ -166,11 +166,7 @@ export default function LessonPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
-      <div className="mb-6">
-        <Link href={`/dashboard/courses${planId ? `?planId=${planId}` : ''}`} className="text-sm text-slate-500 hover:text-indigo-600 font-medium mb-3 flex items-center gap-1 transition-colors w-fit">
-          ← {t.back}
-        </Link>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{course.title}</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{course.title}</h1>
         <p className="text-slate-500 mt-1 text-sm">{t.by} {course.instructor} • {videoList.length} {videoList.length !== 1 ? t.videos : t.video}</p>
         
         <div className="mt-4 bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
@@ -190,7 +186,6 @@ export default function LessonPage() {
             <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1">🎉 {t.courseCompleted}</p>
           )}
         </div>
-      </div>
 
       {videoList.length === 0 ? (
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center">

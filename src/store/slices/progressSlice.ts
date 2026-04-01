@@ -7,6 +7,7 @@ export interface UserProgress {
   lastUpdated: string;
   rating?: number;
   isRated?: boolean;
+  dailyActivity?: { [date: string]: string[] };
 }
 
 interface ProgressState {
@@ -30,7 +31,7 @@ const progressSlice = createSlice({
       state.error = null;
     },
     fetchProgressSuccess: (state, action: PayloadAction<UserProgress>) => {
-      const { courseId, watchedDurations, completedVideos, lastUpdated, rating, isRated } = action.payload;
+      const { courseId, watchedDurations, completedVideos, lastUpdated, rating, isRated, dailyActivity } = action.payload;
       state.progress[courseId] = {
         courseId,
         watchedDurations: watchedDurations || {},
@@ -38,6 +39,7 @@ const progressSlice = createSlice({
         lastUpdated: lastUpdated || new Date().toISOString(),
         rating,
         isRated,
+        dailyActivity: dailyActivity || {},
       };
       state.loading = false;
     },
@@ -68,6 +70,7 @@ const progressSlice = createSlice({
           watchedDurations: {},
           completedVideos: [],
           lastUpdated: new Date().toISOString(),
+          dailyActivity: {},
         };
       }
       
@@ -76,6 +79,15 @@ const progressSlice = createSlice({
       // Defensive initialization for existing records
       if (!currentProgress.watchedDurations) currentProgress.watchedDurations = {};
       if (!currentProgress.completedVideos) currentProgress.completedVideos = [];
+      if (!currentProgress.dailyActivity) currentProgress.dailyActivity = {};
+
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      if (!currentProgress.dailyActivity[today]) {
+        currentProgress.dailyActivity[today] = [];
+      }
+      if (!currentProgress.dailyActivity[today].includes(videoId)) {
+        currentProgress.dailyActivity[today].push(videoId);
+      }
 
       // Only update if the new duration is greater to avoid rewinding progress
       if (!currentProgress.watchedDurations[videoId] || watchedDuration > currentProgress.watchedDurations[videoId]) {

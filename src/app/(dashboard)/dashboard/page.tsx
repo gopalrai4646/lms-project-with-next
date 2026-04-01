@@ -135,20 +135,21 @@ export default function DashboardPage() {
       });
     }
 
-    // Tally activity from real Redux progress
+    // Tally activity from persistent daily logs
     Object.values(progress).forEach((courseProgress) => {
-      if (!courseProgress.lastUpdated) return;
+      if (!courseProgress.dailyActivity) return;
       
-      const progressDate = new Date(courseProgress.lastUpdated);
-      const ds = progressDate.toDateString();
-      
-      const dayBucket = result.find(r => r.dateStr === ds);
-      if (dayBucket) {
-        // We count 1 point to represent "active on this day"
-        // And if they completed videos, add those to the activity count
-        const completedVideosCount = courseProgress.completedVideos?.length || 0;
-        dayBucket.value += Math.max(1, completedVideosCount);
-      }
+      Object.entries(courseProgress.dailyActivity).forEach(([dateStr, videoIds]) => {
+        // dateStr is in YYYY-MM-DD format
+        const progressDate = new Date(dateStr);
+        const ds = progressDate.toDateString(); // Matches the dateStr format used in result buckets
+        
+        const dayBucket = result.find(r => r.dateStr === ds);
+        if (dayBucket) {
+          // Total videos interacted with on this specific day for this course
+          dayBucket.value += videoIds.length;
+        }
+      });
     });
 
     return result.map(r => ({ label: r.label, value: r.value }));
