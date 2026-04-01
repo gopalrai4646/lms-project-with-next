@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logoutRequest } from '@/store/slices/authSlice';
 import { setLanguage, Language, toggleMobileMenu } from '@/store/slices/settingsSlice';
@@ -12,6 +13,7 @@ export default function Navbar() {
   const { user } = useAppSelector((state) => state.auth);
   const { language } = useAppSelector((state) => state.settings);
   const t = translations[language].nav;
+  const router = useRouter();
 
   useEffect(() => {
     const savedLang = localStorage.getItem('app_language') as Language;
@@ -22,6 +24,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     dispatch(logoutRequest());
+    router.push('/login');
   };
 
   const handleLanguageChange = (lang: Language) => {
@@ -43,13 +46,13 @@ export default function Navbar() {
           </button>
         )}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-white font-bold text-xl leading-none">L</span>
-          </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400">
-            LMS Portal
-          </span>
+          <img 
+            src="/logo.png" 
+            alt="Mentora" 
+            className="h-14 w-auto object-contain group-hover:scale-105 transition-transform" 
+          />
         </Link>
+       
       </div>
 
       <div className="flex items-center gap-4 md:gap-6">

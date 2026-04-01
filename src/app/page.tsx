@@ -18,7 +18,7 @@ export default function Home() {
               </div>
             </div>
             <h1 className="text-5xl font-black tracking-tight text-slate-900 sm:text-7xl mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-              Master New Skills with <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600">LMS Portal</span>
+              Master New Skills with <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600">Mentora</span>
             </h1>
             <p className="text-xl leading-relaxed text-slate-600 mb-12 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
               The all-in-one platform to manage courses, track real-time progress, and achieve your educational goals through an intuitive digital experience.
@@ -116,7 +116,7 @@ export default function Home() {
               <p className="text-sm text-slate-600">Stay informed with our latest course additions and platform features.</p>
             </div>
             <div className="md:text-right">
-              <p className="text-sm text-slate-500">© 2026 LMS Portal. All rights reserved.</p>
+              <p className="text-sm text-slate-500">© 2026 Mentora. All rights reserved.</p>
             </div>
           </div>
         </div>
