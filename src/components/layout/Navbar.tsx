@@ -8,6 +8,8 @@ import { logoutRequest } from '@/store/slices/authSlice';
 import { setLanguage, Language, toggleMobileMenu } from '@/store/slices/settingsSlice';
 import { translations } from '@/utils/translations';
 
+import { Menu, LogOut, Globe } from 'lucide-react';
+
 export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
@@ -40,9 +42,7 @@ export default function Navbar() {
             className="md:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors focus:outline-none"
             aria-label="Toggle Menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Menu size={24} />
           </button>
         )}
         <Link href="/" className="flex items-center gap-2 group">
@@ -59,14 +59,15 @@ export default function Navbar() {
         
         {/* Language Switcher */}
         <div className="flex items-center gap-2">
+          <Globe size={18} className="text-slate-400" />
           <select 
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value as Language)}
-            className="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2 outline-none cursor-pointer hover:bg-slate-100 transition-all"
+            className="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2 outline-none cursor-pointer hover:bg-slate-100 transition-all appearance-none"
           >
-            <option value="en">🇺🇸 English</option>
-            <option value="de">🇩🇪 German</option>
-            <option value="fr">🇫🇷 French</option>
+            <option value="en">English</option>
+            <option value="de">German</option>
+            <option value="fr">French</option>
           </select>
         </div>
 
@@ -77,8 +78,9 @@ export default function Navbar() {
             </span>
             <button 
               onClick={handleLogout}
-              className="px-4 py-2 border border-rose-200 rounded-lg text-rose-600 hover:bg-rose-50 transition-all font-bold text-sm"
+              className="px-4 py-2 border border-rose-200 rounded-lg text-rose-600 hover:bg-rose-50 transition-all font-bold text-sm flex items-center gap-2"
             >
+              <LogOut size={16} />
               {t.signOut}
             </button>
           </div>

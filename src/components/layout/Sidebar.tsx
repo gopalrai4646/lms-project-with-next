@@ -5,6 +5,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 
+import { 
+  LayoutDashboard, 
+  BookOpen, 
+  ClipboardList, 
+  Settings, 
+  BarChart3, 
+  Wrench, 
+  Users,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+
 import { translations } from '@/utils/translations';
 import { setMobileMenuOpen } from '@/store/slices/settingsSlice';
 
@@ -26,18 +38,18 @@ export default function Sidebar() {
   if (!user) return null;
 
   const userMenuItems = [
-    { name: t.dashboard, href: '/dashboard', icon: '🏠' },
-    { name: t.courses, href: '/dashboard/courses', icon: '📚' },
-    { name: t.trainingPlans, href: '/training-plans', icon: '📋' },
-    { name: t.accountSettings, href: '/settings', icon: '⚙️' },
+    { name: t.dashboard, href: '/dashboard', icon: <LayoutDashboard size={22} /> },
+    { name: t.courses, href: '/dashboard/courses', icon: <BookOpen size={22} /> },
+    { name: t.trainingPlans, href: '/training-plans', icon: <ClipboardList size={22} /> },
+    { name: t.accountSettings, href: '/settings', icon: <Settings size={22} /> },
   ];
 
   const adminMenuItems = [
-    { name: t.adminDashboard, href: '/admin', icon: '📊' },
-    { name: t.manageCourses, href: '/admin/courses', icon: '🛠️' },
-    { name: t.trainingPlans, href: '/admin/training-plans', icon: '📋' },
-    { name: t.users, href: '/admin/users', icon: '👥' },
-    { name: t.settings, href: '/settings', icon: '⚙️' },
+    { name: t.adminDashboard, href: '/admin', icon: <BarChart3 size={22} /> },
+    { name: t.manageCourses, href: '/admin/courses', icon: <Wrench size={22} /> },
+    { name: t.trainingPlans, href: '/admin/training-plans', icon: <ClipboardList size={22} /> },
+    { name: t.users, href: '/admin/users', icon: <Users size={22} /> },
+    { name: t.settings, href: '/settings', icon: <Settings size={22} /> },
   ];
 
   const menuItems = role === 'admin' ? adminMenuItems : userMenuItems;
@@ -62,8 +74,8 @@ export default function Sidebar() {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="hidden md:flex absolute -right-3 top-4 w-6 h-6 bg-white border border-slate-200 rounded-full items-center justify-center text-xs shadow-sm hover:bg-slate-50 transition-all z-50 text-slate-400 hover:text-indigo-600"
         >
-        {isCollapsed ? '→' : '←'}
-      </button>
+          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
 
       <div className="p-4 space-y-2">
         {menuItems.map((item) => {

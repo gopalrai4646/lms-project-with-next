@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
 import { translations } from '@/utils/translations';
+import { ChevronRight } from 'lucide-react';
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
@@ -131,9 +132,7 @@ export default function Breadcrumbs() {
         <div key={index} className="flex items-center">
           {index > 0 && (
             <span className="mx-2 text-slate-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="9 5l7 7-7 7" />
-              </svg>
+              <ChevronRight size={14} />
             </span>
           )}
           {item.isLast ? (
