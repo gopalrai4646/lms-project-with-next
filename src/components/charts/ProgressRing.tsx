@@ -30,7 +30,7 @@ export default function ProgressRing({
   const center = size / 2;
 
   // Color based on completion
-  const progressColor = animatedPct >= 100 ? '#10b981' : animatedPct > 50 ? '#6366f1' : '#f59e0b';
+  const progressColor = animatedPct >= 100 ? '#459D68' : animatedPct > 50 ? '#4A55E2' : '#f59e0b';
 
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>

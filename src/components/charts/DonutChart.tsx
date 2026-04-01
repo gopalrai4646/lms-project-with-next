@@ -16,7 +16,7 @@ export default function DonutChart({
   percentage,
   size = 180,
   strokeWidth = 14,
-  color = '#6366f1',
+  color = '#4A55E2',
   secondaryColor = '#e2e8f0',
   label,
   sublabel,
@@ -39,7 +39,7 @@ export default function DonutChart({
         <defs>
           <linearGradient id="donut-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={color} />
-            <stop offset="100%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#A85EE6" />
           </linearGradient>
         </defs>
         {/* Background circle */}

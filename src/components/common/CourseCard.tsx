@@ -76,7 +76,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   return (
     <div className="bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col border border-slate-100">
       {/* Top half - Grey area */}
-      <div className="bg-[#f0f2f5] p-5 relative h-52 flex flex-col">
+      <div className="bg-[#F8FAFD] p-5 relative h-52 flex flex-col">
         {/* Header icons */}
         <div className="flex justify-between items-start z-10 relative">
           <div className="bg-[#2d3142] text-white px-3 py-1.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm">
@@ -139,11 +139,11 @@ export default function CourseCard({ course }: CourseCardProps) {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.yourProgress || 'YOUR PROGRESS'}</span>
-              <span className="text-xs font-bold text-[#6366f1]">{progressPercentage}%</span>
+              <span className="text-xs font-bold text-[#4A55E2]">{progressPercentage}%</span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#6366f1] rounded-full transition-all duration-500"
+                className="h-full bg-[#4A55E2] rounded-full transition-all duration-500"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>

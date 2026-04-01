@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #F8FAFD;
   --foreground: #171717;
 }
 
@@ -10,6 +10,73 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* ── Primary (#4A55E2) ── */
+  --color-indigo-50: #ECEDFB;
+  --color-indigo-100: #D5D8F7;
+  --color-indigo-200: #ABB1EF;
+  --color-indigo-300: #818AE7;
+  --color-indigo-400: #6770E5;
+  --color-indigo-500: #4A55E2;
+  --color-indigo-600: #4A55E2;
+  --color-indigo-700: #3A44CB;
+  --color-indigo-800: #2D35A0;
+  --color-indigo-900: #161B4F;
+  --color-indigo-950: #0D1030;
+
+  /* ── Secondary (#A85EE6) ── */
+  --color-purple-50: #F5EDFD;
+  --color-purple-100: #EBDBFB;
+  --color-purple-200: #D6B7F7;
+  --color-purple-300: #C193F3;
+  --color-purple-400: #B479EC;
+  --color-purple-500: #A85EE6;
+  --color-purple-600: #A85EE6;
+  --color-purple-700: #6E2FA3;
+  --color-purple-800: #502276;
+  --color-purple-900: #35174F;
+  --color-purple-950: #1F0D2E;
+
+  --color-violet-50: #F5EDFD;
+  --color-violet-100: #EBDBFB;
+  --color-violet-200: #D6B7F7;
+  --color-violet-300: #C193F3;
+  --color-violet-400: #B479EC;
+  --color-violet-500: #A85EE6;
+  --color-violet-600: #A85EE6;
+  --color-violet-700: #6E2FA3;
+  --color-violet-800: #502276;
+  --color-violet-900: #35174F;
+  --color-violet-950: #1F0D2E;
+
+  /* ── Success (#459D68) ── */
+  --color-emerald-50: #ECFAF1;
+  --color-emerald-100: #D1F4DE;
+  --color-emerald-200: #A3E9BD;
+  --color-emerald-300: #75DE9C;
+  --color-emerald-400: #56C47F;
+  --color-emerald-500: #459D68;
+  --color-emerald-600: #459D68;
+  --color-emerald-700: #2A6341;
+  --color-emerald-800: #1E472E;
+  --color-emerald-900: #132E1E;
+  --color-emerald-950: #0A1A11;
+
+  /* ── Danger (#E95B67) ── */
+  --color-red-50: #FEF0F1;
+  --color-red-100: #FDD8DB;
+  --color-red-200: #FBB1B7;
+  --color-red-300: #F38A93;
+  --color-red-400: #EE707B;
+  --color-red-500: #E95B67;
+  --color-red-600: #E95B67;
+  --color-red-700: #A52D38;
+  --color-red-800: #7A2129;
+  --color-red-900: #51161B;
+  --color-red-950: #2E0D10;
+
+  /* ── Background override ── */
+  --color-slate-50: #F8FAFD;
 }
 
 @media (prefers-color-scheme: dark) {

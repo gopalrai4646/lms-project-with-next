@@ -14,7 +14,7 @@ export default function BarChart({
   data,
   maxValue,
   height = 160,
-  barColor = '#6366f1',
+  barColor = '#4A55E2',
   emptyLabel = 'No activity yet',
 }: BarChartProps) {
   const [animated, setAnimated] = useState(false);
@@ -42,7 +42,7 @@ export default function BarChart({
         <defs>
           <linearGradient id="bar-gradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={barColor} />
-            <stop offset="100%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#A85EE6" />
           </linearGradient>
         </defs>
         {data.map((item, i) => {

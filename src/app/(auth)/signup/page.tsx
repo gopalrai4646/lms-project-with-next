@@ -40,9 +40,13 @@ export default function SignupPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 p-6 md:p-8">
         <div className="text-center mb-10">
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
-            <span className="text-white font-bold text-2xl">L</span>
-          </div>
+          <Link href="/" className="inline-block mb-4 hover:scale-105 transition-transform">
+            <img 
+              src="/logo.png" 
+              alt="Mentora" 
+              className="h-14 w-auto object-contain mx-auto" 
+            />
+          </Link>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{t.createAccount}</h1>
           <p className="text-slate-500">{t.joinLearners}</p>
         </div>
