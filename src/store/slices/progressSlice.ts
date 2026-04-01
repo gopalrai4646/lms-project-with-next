@@ -5,6 +5,8 @@ export interface UserProgress {
   watchedDurations: { [videoId: string]: number };
   completedVideos: string[];
   lastUpdated: string;
+  rating?: number;
+  isRated?: boolean;
 }
 
 interface ProgressState {
@@ -28,12 +30,14 @@ const progressSlice = createSlice({
       state.error = null;
     },
     fetchProgressSuccess: (state, action: PayloadAction<UserProgress>) => {
-      const { courseId, watchedDurations, completedVideos, lastUpdated } = action.payload;
+      const { courseId, watchedDurations, completedVideos, lastUpdated, rating, isRated } = action.payload;
       state.progress[courseId] = {
         courseId,
         watchedDurations: watchedDurations || {},
         completedVideos: completedVideos || [],
         lastUpdated: lastUpdated || new Date().toISOString(),
+        rating,
+        isRated,
       };
       state.loading = false;
     },
@@ -43,6 +47,18 @@ const progressSlice = createSlice({
     },
     updateProgressRequest: (state, _action: PayloadAction<{ userId: string; courseId: string; videoId: string; watchedDuration: number; isCompleted: boolean }>) => {
       // Handled by saga for Firestore sync, but we can optimistically update state if needed
+    },
+    updateRatingRequest: (state, _action: PayloadAction<{ userId: string; courseId: string; rating: number }>) => {
+      state.loading = true;
+    },
+    updateLocalRating: (state, action: PayloadAction<{ courseId: string; rating: number }>) => {
+      const { courseId, rating } = action.payload;
+      if (state.progress[courseId]) {
+        state.progress[courseId].rating = rating;
+        state.progress[courseId].isRated = true;
+        state.progress[courseId].lastUpdated = new Date().toISOString();
+      }
+      state.loading = false;
     },
     updateLocalProgress: (state, action: PayloadAction<{ courseId: string; videoId: string; watchedDuration: number; isCompleted: boolean }>) => {
       const { courseId, videoId, watchedDuration, isCompleted } = action.payload;
@@ -80,6 +96,8 @@ export const {
   fetchProgressSuccess,
   fetchProgressFailure,
   updateProgressRequest,
+  updateRatingRequest,
+  updateLocalRating,
   updateLocalProgress,
 } = progressSlice.actions;
 

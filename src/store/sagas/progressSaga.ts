@@ -6,9 +6,36 @@ import {
   fetchProgressSuccess,
   fetchProgressFailure,
   updateProgressRequest,
+  updateRatingRequest,
+  updateLocalRating,
   updateLocalProgress,
   UserProgress
 } from '../slices/progressSlice';
+
+function* handleUpdateRating(action: ReturnType<typeof updateRatingRequest>): any {
+  try {
+    const { userId, courseId, rating } = action.payload;
+    
+    // Update local state first
+    yield put(updateLocalRating({ courseId, rating }));
+
+    const progressRef = doc(db, 'userProgress', `${userId}_${courseId}`);
+    
+    // Ensure document exists
+    yield call((ref: any, data: any, options: any) => setDoc(ref, data, options), progressRef, { courseId }, { merge: true });
+
+    // Update rating and isRated fields
+    const updates = {
+      rating,
+      isRated: true,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    yield call((ref: any, data: any) => updateDoc(ref, data), progressRef, updates);
+  } catch (error: any) {
+    console.error('Saga: Error updating rating:', error);
+  }
+}
 
 function* handleFetchProgress(action: ReturnType<typeof fetchProgressRequest>): any {
   try {
@@ -63,6 +90,7 @@ function* handleUpdateProgress(action: ReturnType<typeof updateProgressRequest>)
 
 export default function* progressSaga() {
   yield takeLatest(fetchProgressRequest.type, handleFetchProgress);
+  yield takeLatest(updateRatingRequest.type, handleUpdateRating);
   // use takeEvery or a manual buffer for progress updates to avoid dropping intermediate states
   yield takeEvery(updateProgressRequest.type, handleUpdateProgress);
 }

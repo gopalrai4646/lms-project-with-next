@@ -7,6 +7,8 @@ import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchProgressRequest, updateProgressRequest } from '@/store/slices/progressSlice';
 import { translations } from '@/utils/translations';
 import Link from 'next/link';
+import CourseRatingModal from '@/components/common/CourseRatingModal';
+import { Star } from 'lucide-react';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '0:00';
@@ -32,6 +34,8 @@ export default function LessonPage() {
   const lastSyncRef = useRef<number>(0);
 
   const [detectedDurations, setDetectedDurations] = useState<Record<string, number>>({});
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [hasDismissedRating, setHasDismissedRating] = useState(false);
 
   const courseProgress = progress[courseId];
 
@@ -54,10 +58,41 @@ export default function LessonPage() {
       ? [{ title: t.courseContent, url: course.videoUrl, order: 0, duration: 0 }]
       : [];
 
+  const calculateCourseProgress = useCallback((): number => {
+    if (!courseProgress || videoList.length === 0) return 0;
+    let totalDurationUnits = 0;
+    let totalWatchedUnits = 0;
+    videoList.forEach((video, index) => {
+      const vidId = `video_${index}`;
+      const dbDuration = video.duration || 0;
+      const detectedDuration = detectedDurations[vidId] || 0;
+      const effectiveDuration = dbDuration || detectedDuration;
+      const watched = courseProgress.watchedDurations?.[vidId] || 0;
+      const isCompleted = courseProgress.completedVideos?.includes(vidId);
+      if (effectiveDuration > 0) {
+        totalDurationUnits += effectiveDuration;
+        totalWatchedUnits += isCompleted ? effectiveDuration : Math.min(watched, effectiveDuration);
+      } else {
+        totalDurationUnits += 100;
+        totalWatchedUnits += isCompleted ? 100 : 0;
+      }
+    });
+    if (totalDurationUnits <= 0) return 0;
+    return Math.min(100, Math.round((totalWatchedUnits / totalDurationUnits) * 100));
+  }, [courseProgress, videoList, detectedDurations]);
+
+  useEffect(() => {
+    if (!courseProgress || !course) return;
+    const percentage = calculateCourseProgress();
+    if (percentage === 100 && !courseProgress.isRated && !hasDismissedRating && !showRatingModal) {
+      setShowRatingModal(true);
+    }
+  }, [courseProgress, calculateCourseProgress, hasDismissedRating, showRatingModal, course]);
+
   // Parse active video from videoId param
-  // Example: video_0 -> index 0
   const activeVideoIndex = videoList.findIndex((_, index) => `video_${index}` === videoId);
   const activeVideo = videoList[activeVideoIndex];
+
 
   const handleTimeUpdate = useCallback(() => {
     if (!videoRef.current || !user?.uid || !courseId || !videoId) return;
@@ -87,28 +122,6 @@ export default function LessonPage() {
     }
   }, [courseProgress, videoId]);
 
-  const calculateCourseProgress = (): number => {
-    if (!courseProgress || videoList.length === 0) return 0;
-    let totalDurationUnits = 0;
-    let totalWatchedUnits = 0;
-    videoList.forEach((video, index) => {
-      const vidId = `video_${index}`;
-      const dbDuration = video.duration || 0;
-      const detectedDuration = detectedDurations[vidId] || 0;
-      const effectiveDuration = dbDuration || detectedDuration;
-      const watched = courseProgress.watchedDurations?.[vidId] || 0;
-      const isCompleted = courseProgress.completedVideos?.includes(vidId);
-      if (effectiveDuration > 0) {
-        totalDurationUnits += effectiveDuration;
-        totalWatchedUnits += isCompleted ? effectiveDuration : Math.min(watched, effectiveDuration);
-      } else {
-        totalDurationUnits += 100;
-        totalWatchedUnits += isCompleted ? 100 : 0;
-      }
-    });
-    if (totalDurationUnits <= 0) return 0;
-    return Math.min(100, Math.round((totalWatchedUnits / totalDurationUnits) * 100));
-  };
 
   const getVideoProgress = (index: number): number => {
     if (!courseProgress) return 0;
@@ -291,6 +304,18 @@ export default function LessonPage() {
         <h3 className="text-lg font-bold text-slate-900 mb-3">{t.aboutCourse}</h3>
         <p className="text-slate-600 leading-relaxed">{course.description}</p>
       </div>
+
+      {showRatingModal && user?.uid && (
+        <CourseRatingModal 
+          courseId={courseId}
+          userId={user.uid}
+          courseTitle={course.title}
+          onDismiss={() => {
+            setShowRatingModal(false);
+            setHasDismissedRating(true);
+          }}
+        />
+      )}
     </div>
   );
 }
