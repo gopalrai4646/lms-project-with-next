@@ -60,30 +60,56 @@ export default function Breadcrumbs() {
     
     const isLast = index === paths.length - 1;
     const prevSegment = paths[index - 1];
+    let href = `/${paths.slice(0, index + 1).join('/')}`;
+    if (planId) href += `?planId=${planId}`;
 
-    // Replacement logic
-    if (prevSegment === 'courses' || prevSegment === 'course-management') {
-      const course = courses.find(c => c.id === path);
-      if (course) label = course.title;
+    // ─── Special handling for Admin Edit routes: /admin/[type]/edit/[id] ───
+    // This swaps "Edit > [ID]" to "[Item Name] > Edit"
+    if (path === 'edit' && paths[index + 1]) {
+      const nextId = paths[index + 1];
+      const type = paths[index - 1]; 
+      
+      if (type === 'training-plans') {
+        const plan = trainingPlans.find(tp => tp.id === nextId);
+        if (plan) label = plan.name;
+      } else if (type === 'courses' || type === 'course-management' || type === 'admin/courses') {
+        const course = courses.find(c => c.id === nextId);
+        if (course) label = course.title;
+      }
+      
+      // Link the "Item Name" back to the list page instead of the empty /edit/ folder
+      href = `/${paths.slice(0, index).join('/')}`;
     }
 
-    const isCourseIdPrev = paths[index - 1] && paths[index - 2] === 'courses';
-    if (isCourseIdPrev) {
-      const course = courses.find(c => c.id === prevSegment);
-      if (course) {
-        if (path.startsWith('video_')) {
-          const videoIndex = parseInt(path.split('_')[1], 10);
-          const sortedVideos = [...(course.videos || [])].sort((a, b) => a.order - b.order);
-          const video = sortedVideos[videoIndex];
-          if (video) label = video.title;
-          else if (videoIndex === 0) label = 'Introduction';
+    if (prevSegment === 'edit') {
+      label = 'Edit'; 
+    }
+
+    // ─── Standard Replacement logic (non-edit routes) ───
+    if (path !== 'edit' && prevSegment !== 'edit') {
+      if (prevSegment === 'courses' || prevSegment === 'course-management') {
+        const course = courses.find(c => c.id === path);
+        if (course) label = course.title;
+      }
+
+      const isCourseIdPrev = paths[index - 1] && paths[index - 2] === 'courses';
+      if (isCourseIdPrev) {
+        const course = courses.find(c => c.id === prevSegment);
+        if (course) {
+          if (path.startsWith('video_')) {
+            const videoIndex = parseInt(path.split('_')[1], 10);
+            const sortedVideos = [...(course.videos || [])].sort((a, b) => a.order - b.order);
+            const video = sortedVideos[videoIndex];
+            if (video) label = video.title;
+            else if (videoIndex === 0) label = 'Introduction';
+          }
         }
       }
-    }
 
-    if (prevSegment === 'training-plans') {
-      const plan = trainingPlans.find(tp => tp.id === path);
-      if (plan) label = plan.name;
+      if (prevSegment === 'training-plans') {
+        const plan = trainingPlans.find(tp => tp.id === path);
+        if (plan) label = plan.name;
+      }
     }
 
     // Translation Overrides
@@ -93,10 +119,6 @@ export default function Breadcrumbs() {
     if (path === 'users') label = languageNav.users;
 
     if (label.length > 25 && !label.includes(' ')) label = 'Details';
-
-    // Build HREF with planId propagation
-    let href = `/${paths.slice(0, index + 1).join('/')}`;
-    if (planId) href += `?planId=${planId}`;
 
     breadcrumbItems.push({ label, href, isLast });
   });
