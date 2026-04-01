@@ -27,7 +27,7 @@ export default function Sidebar() {
 
   const userMenuItems = [
     { name: t.dashboard, href: '/dashboard', icon: '🏠' },
-    { name: t.courses, href: '/courses', icon: '📚' },
+    { name: t.courses, href: '/dashboard/courses', icon: '📚' },
     { name: t.trainingPlans, href: '/training-plans', icon: '📋' },
     { name: t.accountSettings, href: '/settings', icon: '⚙️' },
   ];

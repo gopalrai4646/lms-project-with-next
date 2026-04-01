@@ -248,7 +248,7 @@ export default function MyCoursesPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
-                            href={`/courses/${course.id}`}
+                            href={`/dashboard/courses/${course.id}`}
                             className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all"
                           >
                             {pct > 0 ? (t.continue || 'Continue') : (t.viewCourse || 'Start')} →

@@ -181,7 +181,7 @@ export default function DashboardPage() {
             </div>
             {continueLearning.length > 0 && (
               <Link
-                href={`/courses/${continueLearning[0].id}`}
+                href={`/dashboard/courses/${continueLearning[0].id}`}
                 className="flex items-center gap-4 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/25 transition-all group shrink-0"
               >
                 <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">

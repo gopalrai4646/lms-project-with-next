@@ -32,7 +32,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-4 md:px-6 shadow-sm backdrop-blur-md bg-white/80">
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-4 md:px-6 shadow-sm">
       <div className="flex items-center gap-2 md:gap-4">
         {user && (
           <button 
@@ -62,7 +62,7 @@ export default function Navbar() {
           <select 
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value as Language)}
-            className="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-1.5 outline-none cursor-pointer hover:bg-slate-100 transition-all"
+            className="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2 outline-none cursor-pointer hover:bg-slate-100 transition-all"
           >
             <option value="en">🇺🇸 English</option>
             <option value="de">🇩🇪 German</option>
@@ -72,7 +72,7 @@ export default function Navbar() {
 
         {user ? (
           <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-slate-700 hidden lg:block">
+            <span className="text-sm font-bold text-slate-700 hidden lg:block">
               {user.displayName || user.email}
             </span>
             <button 
@@ -84,8 +84,8 @@ export default function Navbar() {
           </div>
         ) : (
           <div className="flex items-center gap-2 md:gap-4">
-            <Link href="/login" className="px-3 md:px-4 py-2 text-slate-600 hover:text-indigo-600 transition-all font-bold text-sm">{t.signIn}</Link>
-            <Link href="/signup" className="px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold text-sm shadow-md shadow-indigo-100">{t.getStarted}</Link>
+            <Link href="/login" className="px-4 py-2 text-slate-600 hover:text-indigo-600 transition-all font-bold text-sm">{t.signIn}</Link>
+            <Link href="/signup" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold text-sm shadow-md shadow-indigo-100">{t.getStarted}</Link>
           </div>
         )}
       </div>

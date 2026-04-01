@@ -160,7 +160,7 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
                   <div className="shrink-0 w-full sm:w-auto">
                     {isEnrolled ? (
                       <Link
-                        href={`/courses/${course.id}`}
+                        href={`/dashboard/courses/${course.id}?planId=${plan.id}`}
                         className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold transition-all hover:bg-emerald-700 shadow-md shadow-emerald-100 flex items-center justify-center gap-2"
                       >
                          <span>▶️</span> {adminT.startCourse || t.viewCourse || "Start Course"}

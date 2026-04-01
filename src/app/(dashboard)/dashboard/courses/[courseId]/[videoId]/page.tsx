@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchProgressRequest, updateProgressRequest } from '@/store/slices/progressSlice';
@@ -15,10 +15,13 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-export default function CoursePlayerPage() {
+export default function LessonPage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = params.id as string;
+  const searchParams = useSearchParams();
+  const planId = searchParams.get('planId');
+  const courseId = params.courseId as string;
+  const videoId = params.videoId as string; // Format: video_0, video_1, etc.
   const dispatch = useAppDispatch();
   const { courses } = useAppSelector(state => state.courses);
   const { user } = useAppSelector(state => state.auth);
@@ -28,7 +31,6 @@ export default function CoursePlayerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSyncRef = useRef<number>(0);
 
-  const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [detectedDurations, setDetectedDurations] = useState<Record<string, number>>({});
 
   const courseProgress = progress[courseId];
@@ -52,31 +54,29 @@ export default function CoursePlayerPage() {
       ? [{ title: t.courseContent, url: course.videoUrl, order: 0, duration: 0 }]
       : [];
 
+  // Parse active video from videoId param
+  // Example: video_0 -> index 0
+  const activeVideoIndex = videoList.findIndex((_, index) => `video_${index}` === videoId);
   const activeVideo = videoList[activeVideoIndex];
 
-  const getVideoId = useCallback((index: number) => `video_${index}`, []);
-
   const handleTimeUpdate = useCallback(() => {
-    if (!videoRef.current || !user?.uid || !courseId) return;
+    if (!videoRef.current || !user?.uid || !courseId || !videoId) return;
     const currentTime = videoRef.current.currentTime;
     const duration = videoRef.current.duration;
-    const videoId = getVideoId(activeVideoIndex);
     const now = Date.now();
     if (now - lastSyncRef.current < 3000) return;
     lastSyncRef.current = now;
     const isCompleted = duration > 0 && currentTime >= duration - 1.5;
     dispatch(updateProgressRequest({ userId: user.uid, courseId, videoId, watchedDuration: Math.round(currentTime), isCompleted }));
-  }, [dispatch, user?.uid, courseId, activeVideoIndex, getVideoId]);
+  }, [dispatch, user?.uid, courseId, videoId]);
 
   const handleVideoEnded = useCallback(() => {
-    if (!videoRef.current || !user?.uid || !courseId) return;
-    const videoId = getVideoId(activeVideoIndex);
+    if (!videoRef.current || !user?.uid || !courseId || !videoId) return;
     dispatch(updateProgressRequest({ userId: user.uid, courseId, videoId, watchedDuration: Math.round(videoRef.current.duration), isCompleted: true }));
-  }, [dispatch, user?.uid, courseId, activeVideoIndex, getVideoId]);
+  }, [dispatch, user?.uid, courseId, videoId]);
 
   const handleLoadedMetadata = useCallback(() => {
-    if (!videoRef.current || !courseProgress) return;
-    const videoId = getVideoId(activeVideoIndex);
+    if (!videoRef.current || !courseProgress || !videoId) return;
     const savedTime = courseProgress.watchedDurations?.[videoId];
     if (videoRef.current.duration > 0) {
       const roundedDuration = Math.round(videoRef.current.duration);
@@ -85,14 +85,14 @@ export default function CoursePlayerPage() {
     if (savedTime && savedTime > 0 && !courseProgress.completedVideos?.includes(videoId)) {
       videoRef.current.currentTime = savedTime;
     }
-  }, [courseProgress, activeVideoIndex, getVideoId]);
+  }, [courseProgress, videoId]);
 
   const calculateCourseProgress = (): number => {
     if (!courseProgress || videoList.length === 0) return 0;
     let totalDurationUnits = 0;
     let totalWatchedUnits = 0;
     videoList.forEach((video, index) => {
-      const vidId = getVideoId(index);
+      const vidId = `video_${index}`;
       const dbDuration = video.duration || 0;
       const detectedDuration = detectedDurations[vidId] || 0;
       const effectiveDuration = dbDuration || detectedDuration;
@@ -112,19 +112,17 @@ export default function CoursePlayerPage() {
 
   const getVideoProgress = (index: number): number => {
     if (!courseProgress) return 0;
-    const videoId = getVideoId(index);
-    const watched = courseProgress.watchedDurations?.[videoId] || 0;
-    const videoDuration = videoList[index]?.duration || detectedDurations[videoId] || 0;
+    const vidId = `video_${index}`;
+    const watched = courseProgress.watchedDurations?.[vidId] || 0;
+    const videoDuration = videoList[index]?.duration || detectedDurations[vidId] || 0;
     if (videoDuration <= 0) return 0;
     return Math.min(100, Math.round((watched / videoDuration) * 100));
   };
 
   const isVideoCompleted = (index: number): boolean => {
     if (!courseProgress) return false;
-    return courseProgress.completedVideos?.includes(getVideoId(index)) || false;
+    return courseProgress.completedVideos?.includes(`video_${index}`) || false;
   };
-
-  const coursePercentage = calculateCourseProgress();
 
   if (!course) {
     return (
@@ -151,12 +149,14 @@ export default function CoursePlayerPage() {
     );
   }
 
+  const coursePercentage = calculateCourseProgress();
+
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
       <div className="mb-6">
-        <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-indigo-600 font-medium mb-3 flex items-center gap-1 transition-colors">
+        <Link href={`/dashboard/courses${planId ? `?planId=${planId}` : ''}`} className="text-sm text-slate-500 hover:text-indigo-600 font-medium mb-3 flex items-center gap-1 transition-colors w-fit">
           ← {t.back}
-        </button>
+        </Link>
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{course.title}</h1>
         <p className="text-slate-500 mt-1 text-sm">{t.by} {course.instructor} • {videoList.length} {videoList.length !== 1 ? t.videos : t.video}</p>
         
@@ -203,8 +203,11 @@ export default function CoursePlayerPage() {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/50">
-                  {t.selectVideo}
+                <div className="w-full h-full flex items-center justify-center text-white/50 text-center p-8">
+                  <div className="max-w-xs">
+                    <p className="text-4xl mb-4">📹</p>
+                    <p className="text-lg font-bold">{t.selectVideo}</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -239,21 +242,23 @@ export default function CoursePlayerPage() {
                 {videoList.map((video, index) => {
                   const completed = isVideoCompleted(index);
                   const vidProgress = getVideoProgress(index);
+                  const isCurrent = `video_${index}` === videoId;
+                  
                   return (
-                    <button
+                    <Link
                       key={index}
-                      onClick={() => setActiveVideoIndex(index)}
+                      href={`/dashboard/courses/${courseId}/video_${index}${planId ? `?planId=${planId}` : ''}`}
                       className={`w-full text-left p-4 flex items-start gap-3 transition-all hover:bg-slate-50 ${
-                        index === activeVideoIndex ? 'bg-indigo-50 border-l-4 border-indigo-600' : 'border-l-4 border-transparent'
+                        isCurrent ? 'bg-indigo-50 border-l-4 border-indigo-600' : 'border-l-4 border-transparent'
                       }`}
                     >
                       <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                        completed ? 'bg-emerald-500 text-white' : index === activeVideoIndex ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
+                        completed ? 'bg-emerald-500 text-white' : isCurrent ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
                       }`}>
-                        {completed ? '✓' : index === activeVideoIndex ? '▶' : index + 1}
+                        {completed ? '✓' : isCurrent ? '▶' : index + 1}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className={`text-sm font-semibold truncate ${index === activeVideoIndex ? 'text-indigo-700' : 'text-slate-700'}`}>
+                        <p className={`text-sm font-semibold truncate ${isCurrent ? 'text-indigo-700' : 'text-slate-700'}`}>
                           {video.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
@@ -273,7 +278,7 @@ export default function CoursePlayerPage() {
                           </div>
                         )}
                       </div>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>

@@ -153,7 +153,7 @@ export default function CourseCard({ course }: CourseCardProps) {
         <div className={`space-y-3 ${isEnrolled ? '' : 'pt-2'}`}>
           {isEnrolled && videoCount > 0 && (
             <Link
-              href={`/courses/${course.id}`}
+              href={`/dashboard/courses/${course.id}`}
               className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl font-bold transition-all hover:bg-emerald-700 shadow flex items-center justify-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
