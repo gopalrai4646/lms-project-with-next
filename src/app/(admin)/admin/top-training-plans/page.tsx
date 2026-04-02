@@ -30,7 +30,10 @@ export default function TopTrainingPlansPage() {
     const planCounts: Record<string, number> = {};
     trainingPlans.forEach(tp => { planCounts[tp.id] = 0; });
     
-    users.forEach(u => {
+    // Only count assignments for students, not admins
+    const learnerUsers = users.filter(u => u.role !== 'admin');
+    
+    learnerUsers.forEach(u => {
       u.assignedTrainingPlans?.forEach(tpId => {
         if (planCounts[tpId] !== undefined) planCounts[tpId]++;
       });
@@ -51,6 +54,20 @@ export default function TopTrainingPlansPage() {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (trainingPlans.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-in fade-in duration-500">
+        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
+          <Award size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-400">No training plans available</h2>
+        <p className="text-slate-400 mt-2 max-w-sm">
+          Create curated learning paths to see performance analytics here.
+        </p>
       </div>
     );
   }

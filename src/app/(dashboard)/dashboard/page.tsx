@@ -96,13 +96,19 @@ export default function DashboardPage() {
       return p > 0 && p < 100;
     });
     
-    // Total learning time from video durations of enrolled courses
-    let totalSeconds = 0;
+    // Real platform-wide learning time (Actual sum of watched durations)
+    let totalSecondsWatched = 0;
     enrolledCourses.forEach(c => {
-      c.videos?.forEach(v => { totalSeconds += v.duration || 0; });
+      const courseProgress = progress[c.id];
+      if (courseProgress && courseProgress.watchedDurations) {
+        Object.values(courseProgress.watchedDurations).forEach(duration => {
+          totalSecondsWatched += duration;
+        });
+      }
     });
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+    const hours = Math.floor(totalSecondsWatched / 3600);
+    const minutes = Math.floor((totalSecondsWatched % 3600) / 60);
     const timeFormatted = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
     const completionRate = enrolledCourses.length > 0
@@ -140,9 +146,11 @@ export default function DashboardPage() {
       });
     }
 
-    // Tally activity from persistent daily logs
+    // Tally activity from persistent daily logs (Only for enrolled courses)
+    const enrolledIds = new Set(user?.enrolledCourses || []);
+    
     Object.values(progress).forEach((courseProgress) => {
-      if (!courseProgress.dailyActivity) return;
+      if (!courseProgress.dailyActivity || !enrolledIds.has(courseProgress.courseId)) return;
       
       Object.entries(courseProgress.dailyActivity).forEach(([dateStr, videoIds]) => {
         // Find bucket matching the YYYY-MM-DD dateStr
@@ -154,7 +162,7 @@ export default function DashboardPage() {
     });
 
     return result.map(r => ({ label: r.label, value: r.value }));
-  }, [progress]);
+  }, [progress, user?.enrolledCourses]);
 
   // Continue learning - courses in progress
   const continueLearning = enrolledCourses
@@ -237,16 +245,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Bar Chart - Weekly Activity */}
-        <div className="bg-white rounded-[28px] shadow-sm border border-slate-100 p-6 md:p-8">
-          <h3 className="text-lg font-bold text-slate-900 mb-1">{t.weeklyActivity || 'Weekly Activity'}</h3>
-          <p className="text-sm text-slate-400 mb-6">{t.weeklyActivitySub || 'Videos watched per day this week'}</p>
-          <BarChart
-            data={weeklyData}
-            height={180}
-            emptyLabel={t.noActivityYet || 'Enroll in a course to start tracking!'}
-          />
-        </div>
+        {/* Bar Chart - Weekly Activity (Only if real data exists) */}
+        {!weeklyData.every(d => d.value === 0) && (
+          <div className="bg-white rounded-[28px] shadow-sm border border-slate-100 p-6 md:p-8">
+            <h3 className="text-lg font-bold text-slate-900 mb-1">{t.weeklyActivity || 'Weekly Activity'}</h3>
+            <p className="text-sm text-slate-400 mb-6">{t.weeklyActivitySub || 'Videos watched per day this week'}</p>
+            <BarChart
+              data={weeklyData}
+              height={180}
+              emptyLabel={t.noActivityYet || 'Enroll in a course to start tracking!'}
+            />
+          </div>
+        )}
       </div>
 
       {/* ─── Continue Learning ─── */}

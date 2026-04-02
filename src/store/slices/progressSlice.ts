@@ -100,6 +100,11 @@ const progressSlice = createSlice({
       
       currentProgress.lastUpdated = new Date().toISOString();
     },
+    clearProgress: (state) => {
+      state.progress = {};
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
@@ -111,6 +116,7 @@ export const {
   updateRatingRequest,
   updateLocalRating,
   updateLocalProgress,
+  clearProgress,
 } = progressSlice.actions;
 
 export default progressSlice.reducer;

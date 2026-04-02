@@ -78,6 +78,8 @@ const authSlice = createSlice({
     },
     logoutSuccess: (state) => {
       state.user = null;
+      state.role = null;
+      state.isNewUser = false;
       state.loading = false;
     },
     clearError: (state) => {

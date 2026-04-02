@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
+import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { 
   BarChart, 
   Bar, 
@@ -17,28 +18,50 @@ import { BarChart2, BookOpen, Users } from 'lucide-react';
 
 export default function TopCoursesPage() {
   const dispatch = useAppDispatch();
-  const { courses, loading } = useAppSelector(state => state.courses);
+  const { courses, loading: coursesLoading } = useAppSelector(state => state.courses);
+  const { users, loading: usersLoading } = useAppSelector(state => state.users);
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());
+    dispatch(fetchUsersRequest());
   }, [dispatch]);
 
   const chartData = useMemo(() => {
+    const learnerIds = new Set(users.filter(u => u.role !== 'admin').map(u => u.id));
+
     return [...courses]
-      .sort((a, b) => (b.enrolledUsers?.length || 0) - (a.enrolledUsers?.length || 0))
+      .map(c => ({
+        ...c,
+        learnerEnrollmentCount: c.enrolledUsers?.filter(id => learnerIds.has(id)).length || 0
+      }))
+      .sort((a, b) => b.learnerEnrollmentCount - a.learnerEnrollmentCount)
       .slice(0, 5)
       .map(c => ({
         name: c.title.length > 20 ? c.title.substring(0, 17) + '...' : c.title,
         fullTitle: c.title,
-        enrollments: c.enrolledUsers?.length || 0,
+        enrollments: c.learnerEnrollmentCount,
         price: c.price
       }));
-  }, [courses]);
+  }, [courses, users]);
 
-  if (loading) {
+  if (coursesLoading || usersLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-in fade-in duration-500">
+        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
+          <BookOpen size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-400">No courses available</h2>
+        <p className="text-slate-400 mt-2 max-w-sm">
+          Once you create courses and learners enroll, analytic data will appear here.
+        </p>
       </div>
     );
   }

@@ -10,7 +10,7 @@ import DonutChart from '@/components/charts/DonutChart';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import Link from 'next/link';
-import { Users, CheckCircle2, Zap, Star, AlertTriangle, Hourglass } from 'lucide-react';
+import { Users, CheckCircle2, Zap, Star, AlertTriangle, Hourglass, PieChart } from 'lucide-react';
 
 export default function AdminReport() {
   const dispatch = useAppDispatch();
@@ -186,6 +186,27 @@ export default function AdminReport() {
   }, [users, courses, allProgress, dauTimeframe]);
 
   if (loadingProgress || courses.length === 0) {
+    if (courses.length === 0 && !loadingProgress) {
+        // Handle empty courses/plans state
+        return (
+            <div className="flex flex-col items-center justify-center h-[70vh] text-center animate-in fade-in duration-700">
+                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-8 text-slate-300">
+                    <PieChart size={48} />
+                </div>
+                <h1 className="text-3xl font-extrabold text-slate-900 mb-2">No reports to show</h1>
+                <p className="text-slate-500 max-w-sm mb-8">
+                    Your analytics dashboard is empty because there are no courses or training plans created yet.
+                </p>
+                <Link 
+                    href="/admin/courses" 
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-2xl transition-all shadow-lg shadow-indigo-100"
+                >
+                    Create a Course
+                </Link>
+            </div>
+        );
+    }
+
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
@@ -195,10 +216,16 @@ export default function AdminReport() {
 
   return (
     <div className="space-y-6 pb-20">
-      <header>
-        <h1 className="text-3xl font-extrabold text-slate-900">Admin Report</h1>
-        <p className="text-slate-500 mt-1">Platform analytics and engagement performance</p>
-      </header>
+      {/* Header Section */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white mb-10 shadow-xl shadow-indigo-100">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
+        
+        <div className="relative z-10">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Admin Performance Overview</h1>
+          <p className="text-indigo-100 text-lg opacity-90">Welcome back, admin. Here is how your platform is performing today.</p>
+        </div>
+      </div>
 
       {/* ─── Top 4 Metric Cards ─── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -33,8 +33,8 @@ export default function AdminDashboard() {
   }, [dispatch]);
 
   const stats = useMemo(() => {
-    // 1. Total Users
-    const totalUsers = users.length;
+    // 1. Total Users (Excluding admins)
+    const totalUsers = users.filter(u => u.role !== 'admin').length;
 
     // 2. Total Courses
     const totalCourses = courses.length;
@@ -42,16 +42,20 @@ export default function AdminDashboard() {
     // 3. Total Training Plans
     const totalPlans = trainingPlans.length;
 
-    // 4. Total Revenue (Sum of course.price * enrollment count)
+    // Filtered learner IDs for accurate enrollment counts
+    const learnerIds = new Set(users.filter(u => u.role !== 'admin').map(u => u.id));
+
+    // 4. Total Revenue (Sum of course.price * learner enrollment count)
     const totalRevenue = courses.reduce((sum, course) => {
-      const enrollments = course.enrolledUsers?.length || 0;
+      const enrollments = course.enrolledUsers?.filter(id => learnerIds.has(id)).length || 0;
       return sum + (course.price * enrollments);
     }, 0);
 
-    // 5. Top Training Plans (Count assignments in users)
+    // 5. Top Training Plans (Count assignments in learners)
     const planCounts: Record<string, number> = {};
     trainingPlans.forEach(tp => { planCounts[tp.id] = 0; });
-    users.forEach(u => {
+    
+    users.filter(u => u.role !== 'admin').forEach(u => {
       u.assignedTrainingPlans?.forEach(tpId => {
         if (planCounts[tpId] !== undefined) planCounts[tpId]++;
       });
@@ -59,8 +63,12 @@ export default function AdminDashboard() {
     const sortedPlans = [...trainingPlans].sort((a, b) => (planCounts[b.id] || 0) - (planCounts[a.id] || 0));
     const topPlanName = sortedPlans[0]?.name || 'None';
 
-    // 6. Top Courses (Enrolled count)
-    const sortedCourses = [...courses].sort((a, b) => (b.enrolledUsers?.length || 0) - (a.enrolledUsers?.length || 0));
+    // 6. Top Courses (Learner enrolled count only)
+    const sortedCourses = [...courses].sort((a, b) => {
+        const countA = a.enrolledUsers?.filter(id => learnerIds.has(id)).length || 0;
+        const countB = b.enrolledUsers?.filter(id => learnerIds.has(id)).length || 0;
+        return countB - countA;
+    });
     const topCourseName = sortedCourses[0]?.title || 'None';
 
     return {
@@ -75,16 +83,18 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-16">
-      <header className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-3xl p-8 md:p-10 text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
+      <header className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white mb-2 shadow-xl shadow-indigo-100">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
+        
         <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
             Admin Performance Overview
           </h1>
           <p className="text-indigo-100 text-lg max-w-2xl opacity-90">
             Welcome back, {user?.displayName || 'Admin'}. Here is how your platform is performing today.
           </p>
         </div>
-        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
