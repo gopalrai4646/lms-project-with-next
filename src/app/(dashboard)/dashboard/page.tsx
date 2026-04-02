@@ -123,13 +123,18 @@ export default function DashboardPage() {
     const result: { dateStr: string; label: string; value: number }[] = [];
     const now = new Date();
     
-    // Create buckets for the last 7 days ending today
+    // Create buckets for the last 7 days ending today (UTC-based to match activity logs)
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - i);
+      const ds = d.toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      const labelDate = new Date();
+      labelDate.setDate(labelDate.getDate() - i);
+      const label = labelDate.toLocaleDateString('en-US', { weekday: 'short' });
+      
       result.push({
-        dateStr: d.toDateString(),
+        dateStr: ds,
         label,
         value: 0
       });
@@ -140,14 +145,10 @@ export default function DashboardPage() {
       if (!courseProgress.dailyActivity) return;
       
       Object.entries(courseProgress.dailyActivity).forEach(([dateStr, videoIds]) => {
-        // dateStr is in YYYY-MM-DD format
-        const progressDate = new Date(dateStr);
-        const ds = progressDate.toDateString(); // Matches the dateStr format used in result buckets
-        
-        const dayBucket = result.find(r => r.dateStr === ds);
+        // Find bucket matching the YYYY-MM-DD dateStr
+        const dayBucket = result.find(r => r.dateStr === dateStr);
         if (dayBucket) {
-          // Total videos interacted with on this specific day for this course
-          dayBucket.value += videoIds.length;
+          dayBucket.value += (videoIds as string[]).length;
         }
       });
     });
@@ -164,7 +165,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-10 pb-16">
       {/* ─── Welcome Hero Banner ─── */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 p-8 md:p-10 text-white">
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
         <div className="relative z-10">

@@ -12,18 +12,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { user, loading, error } = useAppSelector((state) => state.auth);
+  const { user, role, loading, error } = useAppSelector((state) => state.auth);
   const { language } = useAppSelector((state) => state.settings);
   const t = translations[language].auth;
 
   useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      if (role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
     return () => {
       dispatch(clearError());
     };
-  }, [user, router, dispatch]);
+  }, [user, role, router, dispatch]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

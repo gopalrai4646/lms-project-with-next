@@ -14,18 +14,22 @@ export default function SignupPage() {
   const [role, setRole] = useState<'student' | 'admin'>('student');
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { user, loading, error } = useAppSelector((state) => state.auth);
+  const { user, role: authRole, loading, error } = useAppSelector((state) => state.auth);
   const { language } = useAppSelector((state) => state.settings);
   const t = translations[language].auth;
 
   useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      if (authRole === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
     return () => {
       dispatch(clearError());
     };
-  }, [user, router, dispatch]);
+  }, [user, authRole, router, dispatch]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
