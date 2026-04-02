@@ -1,77 +1,187 @@
 'use client';
 
-import { useAppSelector } from '@/store/hooks';
+import { useEffect, useMemo } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchUsersRequest } from '@/store/slices/userSlice';
+import { fetchCoursesRequest } from '@/store/slices/courseSlice';
+import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { translations } from '@/utils/translations';
-import { LayoutDashboard, Users, BookOpen, PieChart, ArrowRight } from 'lucide-react';
+import { 
+  Users, 
+  BookOpen, 
+  GraduationCap, 
+  DollarSign, 
+  BarChart2, 
+  Award,
+  ArrowUpRight 
+} from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
+  const dispatch = useAppDispatch();
+  const { users } = useAppSelector(state => state.users);
+  const { courses } = useAppSelector(state => state.courses);
+  const { trainingPlans } = useAppSelector(state => state.trainingPlans);
   const { user } = useAppSelector(state => state.auth);
   const { language } = useAppSelector(state => state.settings);
   const t = translations[language].admin;
 
+  useEffect(() => {
+    dispatch(fetchUsersRequest());
+    dispatch(fetchCoursesRequest());
+    dispatch(fetchTrainingPlansRequest());
+  }, [dispatch]);
+
+  const stats = useMemo(() => {
+    // 1. Total Users
+    const totalUsers = users.length;
+
+    // 2. Total Courses
+    const totalCourses = courses.length;
+
+    // 3. Total Training Plans
+    const totalPlans = trainingPlans.length;
+
+    // 4. Total Revenue (Sum of course.price * enrollment count)
+    const totalRevenue = courses.reduce((sum, course) => {
+      const enrollments = course.enrolledUsers?.length || 0;
+      return sum + (course.price * enrollments);
+    }, 0);
+
+    // 5. Top Training Plans (Count assignments in users)
+    const planCounts: Record<string, number> = {};
+    trainingPlans.forEach(tp => { planCounts[tp.id] = 0; });
+    users.forEach(u => {
+      u.assignedTrainingPlans?.forEach(tpId => {
+        if (planCounts[tpId] !== undefined) planCounts[tpId]++;
+      });
+    });
+    const sortedPlans = [...trainingPlans].sort((a, b) => (planCounts[b.id] || 0) - (planCounts[a.id] || 0));
+    const topPlanName = sortedPlans[0]?.name || 'None';
+
+    // 6. Top Courses (Enrolled count)
+    const sortedCourses = [...courses].sort((a, b) => (b.enrolledUsers?.length || 0) - (a.enrolledUsers?.length || 0));
+    const topCourseName = sortedCourses[0]?.title || 'None';
+
+    return {
+      totalUsers,
+      totalCourses,
+      totalPlans,
+      totalRevenue,
+      topPlanName,
+      topCourseName
+    };
+  }, [users, courses, trainingPlans]);
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <header className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 md:p-12 text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-16">
+      <header className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-3xl p-8 md:p-10 text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
         <div className="relative z-10">
-          <h1 className="text-3xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
-            Welcome back, {user?.displayName || 'Admin'} 👋
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
+            Admin Performance Overview
           </h1>
-          <p className="text-indigo-100 text-lg md:text-xl max-w-2xl font-medium opacity-90">
-            Welcome to your administrative command center. Manage your learners, courses, and track platform performance from one central place.
+          <p className="text-indigo-100 text-lg max-w-2xl opacity-90">
+            Welcome back, {user?.displayName || 'Admin'}. Here is how your platform is performing today.
           </p>
         </div>
-        
-        {/* Abstract background shapes */}
-        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-64 h-64 bg-indigo-400/20 rounded-full blur-2xl"></div>
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <QuickLink 
-          href="/admin/report" 
-          title="Admin Report" 
-          description="Detailed platform analytics, DAU tracking, and course performance metrics."
-          icon={<PieChart size={24} />}
+        <AnalyticsCard 
+          href="/admin/users"
+          title="Total Users"
+          value={stats.totalUsers.toLocaleString()}
+          subtext="+5.2% from last month"
+          icon={<Users size={24} />}
           color="indigo"
         />
-        <QuickLink 
-          href="/admin/users" 
-          title="Manage Users" 
-          description="View, edit, and manage all learners and administrative accounts."
-          icon={<Users size={24} />}
+        <AnalyticsCard 
+          href="/admin/courses"
+          title="Total Courses"
+          value={stats.totalCourses.toLocaleString()}
+          subtext="Active learning modules"
+          icon={<BookOpen size={24} />}
           color="emerald"
         />
-        <QuickLink 
-          href="/admin/courses" 
-          title="Manage Courses" 
-          description="Create and organize high-quality learning content for your students."
-          icon={<BookOpen size={24} />}
+        <AnalyticsCard 
+          href="/admin/training-plans"
+          title="Total Training Plans"
+          value={stats.totalPlans.toLocaleString()}
+          subtext="Curated paths"
+          icon={<Award size={24} />}
           color="amber"
+        />
+        <AnalyticsCard 
+          href="/admin/report"
+          title="Total Revenue"
+          value={`$${stats.totalRevenue.toLocaleString()}`}
+          subtext="Lifetime platform income"
+          icon={<DollarSign size={24} />}
+          color="rose"
+        />
+        <AnalyticsCard 
+          href="/admin/top-training-plans"
+          title="Top Training Plans"
+          value={stats.topPlanName}
+          subtext="Most assigned path"
+          icon={<GraduationCap size={24} />}
+          color="violet"
+        />
+        <AnalyticsCard 
+          href="/admin/top-courses"
+          title="Top Courses"
+          value={stats.topCourseName}
+          subtext="Highest enrollment"
+          icon={<BarChart2 size={24} />}
+          color="sky"
         />
       </div>
     </div>
   );
 }
 
-function QuickLink({ href, title, description, icon, color }: { href: string; title: string; description: string; icon: React.ReactNode; color: 'indigo' | 'emerald' | 'amber' }) {
+interface AnalyticsCardProps {
+  href: string;
+  title: string;
+  value: string | number;
+  subtext: string;
+  icon: React.ReactNode;
+  color: 'indigo' | 'emerald' | 'amber' | 'rose' | 'violet' | 'sky';
+}
+
+function AnalyticsCard({ href, title, value, subtext, icon, color }: AnalyticsCardProps) {
   const colorMap = {
-    indigo: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
-    emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
-    amber: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
+    indigo: 'bg-indigo-50 text-indigo-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
+    amber: 'bg-amber-50 text-amber-600',
+    rose: 'bg-rose-50 text-rose-600',
+    violet: 'bg-violet-50 text-violet-600',
+    sky: 'bg-sky-50 text-sky-600'
   };
 
   return (
-    <Link href={href} className="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col h-full">
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300 ${colorMap[color]}`}>
-        {icon}
+    <Link 
+      href={href} 
+      className="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 ${colorMap[color]}`}>
+          {icon}
+        </div>
+        <div className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all text-slate-400">
+          <ArrowUpRight size={20} />
+        </div>
       </div>
-      <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">{title}</h3>
-      <p className="text-slate-500 font-medium leading-relaxed mb-6 flex-1">
-        {description}
-      </p>
-      <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm uppercase tracking-wider">
-        Get Started <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+      
+      <div>
+        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">{title}</h3>
+        <div className="text-2xl font-black text-slate-900 truncate" title={String(value)}>
+          {value}
+        </div>
+        <p className="text-xs text-slate-400 mt-2 font-medium flex items-center gap-1">
+          {subtext}
+        </p>
       </div>
     </Link>
   );

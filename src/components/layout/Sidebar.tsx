@@ -14,6 +14,7 @@ import {
   Wrench, 
   Users,
   PieChart,
+  Award,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -48,6 +49,8 @@ export default function Sidebar() {
   const adminMenuItems = [
     { name: t.adminDashboard, href: '/admin', icon: <BarChart3 size={22} /> },
     { name: t.adminReport, href: '/admin/report', icon: <PieChart size={22} /> },
+    { name: t.topCourses, href: '/admin/top-courses', icon: <BarChart3 size={22} /> },
+    { name: t.topTrainingPlans, href: '/admin/top-training-plans', icon: <Award size={22} /> },
     { name: t.manageCourses, href: '/admin/courses', icon: <Wrench size={22} /> },
     { name: t.trainingPlans, href: '/admin/training-plans', icon: <ClipboardList size={22} /> },
     { name: t.users, href: '/admin/users', icon: <Users size={22} /> },
