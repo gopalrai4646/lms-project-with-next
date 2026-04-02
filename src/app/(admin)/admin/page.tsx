@@ -1,119 +1,78 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchUsersRequest } from '@/store/slices/userSlice';
-import { fetchCoursesRequest } from '@/store/slices/courseSlice';
+import { useAppSelector } from '@/store/hooks';
 import { translations } from '@/utils/translations';
+import { LayoutDashboard, Users, BookOpen, PieChart, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const dispatch = useAppDispatch();
-  const { users } = useAppSelector(state => state.users);
-  const { courses } = useAppSelector(state => state.courses);
+  const { user } = useAppSelector(state => state.auth);
   const { language } = useAppSelector(state => state.settings);
   const t = translations[language].admin;
 
-  useEffect(() => {
-    dispatch(fetchUsersRequest());
-    dispatch(fetchCoursesRequest());
-  }, [dispatch]);
-
-  const stats = useMemo(() => {
-    const totalUsers = users.length;
-    const activeCourses = courses.length;
-    const totalRevenue = courses.reduce((sum, course) => {
-      return sum + (course.price * (course.enrolledUsers?.length || 0));
-    }, 0);
-
-    const formattedRevenue = totalRevenue >= 1000 
-      ? `$${(totalRevenue / 1000).toFixed(1)}k` 
-      : `$${totalRevenue}`;
-
-    return [
-      { label: t.totalUsers, value: totalUsers.toString(), icon: '👥', color: 'bg-indigo-500' },
-      { label: t.activeCourses, value: activeCourses.toString(), icon: '📚', color: 'bg-emerald-500' },
-      { label: t.totalRevenue, value: formattedRevenue, icon: '💰', color: 'bg-amber-500' }
-    ];
-  }, [users, courses, t]);
-
-  const recentEnrollments = useMemo(() => {
-    const all: Array<{ user: string; course: string; date: string; status: string; id: string }> = [];
-    users.forEach(user => {
-      if (user.enrolledCourses) {
-        user.enrolledCourses.forEach(courseId => {
-          const course = courses.find(c => c.id === courseId);
-          if (course) {
-            all.push({
-              id: `${user.id}-${courseId}`,
-              user: user.name || user.email,
-              course: course.title,
-              date: t.recently, 
-              status: t.success
-            });
-          }
-        });
-      }
-    });
-    return all.reverse().slice(0, 5);
-  }, [users, courses, t]);
-
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-extrabold text-slate-900">{t.adminConsole}</h1>
-        <p className="text-slate-500 mt-1">{t.consoleSubtitle}</p>
+    <div className="space-y-8 animate-in fade-in duration-700">
+      <header className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 md:p-12 text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
+        <div className="relative z-10">
+          <h1 className="text-3xl md:text-5xl font-extrabold mb-4 flex items-center gap-3">
+            Welcome back, {user?.displayName || 'Admin'} 👋
+          </h1>
+          <p className="text-indigo-100 text-lg md:text-xl max-w-2xl font-medium opacity-90">
+            Welcome to your administrative command center. Manage your learners, courses, and track platform performance from one central place.
+          </p>
+        </div>
+        
+        {/* Abstract background shapes */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-64 h-64 bg-indigo-400/20 rounded-full blur-2xl"></div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.label} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <div className={`${stat.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-slate-100 mb-4`}>
-              {stat.icon}
-            </div>
-            <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{stat.label}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-slate-900">{t.recentEnrolments}</h2>
-            <button className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-sm font-bold transition-all">{t.exportCsv}</button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{t.user}</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{t.course}</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{t.date}</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{t.status}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {recentEnrollments.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500 italic">{t.noRecentEnrollments}</td>
-                </tr>
-              ) : (
-                recentEnrollments.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-slate-900">{row.user}</td>
-                    <td className="px-6 py-4 text-slate-600 font-medium">{row.course}</td>
-                    <td className="px-6 py-4 text-slate-500 text-sm font-medium">{row.date}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600">
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <QuickLink 
+          href="/admin/report" 
+          title="Admin Report" 
+          description="Detailed platform analytics, DAU tracking, and course performance metrics."
+          icon={<PieChart size={24} />}
+          color="indigo"
+        />
+        <QuickLink 
+          href="/admin/users" 
+          title="Manage Users" 
+          description="View, edit, and manage all learners and administrative accounts."
+          icon={<Users size={24} />}
+          color="emerald"
+        />
+        <QuickLink 
+          href="/admin/courses" 
+          title="Manage Courses" 
+          description="Create and organize high-quality learning content for your students."
+          icon={<BookOpen size={24} />}
+          color="amber"
+        />
       </div>
     </div>
+  );
+}
+
+function QuickLink({ href, title, description, icon, color }: { href: string; title: string; description: string; icon: React.ReactNode; color: 'indigo' | 'emerald' | 'amber' }) {
+  const colorMap = {
+    indigo: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
+    emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
+    amber: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
+  };
+
+  return (
+    <Link href={href} className="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col h-full">
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300 ${colorMap[color]}`}>
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">{title}</h3>
+      <p className="text-slate-500 font-medium leading-relaxed mb-6 flex-1">
+        {description}
+      </p>
+      <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm uppercase tracking-wider">
+        Get Started <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+      </div>
+    </Link>
   );
 }
