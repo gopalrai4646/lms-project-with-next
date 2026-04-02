@@ -12,8 +12,11 @@ import {
   where,
   orderBy,
   writeBatch,
-  arrayRemove
+  arrayRemove,
+  onSnapshot
 } from 'firebase/firestore';
+import { eventChannel } from 'redux-saga';
+import { take, fork, cancel } from 'redux-saga/effects';
 import { extractPublicIdFromUrl } from '@/utils/cloudinary-utils';
 import { db } from '@/lib/firebase/config';
 import {
@@ -29,17 +32,32 @@ import {
   Course
 } from '../slices/courseSlice';
 
-function* handleFetchCourses(): any {
-  try {
+function createCoursesChannel() {
+  return eventChannel(emit => {
     const q = query(collection(db, 'courses'), orderBy('createdAt', 'desc'));
-    const querySnapshot = yield call(getDocs, q);
-    const courses: Course[] = [];
-    querySnapshot.forEach((doc: any) => {
-      courses.push({ id: doc.id, ...doc.data() });
+    return onSnapshot(q, (snapshot) => {
+      const courses: Course[] = [];
+      snapshot.forEach((doc: any) => {
+        courses.push({ id: doc.id, ...doc.data() });
+      });
+      emit(courses);
+    }, (error) => {
+      console.error("Courses listener error:", error);
     });
-    yield put(fetchCoursesSuccess(courses));
+  });
+}
+
+function* handleFetchCourses(): any {
+  const channel = yield call(createCoursesChannel);
+  try {
+    while (true) {
+      const courses = yield take(channel);
+      yield put(fetchCoursesSuccess(courses));
+    }
   } catch (error: any) {
     yield put(fetchCoursesFailure(error.message));
+  } finally {
+    channel.close();
   }
 }
 
@@ -64,8 +82,8 @@ function* handleUpdateCourse(action: ReturnType<typeof updateCourseRequest>): an
   try {
     const { id, ...updates } = action.payload;
     const courseRef = doc(db, 'courses', id);
-    // Use type assertion to bypass strict updateDoc overload check if needed
-    yield call(updateDoc, courseRef as any, updates as any);
+    // Fixing the call to updateDoc to handle overload resolution correctly
+    yield call(() => updateDoc(courseRef, updates as any));
     yield put(updateCourseSuccess({ ...action.payload } as Course));
   } catch (error: any) {
     yield put(fetchCoursesFailure(error.message));

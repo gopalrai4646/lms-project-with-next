@@ -9,7 +9,10 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  onSnapshot
 } from 'firebase/firestore';
+import { eventChannel } from 'redux-saga';
+import { take, fork, cancel } from 'redux-saga/effects';
 import { db } from '@/lib/firebase/config';
 import {
   fetchTrainingPlansRequest,
@@ -24,17 +27,32 @@ import {
   TrainingPlan,
 } from '../slices/trainingPlanSlice';
 
-function* handleFetchTrainingPlans(): any {
-  try {
+function createTrainingPlansChannel() {
+  return eventChannel(emit => {
     const q = query(collection(db, 'trainingPlans'), orderBy('createdAt', 'desc'));
-    const querySnapshot = yield call(getDocs, q);
-    const plans: TrainingPlan[] = [];
-    querySnapshot.forEach((doc: any) => {
-      plans.push({ id: doc.id, ...doc.data() });
+    return onSnapshot(q, (snapshot) => {
+      const plans: TrainingPlan[] = [];
+      snapshot.forEach((doc: any) => {
+        plans.push({ id: doc.id, ...doc.data() });
+      });
+      emit(plans);
+    }, (error) => {
+      console.error("Training plans listener error:", error);
     });
-    yield put(fetchTrainingPlansSuccess(plans));
+  });
+}
+
+function* handleFetchTrainingPlans(): any {
+  const channel = yield call(createTrainingPlansChannel);
+  try {
+    while (true) {
+      const plans = yield take(channel);
+      yield put(fetchTrainingPlansSuccess(plans));
+    }
   } catch (error: any) {
     yield put(fetchTrainingPlansFailure(error.message));
+  } finally {
+    channel.close();
   }
 }
 
@@ -59,7 +77,8 @@ function* handleUpdateTrainingPlan(action: ReturnType<typeof updateTrainingPlanR
   try {
     const { id, ...updates } = action.payload;
     const planRef = doc(db, 'trainingPlans', id);
-    yield call(updateDoc, planRef as any, updates as any);
+    // Fixing the call to updateDoc to handle overload resolution correctly
+    yield call(() => updateDoc(planRef, updates as any));
     yield put(updateTrainingPlanSuccess({ ...action.payload } as TrainingPlan));
   } catch (error: any) {
     yield put(fetchTrainingPlansFailure(error.message));

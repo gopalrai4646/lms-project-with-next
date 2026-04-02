@@ -82,7 +82,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                 <select 
                   value={selectedPlanId}
                   onChange={(e) => setSelectedPlanId(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 bg-white text-slate-900"
                 >
                   <option value="">{t.selectTrainingPlan || 'Select a Training Plan...'}</option>
                   {trainingPlans.filter(tp => !user.assignedTrainingPlans?.includes(tp.id)).map(plan => (

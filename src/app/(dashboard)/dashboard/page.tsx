@@ -164,11 +164,15 @@ export default function DashboardPage() {
     return result.map(r => ({ label: r.label, value: r.value }));
   }, [progress, user?.enrolledCourses]);
 
-  // Continue learning - courses in progress
+  // Continue learning - courses in progress (Sorted by last accessed time)
   const continueLearning = enrolledCourses
-    .map(c => ({ ...c, progress: getCourseProgress(c) }))
+    .map(c => ({ 
+      ...c, 
+      progress: getCourseProgress(c),
+      lastUpdated: progress[c.id]?.lastUpdated || '1970-01-01T00:00:00.000Z'
+    }))
     .filter(c => c.progress > 0 && c.progress < 100)
-    .sort((a, b) => b.progress - a.progress);
+    .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
 
   return (
     <div className="space-y-10 pb-16">
@@ -272,7 +276,7 @@ export default function DashboardPage() {
             {continueLearning.slice(0, 3).map((course) => (
               <Link
                 key={course.id}
-                href={`/courses/${course.id}`}
+                href={`/dashboard/courses/${course.id}`}
                 className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all group flex"
               >
                 <div className="w-28 shrink-0 bg-slate-100 flex items-center justify-center overflow-hidden">

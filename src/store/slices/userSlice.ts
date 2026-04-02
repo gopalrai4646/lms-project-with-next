@@ -61,6 +61,11 @@ const userSlice = createSlice({
       }
       state.loading = false;
     },
+    clearUsers: (state) => {
+      state.users = [];
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
@@ -72,6 +77,7 @@ export const {
   deleteUserSuccess,
   assignTrainingPlanRequest,
   assignTrainingPlanSuccess,
+  clearUsers,
 } = userSlice.actions;
 
 export default userSlice.reducer;

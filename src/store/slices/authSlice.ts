@@ -110,7 +110,18 @@ const authSlice = createSlice({
           state.user.savedCourses.splice(index, 1); // Toggle save
         }
       }
-    }
+    },
+    updateUserData: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | null }>) => {
+      // Merges incoming Firestore data into the existing auth state
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload.user };
+      } else {
+        state.user = action.payload.user;
+      }
+      if (action.payload.role !== undefined) {
+        state.role = action.payload.role;
+      }
+    },
   },
 });
 
@@ -131,7 +142,8 @@ export const {
   enrollCourseRequest,
   enrollCourseSuccess,
   saveCourseRequest,
-  saveCourseSuccess
+  saveCourseSuccess,
+  updateUserData
 } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -1,4 +1,4 @@
-import { call, put, takeLatest, all } from 'redux-saga/effects';
+import { call, put, takeLatest, all, take, fork, cancel } from 'redux-saga/effects';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -11,7 +11,8 @@ import {
   User,
   UserCredential
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { eventChannel } from 'redux-saga';
 import { auth, db } from '@/lib/firebase/config';
 import { 
   loginRequest, 
@@ -29,9 +30,53 @@ import {
   enrollCourseRequest,
   enrollCourseSuccess,
   saveCourseRequest,
-  saveCourseSuccess
+  saveCourseSuccess,
+  updateUserData
 } from '../slices/authSlice';
 import { enrollUserInCourseSuccess } from '../slices/courseSlice';
+import { clearProgress } from '../slices/progressSlice';
+import { clearUsers } from '../slices/userSlice';
+
+// Helper: Create a Firestore listener channel for user data
+function createUserChannel(uid: string) {
+  return eventChannel(emit => {
+    const userRef = doc(db, 'users', uid);
+    return onSnapshot(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        emit({
+          user: {
+            uid: uid,
+            email: data.email || null,
+            displayName: data.displayName || null,
+            enrolledCourses: data.enrolledCourses || [],
+            savedCourses: data.savedCourses || [],
+            assignedTrainingPlans: data.assignedTrainingPlans || []
+          },
+          role: data.role || 'student'
+        });
+      }
+    }, (error) => {
+      console.error("Firestore listener error:", error);
+    });
+  });
+}
+
+// Saga: Listen for changes to the user's document
+function* syncUserSession(uid: string): any {
+  const channel = yield call(createUserChannel, uid);
+  try {
+    while (true) {
+      const data = yield take(channel);
+      yield put(updateUserData(data));
+    }
+  } finally {
+    channel.close();
+  }
+}
+
+// Global variable to track the current sync task so we can cancel it on logout
+let userSyncTask: any = null;
 
 function* handleLogin(action: ReturnType<typeof loginRequest>): any {
   try {
@@ -39,25 +84,31 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     const userCredential: UserCredential = yield call(signInWithEmailAndPassword, auth, email, pass);
     const { uid, email: userEmail, displayName } = userCredential.user;
     
-    // Fetch role and course data from Firestore
+    // Initial fetch to establish roles and profile
     const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
-    
     if (!userDoc.exists()) {
       yield call(signOut, auth);
       throw new Error('Your account has been deleted by an administrator.');
     }
 
     const userData = userDoc.data();
-    const role = userData.role || null;
-    const enrolledCourses = userData.enrolledCourses || [];
-    const savedCourses = userData.savedCourses || [];
-    const assignedTrainingPlans = userData.assignedTrainingPlans || [];
-    
     yield put(authSuccess({ 
-      user: { uid, email: userEmail, displayName, enrolledCourses, savedCourses, assignedTrainingPlans }, 
-      role, 
+      user: { 
+        uid, 
+        email: userEmail, 
+        displayName, 
+        enrolledCourses: userData.enrolledCourses || [], 
+        savedCourses: userData.savedCourses || [], 
+        assignedTrainingPlans: userData.assignedTrainingPlans || [] 
+      }, 
+      role: userData.role || 'student', 
       isNewUser: false 
     }));
+
+    // Start real-time sync
+    if (userSyncTask) yield cancel(userSyncTask);
+    userSyncTask = yield fork(syncUserSession, uid);
+
   } catch (error: any) {
     let message = 'An unexpected error occurred. Please try again.';
     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -88,10 +139,15 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
     });
 
     yield put(authSuccess({ 
-      user: { uid, email: userEmail, displayName: name, enrolledCourses: [], savedCourses: [] }, 
+      user: { uid, email: userEmail, displayName: name, enrolledCourses: [], savedCourses: [], assignedTrainingPlans: [] }, 
       role, 
       isNewUser: true 
     }));
+
+    // Start real-time sync
+    if (userSyncTask) yield cancel(userSyncTask);
+    userSyncTask = yield fork(syncUserSession, uid);
+
   } catch (error: any) {
     let message = 'Failed to create account. Please try again.';
     if (error.code === 'auth/email-already-in-use') {
@@ -108,6 +164,9 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
 function* handleLogout(): any {
   try {
     yield call(signOut, auth);
+    if (userSyncTask) yield cancel(userSyncTask);
+    yield put(clearProgress());
+    yield put(clearUsers());
     yield put(logoutSuccess());
   } catch (error: any) {
     yield put(authFailure(error.message));
@@ -121,38 +180,30 @@ function* handleGoogleLogin(): any {
     const { uid, email, displayName, metadata } = userCredential.user;
     const isNew = metadata.creationTime === metadata.lastSignInTime;
     
-    let role = 'student';
-    let enrolledCourses: string[] = [];
-    let savedCourses: string[] = [];
-    let assignedTrainingPlans: string[] = [];
-
     if (isNew) {
       yield call(setDoc as any, doc(db, 'users', uid), {
-        uid,
-        email,
-        displayName,
-        role,
-        createdAt: serverTimestamp(),
+        uid, email, displayName, role: 'student', createdAt: serverTimestamp(),
       });
-    } else {
-      const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
-      if (!userDoc.exists()) {
-        yield call(signOut, auth);
-        throw new Error('Your account has been deleted by an administrator.');
-      }
-      
-      const userData = userDoc.data();
-      role = userData.role || 'student';
-      enrolledCourses = userData.enrolledCourses || [];
-      savedCourses = userData.savedCourses || [];
-      assignedTrainingPlans = userData.assignedTrainingPlans || [];
     }
 
+    const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
+    const userData = userDoc.data();
+
     yield put(authSuccess({ 
-      user: { uid, email, displayName, enrolledCourses, savedCourses, assignedTrainingPlans }, 
-      role: role as any, 
+      user: { 
+        uid, email, displayName, 
+        enrolledCourses: userData.enrolledCourses || [], 
+        savedCourses: userData.savedCourses || [], 
+        assignedTrainingPlans: userData.assignedTrainingPlans || [] 
+      }, 
+      role: userData.role || 'student', 
       isNewUser: isNew 
     }));
+
+    // Start real-time sync
+    if (userSyncTask) yield cancel(userSyncTask);
+    userSyncTask = yield fork(syncUserSession, uid);
+
   } catch (error: any) {
     yield put(authFailure(error.message));
   }
@@ -194,10 +245,8 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
 function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): any {
   try {
     const courseId = action.payload;
-    console.log('Saga: Handling enroll course request for:', courseId);
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.error('Saga: No current user found for enrollment');
       yield put(authFailure('You must be logged in to enroll in a course.'));
       return;
     }
@@ -213,11 +262,8 @@ function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): an
     }, { merge: true });
     
     yield put(enrollUserInCourseSuccess({ courseId, userId: currentUser.uid }));
-    
-    console.log('Saga: Successfully enrolled in course:', courseId);
     yield put(enrollCourseSuccess(courseId));
   } catch (error: any) {
-    console.error('Saga: Error enrolling in course:', error.message);
     yield put(authFailure(error.message));
   }
 }
@@ -225,10 +271,8 @@ function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): an
 function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
   try {
     const courseId = action.payload;
-    console.log('Saga: Handling save course request for:', courseId);
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.error('Saga: No current user found for saving');
       yield put(authFailure('You must be logged in to save a course.'));
       return;
     }
@@ -243,10 +287,8 @@ function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
       savedCourses: isSaved ? arrayRemove(courseId) : arrayUnion(courseId)
     }, { merge: true });
     
-    console.log('Saga: Successfully toggled save for course:', courseId);
     yield put(saveCourseSuccess(courseId));
   } catch (error: any) {
-    console.error('Saga: Error saving course:', error.message);
     yield put(authFailure(error.message));
   }
 }

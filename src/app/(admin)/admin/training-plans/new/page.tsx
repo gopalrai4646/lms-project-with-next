@@ -132,7 +132,7 @@ export default function NewTrainingPlanPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
                   placeholder="e.g. Frontend Masterclass"
                 />
               </div>
@@ -144,7 +144,7 @@ export default function NewTrainingPlanPage() {
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
                   placeholder="Describe this training plan..."
                 />
               </div>
@@ -297,7 +297,7 @@ export default function NewTrainingPlanPage() {
                   value={courseSearch}
                   onChange={(e) => setCourseSearch(e.target.value)}
                   placeholder="Search by title or instructor..."
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 outline-none transition-all bg-white text-slate-900"
                 />
               </div>
               <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar pr-2">
