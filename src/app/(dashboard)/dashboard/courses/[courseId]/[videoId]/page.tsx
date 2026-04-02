@@ -165,7 +165,7 @@ export default function LessonPage() {
   const coursePercentage = calculateCourseProgress();
 
   return (
-    <div className="max-w-6xl mx-auto py-6 px-4">
+    <div className="max-w-6xl mx-auto pb-8 pt-2 px-4">
       <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{course.title}</h1>
         <p className="text-slate-500 mt-1 text-sm">{t.by} {course.instructor} • {videoList.length} {videoList.length !== 1 ? t.videos : t.video}</p>
         
@@ -193,7 +193,7 @@ export default function LessonPage() {
           <p className="text-slate-500 font-medium">{t.noVideosYet}</p>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-8 mt-10">
           <div className="flex-1">
             <div className="bg-black rounded-2xl overflow-hidden shadow-xl aspect-video">
               {activeVideo ? (
@@ -219,26 +219,12 @@ export default function LessonPage() {
                 </div>
               )}
             </div>
-            {activeVideo && (
-              <div className="mt-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-slate-900">{activeVideo.title}</h2>
-                  {isVideoCompleted(activeVideoIndex) && (
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">✓ {t.completed}</span>
-                  )}
-                </div>
-                <p className="text-sm text-slate-500 mt-1">
-                  {t.video} {activeVideoIndex + 1} / {videoList.length}
-                  {activeVideo.duration ? ` • ${formatDuration(activeVideo.duration)}` : ''}
-                </p>
-                <div className="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all ${isVideoCompleted(activeVideoIndex) ? 'bg-emerald-500' : 'bg-indigo-500'}`}
-                    style={{ width: `${getVideoProgress(activeVideoIndex)}%` }}
-                  />
-                </div>
-              </div>
-            )}
+            {/* Active video info removed for cleaner UI */}
+            
+            <div className="mt-4 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-3">{t.aboutCourse}</h3>
+              <p className="text-slate-600 leading-relaxed">{course.description}</p>
+            </div>
           </div>
 
           <div className="lg:w-80 shrink-0">
@@ -295,10 +281,7 @@ export default function LessonPage() {
         </div>
       )}
 
-      <div className="mt-8 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h3 className="text-lg font-bold text-slate-900 mb-3">{t.aboutCourse}</h3>
-        <p className="text-slate-600 leading-relaxed">{course.description}</p>
-      </div>
+
 
       {showRatingModal && user?.uid && (
         <CourseRatingModal 
