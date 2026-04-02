@@ -97,6 +97,9 @@ export const translations = {
       backToSignIn: "Back to Sign In",
       signIn: "Sign in",
       google: "Google",
+      phoneNumber: "Phone Number",
+      profilePhoto: "Profile Photo",
+      uploadingPhoto: "Uploading photo...",
     },
     settings: {
       accountSettings: "Account Settings",
@@ -106,6 +109,9 @@ export const translations = {
       saving: "Saving...",
       saveChanges: "Save Changes",
       updating: "Updating...",
+      phoneNumber: "Phone Number",
+      profilePhoto: "Profile Photo",
+      uploadingPhoto: "Uploading photo...",
     },
     admin: {
       adminConsole: "Dashboard",
@@ -358,6 +364,9 @@ export const translations = {
       backToSignIn: "Zurück zur Anmeldung",
       signIn: "Anmelden",
       google: "Google",
+      phoneNumber: "Phone Number",
+      profilePhoto: "Profile Photo",
+      uploadingPhoto: "Uploading photo...",
     },
     settings: {
       accountSettings: "Kontoeinstellungen",
@@ -367,6 +376,9 @@ export const translations = {
       saving: "Speichern...",
       saveChanges: "Änderungen speichern",
       updating: "Aktualisieren...",
+      phoneNumber: "Telefonnummer",
+      profilePhoto: "Profilbild",
+      uploadingPhoto: "Foto wird hochgeladen...",
     },
     admin: {
       adminConsole: "Dashboard",
@@ -616,6 +628,9 @@ export const translations = {
       backToSignIn: "Retour à la connexion",
       signIn: "Se connecter",
       google: "Google",
+      phoneNumber: "Phone Number",
+      profilePhoto: "Profile Photo",
+      uploadingPhoto: "Uploading photo...",
     },
     settings: {
       accountSettings: "Paramètres du Compte",
@@ -625,6 +640,9 @@ export const translations = {
       saving: "Enregistrement...",
       saveChanges: "Sauvegarder",
       updating: "Mise à jour...",
+      phoneNumber: "Numéro de téléphone",
+      profilePhoto: "Photo de profil",
+      uploadingPhoto: "Téléchargement de la photo...",
     },
     admin: {
       adminConsole: "Tableau de Bord",

@@ -6,12 +6,18 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { signupRequest, googleLoginRequest, clearError } from '@/store/slices/authSlice';
 import { translations } from '@/utils/translations';
+import { uploadToCloudinary } from '@/utils/cloudinary';
+import { Camera, Phone } from 'lucide-react';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [role, setRole] = useState<'student' | 'admin'>('student');
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, role: authRole, loading, error } = useAppSelector((state) => state.auth);
@@ -31,10 +37,42 @@ export default function SignupPage() {
     };
   }, [user, authRole, router, dispatch]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(signupRequest({ email, pass: password, name, role }));
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfileFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    let uploadedPhotoURL: string | undefined = undefined;
+    
+    if (profileFile) {
+      try {
+        setUploading(true);
+        const url = await uploadToCloudinary(profileFile);
+        uploadedPhotoURL = url;
+      } catch (err: any) {
+        // We'll show the error via the existing error handler or a local one
+        return; 
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    dispatch(signupRequest({ 
+      email, 
+      pass: password, 
+      name, 
+      role, 
+      phoneNumber, 
+      photoURL: uploadedPhotoURL 
+    }));
+  };
+
 
   const handleGoogleLogin = () => {
     dispatch(googleLoginRequest());
@@ -89,6 +127,30 @@ export default function SignupPage() {
               </button>
             </div>
           </div>
+
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative group cursor-pointer" onClick={() => document.getElementById('photo-upload')?.click()}>
+              <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-400 group-hover:bg-slate-50">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="text-slate-400 group-hover:text-indigo-500 transition-colors" size={32} />
+                )}
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-white text-xs font-bold">{t.profilePhoto || "Photo"}</span>
+              </div>
+              <input 
+                id="photo-upload"
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={handlePhotoChange}
+              />
+            </div>
+            <p className="text-xs text-slate-400 mt-2 font-medium">{t.profilePhoto || "Profile Photo"}</p>
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">{t.fullName}</label>
             <input 
@@ -112,6 +174,16 @@ export default function SignupPage() {
             />
           </div>
           <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Phone Number</label>
+            <input 
+              type="tel" 
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
+              placeholder="+1 234 567 890"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">{t.password}</label>
             <input 
               type="password" 
@@ -123,14 +195,17 @@ export default function SignupPage() {
             />
           </div>
           <button 
-            disabled={loading}
-            className={`w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 transition-all active:scale-[0.98] mt-2 flex items-center justify-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            disabled={loading || uploading}
+            className={`w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 transition-all active:scale-[0.98] mt-2 flex items-center justify-center ${(loading || uploading) ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
-            {loading ? (
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+            {(loading || uploading) ? (
+              <div className="flex items-center gap-3">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{uploading ? "Uploading photo..." : t.createAccount}</span>
+              </div>
             ) : t.createAccount}
           </button>
         </form>

@@ -70,7 +70,7 @@ export default function Sidebar() {
       )}
       
       <aside 
-        className={`fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 ${
+        className={`fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 flex flex-col ${
           isCollapsed ? 'md:w-20' : 'md:w-64'
         } ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >
@@ -82,40 +82,57 @@ export default function Sidebar() {
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
 
-      <div className="p-4 space-y-2">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={handleLinkClick}
-              title={isCollapsed ? item.name : ''}
-              className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3.5 rounded-2xl transition-all duration-300 group/item relative overflow-hidden ${
-                isActive
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 font-bold'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
-              }`}
-            >
-              <span className={`text-xl shrink-0 transition-transform duration-300 group-hover/item:scale-125 ${isActive ? 'scale-110' : ''}`}>
-                {item.icon}
-              </span>
-              <span className={`whitespace-nowrap transition-all duration-500 origin-left ${
-                isCollapsed ? 'opacity-0 scale-0 w-0' : 'opacity-100 scale-100'
-              }`}>
-                {item.name}
-              </span>
-              
-              {isActive && !isCollapsed && (
-                <div className="absolute right-0 top-0 bottom-0 w-1 bg-white/30 rounded-full my-3 mr-1" />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-      
+        <div className="p-4 space-y-2 overflow-y-auto flex-1 scrollbar-hide">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={handleLinkClick}
+                title={isCollapsed ? item.name : ''}
+                className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3.5 rounded-2xl transition-all duration-300 group/item relative overflow-hidden ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 font-bold'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
+                }`}
+              >
+                <span className={`text-xl shrink-0 transition-transform duration-300 group-hover/item:scale-125 ${isActive ? 'scale-110' : ''}`}>
+                  {item.icon}
+                </span>
+                <span className={`whitespace-nowrap transition-all duration-500 origin-left ${
+                  isCollapsed ? 'opacity-0 scale-0 w-0' : 'opacity-100 scale-100'
+                }`}>
+                  {item.name}
+                </span>
+                
+                {isActive && !isCollapsed && (
+                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-white/30 rounded-full my-3 mr-1" />
+                )}
+              </Link>
+            );
+          })}
+        </div>
 
-    </aside>
+        {/* User Profile Section at bottom */}
+        <div className={`p-4 border-t border-slate-100 bg-slate-50/50 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white border border-slate-200 shrink-0 shadow-sm transition-transform hover:scale-110">
+            {user.photoURL ? (
+              <img src={user.photoURL} alt={user.displayName || "User"} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 font-bold text-sm">
+                {(user.displayName || user.email || "U")[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-800 truncate">{user.displayName || "User"}</p>
+              <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 truncate">{role}</p>
+            </div>
+          )}
+        </div>
+      </aside>
     </>
   );
 }

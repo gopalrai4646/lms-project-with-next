@@ -51,7 +51,9 @@ function createUserChannel(uid: string) {
             displayName: data.displayName || null,
             enrolledCourses: data.enrolledCourses || [],
             savedCourses: data.savedCourses || [],
-            assignedTrainingPlans: data.assignedTrainingPlans || []
+            assignedTrainingPlans: data.assignedTrainingPlans || [],
+            photoURL: data.photoURL || null,
+            phoneNumber: data.phoneNumber || null
           },
           role: data.role || 'student'
         });
@@ -99,7 +101,9 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
         displayName, 
         enrolledCourses: userData.enrolledCourses || [], 
         savedCourses: userData.savedCourses || [], 
-        assignedTrainingPlans: userData.assignedTrainingPlans || [] 
+        assignedTrainingPlans: userData.assignedTrainingPlans || [],
+        photoURL: userData.photoURL || null,
+        phoneNumber: userData.phoneNumber || null
       }, 
       role: userData.role || 'student', 
       isNewUser: false 
@@ -124,9 +128,9 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
 
 function* handleSignup(action: ReturnType<typeof signupRequest>): any {
   try {
-    const { email, pass, name, role } = action.payload;
+    const { email, pass, name, role, photoURL, phoneNumber } = action.payload;
     const userCredential: UserCredential = yield call(createUserWithEmailAndPassword, auth, email, pass);
-    yield call(updateProfile, userCredential.user, { displayName: name });
+    yield call(updateProfile, userCredential.user, { displayName: name, photoURL });
     const { uid, email: userEmail } = userCredential.user;
     
     // Save user profile to Firestore
@@ -135,11 +139,22 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
       email: userEmail,
       displayName: name,
       role,
+      photoURL: photoURL || null,
+      phoneNumber: phoneNumber || null,
       createdAt: serverTimestamp(),
     });
 
     yield put(authSuccess({ 
-      user: { uid, email: userEmail, displayName: name, enrolledCourses: [], savedCourses: [], assignedTrainingPlans: [] }, 
+      user: { 
+        uid, 
+        email: userEmail, 
+        displayName: name, 
+        enrolledCourses: [], 
+        savedCourses: [], 
+        assignedTrainingPlans: [],
+        photoURL: photoURL || null,
+        phoneNumber: phoneNumber || null
+      }, 
       role, 
       isNewUser: true 
     }));
@@ -194,7 +209,9 @@ function* handleGoogleLogin(): any {
         uid, email, displayName, 
         enrolledCourses: userData.enrolledCourses || [], 
         savedCourses: userData.savedCourses || [], 
-        assignedTrainingPlans: userData.assignedTrainingPlans || [] 
+        assignedTrainingPlans: userData.assignedTrainingPlans || [],
+        photoURL: userData.photoURL || null,
+        phoneNumber: userData.phoneNumber || null
       }, 
       role: userData.role || 'student', 
       isNewUser: isNew 
@@ -227,14 +244,20 @@ function* handleUpdatePassword(action: ReturnType<typeof updatePasswordRequest>)
 
 function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): any {
   try {
-    const { displayName } = action.payload;
+    const { displayName, photoURL, phoneNumber } = action.payload;
     const currentUser: User = auth.currentUser!;
     
     // Update Firebase Auth profile
-    yield call(updateProfile, currentUser, { displayName });
+    const updates: any = { displayName };
+    if (photoURL !== undefined) updates.photoURL = photoURL;
+    yield call(updateProfile, currentUser, updates);
     
     // Update Firestore user document
-    yield call(setDoc as any, doc(db, 'users', currentUser.uid), { displayName }, { merge: true });
+    const firestoreUpdates: any = { displayName };
+    if (photoURL !== undefined) firestoreUpdates.photoURL = photoURL;
+    if (phoneNumber !== undefined) firestoreUpdates.phoneNumber = phoneNumber;
+    
+    yield call(setDoc as any, doc(db, 'users', currentUser.uid), firestoreUpdates, { merge: true });
     
     yield put(updateProfileSuccess({ displayName }));
   } catch (error: any) {

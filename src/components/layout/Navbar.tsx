@@ -73,6 +73,15 @@ export default function Navbar() {
 
         {user ? (
           <div className="flex items-center gap-4">
+            {user.photoURL && (
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+                <img 
+                  src={user.photoURL} 
+                  alt={user.displayName || "User"} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             <span className="text-sm font-bold text-slate-700 hidden lg:block">
               {user.displayName || user.email}
             </span>

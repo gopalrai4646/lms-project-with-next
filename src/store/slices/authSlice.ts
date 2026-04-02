@@ -8,6 +8,8 @@ interface AuthState {
     enrolledCourses?: string[];
     savedCourses?: string[];
     assignedTrainingPlans?: string[];
+    photoURL: string | null;
+    phoneNumber: string | null;
   } | null;
   role: 'student' | 'admin' | null;
   loading: boolean;
@@ -31,7 +33,7 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    signupRequest: (state, _action: PayloadAction<{ email: string; pass: string; name: string; role: 'student' | 'admin' }>) => {
+    signupRequest: (state, _action: PayloadAction<{ email: string; pass: string; name: string; role: 'student' | 'admin'; photoURL?: string; phoneNumber?: string }>) => {
       state.loading = true;
       state.error = null;
     },
@@ -39,7 +41,7 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    updateProfileRequest: (state, _action: PayloadAction<{ displayName: string }>) => {
+    updateProfileRequest: (state, _action: PayloadAction<{ displayName: string; photoURL?: string; phoneNumber?: string }>) => {
       state.loading = true;
       state.error = null;
     },

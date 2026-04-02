@@ -8,6 +8,8 @@ export interface User {
   enrolledCourses?: string[];
   savedCourses?: string[];
   assignedTrainingPlans?: string[];
+  photoURL: string | null;
+  phoneNumber: string | null;
   createdAt?: string;
 }
 
