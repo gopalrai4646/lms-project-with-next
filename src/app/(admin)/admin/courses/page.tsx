@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest, deleteCourseRequest } from '@/store/slices/courseSlice';
 import { translations } from '@/utils/translations';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Plus, Search, Eye, ChevronDown, List, LayoutGrid, BookOpen, GraduationCap, Users, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const formatIndianDate = (dateVal: any) => {
   if (!dateVal) return 'N/A';
@@ -112,7 +113,7 @@ export default function AdminCoursesPage() {
           href="/admin/courses/new" 
           className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] flex items-center gap-2 shrink-0 group"
         >
-          <span className="group-hover:rotate-90 transition-transform duration-300">➕</span> {t.newCourse}
+          <Plus className="group-hover:rotate-90 transition-transform duration-300" size={20} /> {t.newCourse}
         </Link>
       </header>
 
@@ -126,7 +127,7 @@ export default function AdminCoursesPage() {
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
         <div className="flex flex-col lg:flex-row gap-4 w-full xl:flex-1">
           <div className="relative flex-1">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text"
               placeholder={t.searchCourses}
@@ -146,8 +147,8 @@ export default function AdminCoursesPage() {
               <option value="public">{t.public?.split(' ')[0] || 'Public'}</option>
               <option value="private">{t.private?.split(' ')[0] || 'Private'}</option>
             </select>
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">👁️</span>
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs text-slate-300">▼</span>
+            <Eye className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={18} />
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={14} />
           </div>
         </div>
         
@@ -172,14 +173,14 @@ export default function AdminCoursesPage() {
               className={`p-2 rounded-lg flex items-center gap-2 transition-all duration-300 ${viewMode === 'list' ? 'bg-white shadow-md text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
               title={t.listView}
             >
-              <span className="text-xl">📋</span> <span className="hidden lg:inline text-sm">{t.listView}</span>
+              <List size={20} /> <span className="hidden lg:inline text-sm">{t.listView}</span>
             </button>
             <button
               onClick={() => handleViewToggle('grid')}
               className={`p-2 rounded-lg flex items-center gap-2 transition-all duration-300 ${viewMode === 'grid' ? 'bg-white shadow-md text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
               title={t.gridView}
             >
-              <span className="text-xl">🧩</span> <span className="hidden lg:inline text-sm">{t.gridView}</span>
+              <LayoutGrid size={20} /> <span className="hidden lg:inline text-sm">{t.gridView}</span>
             </button>
           </div>
         </div>
@@ -192,7 +193,7 @@ export default function AdminCoursesPage() {
         </div>
       ) : paginatedCourses.length === 0 ? (
         <div className="py-16 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
-          <span className="text-5xl opacity-50 grayscale">🔍</span>
+          <Search className="opacity-50 grayscale" size={48} />
           <p className="text-lg text-slate-500 font-semibold">{t.noCoursesFound}</p>
         </div>
       ) : viewMode === 'list' ? (
@@ -216,7 +217,7 @@ export default function AdminCoursesPage() {
                     <td className="px-6 py-4 w-1/3">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center text-2xl relative border border-slate-200/50 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                          {course.thumbnail ? <img src={course.thumbnail} alt="" className="w-full h-full object-cover" /> : '📚'}
+                          {course.thumbnail ? <img src={course.thumbnail} alt="" className="w-full h-full object-cover" /> : <BookOpen size={32} className="text-slate-300" />}
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-1 text-base">{course.title}</p>
@@ -226,7 +227,9 @@ export default function AdminCoursesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2.5">
-                         <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs shrink-0 shadow-sm">🧑‍🏫</div>
+                         <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs shrink-0 shadow-sm text-indigo-600">
+                           <GraduationCap size={16} />
+                         </div>
                          <span className="text-sm font-bold text-slate-700">{course.instructor}</span>
                       </div>
                     </td>
@@ -242,7 +245,7 @@ export default function AdminCoursesPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="text-xs font-black text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-full inline-flex items-center justify-center gap-1.5 w-fit border border-slate-200/50 shadow-sm">
-                        <span className="opacity-60">👥</span> {course.enrolledUsers?.length || 0}
+                        <Users size={14} className="opacity-60" /> {course.enrolledUsers?.length || 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -252,14 +255,14 @@ export default function AdminCoursesPage() {
                           className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center gap-1 shrink-0 shadow-sm hover:shadow-indigo-50"
                           title={t.editCourse}
                         >
-                          ✏️
+                          <Pencil size={18} />
                         </Link>
                         <button 
                           onClick={() => handleDelete(course.id)}
                           className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1 shrink-0 shadow-sm hover:shadow-rose-50"
                           title={t.deleteCourse}
                         >
-                          🗑️
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>
@@ -278,7 +281,7 @@ export default function AdminCoursesPage() {
                 {course.thumbnail ? (
                   <img src={course.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 ) : (
-                  <span className="transform group-hover:scale-125 transition-transform duration-700 drop-shadow-xl">📚</span>
+                  <BookOpen size={64} className="text-slate-300 drop-shadow-xl transform group-hover:scale-125 transition-transform duration-700" />
                 )}
                 <div className="absolute top-4 right-4 flex gap-2">
                   <span className={`text-[10px] font-black uppercase tracking-tighter px-3 py-1.5 rounded-full shadow-lg backdrop-blur-xl border ${course.visibility === 'private' ? 'bg-white/90 text-amber-700 border-amber-200/30' : 'bg-white/90 text-emerald-700 border-emerald-200/30'}`}>
@@ -287,7 +290,7 @@ export default function AdminCoursesPage() {
                 </div>
                 <div className="absolute bottom-4 left-4">
                    <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white text-[10px] font-black flex items-center gap-1.5 shadow-lg">
-                      <span className="opacity-80">👥</span> {course.enrolledUsers?.length || 0} Learners
+                      <Users size={12} className="opacity-80" /> {course.enrolledUsers?.length || 0} Learners
                    </div>
                 </div>
               </div>
@@ -298,8 +301,8 @@ export default function AdminCoursesPage() {
                 
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100/80">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-sm shrink-0 border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors duration-300">
-                      🧑‍🏫
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors duration-300">
+                      <GraduationCap size={20} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.instructor}</p>
@@ -313,14 +316,14 @@ export default function AdminCoursesPage() {
                       className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center justify-center shadow-sm"
                       title={t.editCourse}
                     >
-                      ✏️
+                      <Pencil size={18} />
                     </Link>
                     <button 
                       onClick={() => handleDelete(course.id)}
                       className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center shadow-sm"
                       title={t.deleteCourse}
                     >
-                      🗑️
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
@@ -342,7 +345,7 @@ export default function AdminCoursesPage() {
               disabled={safeCurrentPage === 1 || totalPages === 0}
               className="px-4 sm:px-5 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
             >
-              ⬅️ <span className="hidden sm:inline">{t.prev}</span>
+              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
             
             <div className="flex items-center gap-1.5 px-1">
@@ -388,7 +391,7 @@ export default function AdminCoursesPage() {
               disabled={safeCurrentPage === totalPages || totalPages === 0}
               className="px-4 sm:px-5 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
             >
-               <span className="hidden sm:inline">{t.next}</span> ➡️
+               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={18} />
             </button>
           </div>
         </div>

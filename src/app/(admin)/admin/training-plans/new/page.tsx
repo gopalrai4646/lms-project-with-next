@@ -7,6 +7,7 @@ import { createTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { translations } from '@/utils/translations';
+import { Pencil, Image as ImageIcon, Plus, BookOpen, ChevronUp, ChevronDown, Trash2, Search, X } from 'lucide-react';
 
 export default function NewTrainingPlanPage() {
   const router = useRouter();
@@ -167,12 +168,14 @@ export default function NewTrainingPlanPage() {
                   <>
                     <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover z-0" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <span className="text-white font-semibold flex items-center gap-2"><span>✏️</span> Change Image</span>
+                      <span className="text-white font-semibold flex items-center gap-2">
+                        <Pencil size={18} /> {t.descriptionLabel ? "Change Image" : "Change Image"}
+                      </span>
                     </div>
                   </>
                 ) : (
                   <div className="text-center z-10">
-                    <span className="text-3xl block mb-2">🖼️</span>
+                    <ImageIcon className="text-slate-300 block mx-auto mb-2" size={48} />
                     <p className="text-sm font-medium text-slate-600">Click to upload cover image</p>
                   </div>
                 )}
@@ -191,7 +194,7 @@ export default function NewTrainingPlanPage() {
                 onClick={() => setIsAddingCourse(true)}
                 className="px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-xl hover:bg-indigo-100 transition-all flex items-center gap-2"
               >
-                <span>➕</span> {t.addCourse || "Add Course"}
+                <Plus size={20} /> {t.addCourse || "Add Course"}
               </button>
             </div>
 
@@ -208,7 +211,7 @@ export default function NewTrainingPlanPage() {
                       {index + 1}
                     </div>
                     <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
-                      {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : '📚'}
+                      {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : <BookOpen size={20} className="text-slate-400" />}
                     </div>
                     <div className="flex-grow min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
@@ -230,7 +233,7 @@ export default function NewTrainingPlanPage() {
                         className="p-2 text-slate-400 hover:text-indigo-600 disabled:opacity-30"
                         title={t.moveUpCursor || "Move Up"}
                       >
-                        🔼
+                        <ChevronUp size={18} />
                       </button>
                       <button
                         type="button"
@@ -239,7 +242,7 @@ export default function NewTrainingPlanPage() {
                         className="p-2 text-slate-400 hover:text-indigo-600 disabled:opacity-30"
                         title={t.moveDownCursor || "Move Down"}
                       >
-                        🔽
+                        <ChevronDown size={18} />
                       </button>
                       <button
                         type="button"
@@ -247,7 +250,7 @@ export default function NewTrainingPlanPage() {
                         className="p-2 text-slate-400 hover:text-rose-600"
                         title={t.removeCourse || "Remove"}
                       >
-                        🗑️
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
@@ -285,12 +288,12 @@ export default function NewTrainingPlanPage() {
                 onClick={() => setIsAddingCourse(false)}
                 className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all"
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
             <div className="p-6">
               <div className="relative mb-6">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2">🔍</span>
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="text"
                   autoFocus
@@ -314,7 +317,7 @@ export default function NewTrainingPlanPage() {
                       className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all text-left group"
                     >
                       <div className="w-12 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
-                        {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : '📚'}
+                        {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : <BookOpen size={20} className="text-slate-400" />}
                       </div>
                       <div className="flex-grow min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
@@ -325,7 +328,7 @@ export default function NewTrainingPlanPage() {
                         </div>
                         <p className="text-xs text-slate-500">{course.instructor}</p>
                       </div>
-                      <span className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity font-bold text-sm">Add ➕</span>
+                      <span className="text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity font-bold text-sm tracking-tight flex items-center gap-1.5">Add <Plus size={14} /></span>
                     </button>
                   ))
                 )}

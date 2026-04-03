@@ -7,6 +7,7 @@ import { translations } from '@/utils/translations';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { assignTrainingPlanRequest } from '@/store/slices/userSlice';
 import { useEffect, useState } from 'react';
+import { X, ClipboardList, BookOpen, Heart, Plus } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -48,7 +49,9 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
       <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
           <h2 className="text-xl font-bold text-slate-900">{t.userDetails}</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">✕</button>
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors">
+            <X size={20} />
+          </button>
         </div>
         <div className="p-6 space-y-6">
           <div className="flex items-center gap-4">
@@ -67,13 +70,13 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span>📋</span> {t.assignedTrainingPlans || 'Assigned Training Plans'} ({user.assignedTrainingPlans?.length || 0})
+                <ClipboardList size={16} className="text-slate-400" /> {t.assignedTrainingPlans || 'Assigned Training Plans'} ({user.assignedTrainingPlans?.length || 0})
               </h4>
               <button 
                 onClick={() => setIsAssigning(!isAssigning)}
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg transition-colors"
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg transition-colors flex items-center gap-1"
               >
-                {isAssigning ? (t.cancel || 'Cancel') : '+ ' + (t.assignTrainingPlan || 'Assign Plan')}
+                {isAssigning ? (t.cancel || 'Cancel') : <><Plus size={12} /> {t.assignTrainingPlan || 'Assign Plan'}</>}
               </button>
             </div>
             
@@ -115,7 +118,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
           
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
             <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <span>📚</span> {t.enrolledCourses} ({user.enrolledCourses?.length || 0})
+              <BookOpen size={16} className="text-slate-400" /> {t.enrolledCourses} ({user.enrolledCourses?.length || 0})
             </h4>
             {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
@@ -133,7 +136,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
 
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
             <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <span>❤️</span> {t.savedCourses} ({user.savedCourses?.length || 0})
+              <Heart size={16} className="text-rose-400 fill-rose-400" /> {t.savedCourses} ({user.savedCourses?.length || 0})
             </h4>
             {user.savedCourses && user.savedCourses.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">

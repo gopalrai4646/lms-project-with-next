@@ -10,6 +10,7 @@ import CourseCard from '@/components/common/CourseCard';
 import DonutChart from '@/components/charts/DonutChart';
 import BarChart from '@/components/charts/BarChart';
 import ProgressRing from '@/components/charts/ProgressRing';
+import { ArrowRight, BookOpen, ClipboardList } from 'lucide-react';
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -189,7 +190,7 @@ export default function DashboardPage() {
                 )}
               </p>
               <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
-                {isNewUser ? `${t.hello}, ${firstName}! 👋` : `${t.welcome}, ${firstName}! 👋`}
+                {isNewUser ? `${t.hello}, ${firstName}!` : `${t.welcome}, ${firstName}!`}
               </h1>
               <p className="text-indigo-200 text-lg max-w-lg">{t.subtitle}</p>
             </div>
@@ -206,7 +207,7 @@ export default function DashboardPage() {
                   <p className="font-bold text-white truncate max-w-[180px]">{continueLearning[0].title}</p>
                   <p className="text-xs text-indigo-200">{continueLearning[0].progress}% complete</p>
                 </div>
-                <span className="text-2xl group-hover:translate-x-1 transition-transform">→</span>
+                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={24} />
               </Link>
             )}
           </div>
@@ -283,7 +284,7 @@ export default function DashboardPage() {
                   {course.thumbnail ? (
                     <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <span className="text-3xl">📚</span>
+                    <BookOpen size={32} className="text-slate-300" />
                   )}
                 </div>
                 <div className="p-5 flex-1 flex items-center gap-4 min-w-0">
@@ -327,7 +328,9 @@ export default function DashboardPage() {
                     {plan.image ? (
                       <img src={plan.image} alt={plan.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">📋</div>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ClipboardList size={48} className="text-slate-300" />
+                      </div>
                     )}
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-bold rounded-full shadow-sm">
@@ -339,7 +342,7 @@ export default function DashboardPage() {
                     <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">{plan.name}</h3>
                     <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-1">{plan.description}</p>
                     <span className="text-sm font-bold text-indigo-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
-                      View Plan <span>→</span>
+                      View Plan <ArrowRight size={16} />
                     </span>
                   </div>
                 </div>

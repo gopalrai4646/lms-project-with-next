@@ -8,6 +8,7 @@ import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { enrollCourseRequest } from '@/store/slices/authSlice';
 import { translations } from '@/utils/translations';
+import { ClipboardList, BookOpen, Target, GraduationCap, Video, Play } from 'lucide-react';
 
 export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -91,17 +92,19 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
           {plan.image ? (
              <img src={plan.image} alt={plan.name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl">📋</div>
+            <div className="w-full h-full flex items-center justify-center text-slate-300">
+               <ClipboardList size={80} />
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent"></div>
           <div className="absolute bottom-0 left-0 p-8 md:p-10 w-full">
             <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">{plan.name}</h1>
             <div className="flex flex-wrap items-center gap-4 text-white/90 font-medium">
               <span className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-md text-xs">
-                📚 {plan.courseIds.length} {adminT.courses || 'Courses'}
+                <BookOpen size={12} /> {plan.courseIds.length} {adminT.courses || 'Courses'}
               </span>
               <span className="flex items-center gap-2 bg-indigo-600/80 px-3 py-1 rounded-full backdrop-blur-md text-xs">
-                🎯 Assigned Plan
+                <Target size={12} /> Assigned Plan
               </span>
             </div>
           </div>
@@ -134,7 +137,7 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
                       {index + 1}
                     </div>
                     <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-slate-200/50">
-                      {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : '📚'}
+                      {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : <BookOpen size={24} className="text-slate-300" />}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -147,9 +150,9 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-sm text-slate-500">
-                        <span className="font-medium">🧑‍🏫 {course.instructor}</span>
+                        <span className="font-medium flex items-center gap-1.5"><GraduationCap size={16} /> {course.instructor}</span>
                         <span>•</span>
-                        <span>🎬 {course.videos?.length || 0} Lessons</span>
+                        <span className="flex items-center gap-1.5"><Video size={16} /> {course.videos?.length || 0} Lessons</span>
                       </div>
                     </div>
                   </div>
@@ -160,7 +163,7 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
                         href={`/dashboard/courses/${course.id}?planId=${plan.id}`}
                         className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold transition-all hover:bg-emerald-700 shadow-md shadow-emerald-100 flex items-center justify-center gap-2"
                       >
-                         <span>▶️</span> {adminT.startCourse || t.viewCourse || "Start Course"}
+                         <Play size={18} className="fill-current" /> {adminT.startCourse || t.viewCourse || "Start Course"}
                       </Link>
                     ) : (
                       <button

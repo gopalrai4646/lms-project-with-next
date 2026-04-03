@@ -6,6 +6,7 @@ import { Course } from '@/store/slices/courseSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { enrollCourseRequest, saveCourseRequest } from '@/store/slices/authSlice';
 import { translations } from '@/utils/translations';
+import { Video, Heart, BookOpen, Play } from 'lucide-react';
 
 interface CourseCardProps {
   course: Course;
@@ -80,21 +81,17 @@ export default function CourseCard({ course }: CourseCardProps) {
         {/* Header icons */}
         <div className="flex justify-between items-start z-10 relative">
           <div className="bg-[#2d3142] text-white px-3 py-1.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm">
-            <span>🎬</span> {videoCount} {videoCount === 1 ? 'video' : 'videos'}
+            <Video size={16} /> {videoCount} {videoCount === 1 ? 'video' : 'videos'}
           </div>
           
           <button
             onClick={handleSave}
             className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all ${
-              isSaved ? 'bg-rose-500 text-white' : 'bg-white text-slate-500 hover:text-rose-500'
-            }`}
+              isSaved ? 'bg-rose-500 text-white border-rose-600' : 'bg-white text-slate-500 hover:text-rose-500 border-slate-200'
+            } border`}
             title={isSaved ? t.saved : t.save}
           >
-            {isSaved ? '❤️' : (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-              </svg>
-            )}
+            <Heart size={20} className={isSaved ? 'fill-current' : ''} />
           </button>
         </div>
 
@@ -113,8 +110,8 @@ export default function CourseCard({ course }: CourseCardProps) {
                 className="w-[180px] h-[105px] object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300"
               />
             ) : (
-              <div className="w-[180px] h-[105px] bg-white rounded shadow-md flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300 text-slate-300">
-                📚
+              <div className="w-[180px] h-[105px] bg-white rounded shadow-md flex items-center justify-center group-hover:scale-105 transition-transform duration-300 text-slate-300">
+                <BookOpen size={48} />
               </div>
             )}
           </div>
@@ -157,7 +154,7 @@ export default function CourseCard({ course }: CourseCardProps) {
               className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl font-bold transition-all hover:bg-emerald-700 shadow flex items-center justify-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <span>▶️</span> {t.viewCourse || 'View Course'}
+              <Play size={18} className="fill-current" /> {t.viewCourse || 'View Course'}
             </Link>
           )}
 

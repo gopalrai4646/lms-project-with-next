@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest, deleteTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
 import { translations } from '@/utils/translations';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Plus, Search, List, LayoutGrid, Users, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AdminTrainingPlansPage() {
   const router = useRouter();
@@ -85,7 +86,7 @@ export default function AdminTrainingPlansPage() {
           href="/admin/training-plans/new" 
           className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-2"
         >
-          <span>➕</span> {t.newTrainingPlan || "New Training Plan"}
+          <Plus size={20} /> {t.newTrainingPlan || "New Training Plan"}
         </Link>
       </header>
 
@@ -98,7 +99,7 @@ export default function AdminTrainingPlansPage() {
       {/* Toolbar: Search, Items Per Page, and View toggle */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
         <div className="relative w-full lg:flex-1">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text"
             placeholder={t.searchTrainingPlans || "Search training plans..."}
@@ -129,14 +130,14 @@ export default function AdminTrainingPlansPage() {
               className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
               title={t.listView || "List View"}
             >
-              <span className="text-xl">📋</span> <span className="hidden sm:inline text-sm">{t.listView || "List"}</span>
+              <List size={20} /> <span className="hidden sm:inline text-sm">{t.listView || "List"}</span>
             </button>
             <button
               onClick={() => handleViewToggle('grid')}
               className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
               title={t.gridView || "Grid View"}
             >
-              <span className="text-xl">🧩</span> <span className="hidden sm:inline text-sm">{t.gridView || "Grid"}</span>
+              <LayoutGrid size={20} /> <span className="hidden sm:inline text-sm">{t.gridView || "Grid"}</span>
             </button>
           </div>
         </div>
@@ -149,7 +150,7 @@ export default function AdminTrainingPlansPage() {
         </div>
       ) : paginatedPlans.length === 0 ? (
         <div className="py-16 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
-          <span className="text-5xl opacity-50 grayscale">🔍</span>
+          <Search className="opacity-50 grayscale" size={48} />
           <p className="text-lg text-slate-500 font-semibold">{t.noTrainingPlansFound || "No training plans found"}</p>
         </div>
       ) : viewMode === 'list' ? (
@@ -177,7 +178,7 @@ export default function AdminTrainingPlansPage() {
                           {plan.image ? (
                             <img src={plan.image} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <div className="text-xl">📋</div>
+                            <List size={24} className="text-slate-400" />
                           )}
                         </div>
                         <div>
@@ -188,7 +189,7 @@ export default function AdminTrainingPlansPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/50 shadow-sm inline-flex items-center gap-1.5">
-                         <span className="text-[10px]">👥</span> {plan.courseIds?.length || 0}
+                         <Users size={14} className="opacity-60" /> {plan.courseIds?.length || 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -198,14 +199,14 @@ export default function AdminTrainingPlansPage() {
                           className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all border border-transparent hover:border-amber-100 flex items-center gap-1"
                           title={t.editTrainingPlan || "Edit"}
                         >
-                          ✏️
+                          <Pencil size={18} />
                         </Link>
                         <button 
                           onClick={() => handleDelete(plan.id)}
                           className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1"
                           title={t.deleteTrainingPlan || "Delete"}
                         >
-                          🗑️
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>
@@ -228,11 +229,11 @@ export default function AdminTrainingPlansPage() {
                 {plan.image ? (
                   <img src={plan.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
-                  <span className="transform group-hover:scale-110 transition-transform duration-500 drop-shadow-sm">📋</span>
+                  <List size={48} className="text-slate-300 transform group-hover:scale-110 transition-transform duration-500" />
                 )}
                 <div className="absolute top-3 right-3 shadow-sm">
                   <span className="text-xs font-bold px-3 py-1 bg-white/90 backdrop-blur-md text-indigo-700 rounded-full border border-indigo-100/50 flex items-center gap-1.5">
-                    📚 {plan.courseIds?.length || 0}
+                    <BookOpen size={14} /> {plan.courseIds?.length || 0}
                   </span>
                 </div>
               </div>
@@ -246,14 +247,14 @@ export default function AdminTrainingPlansPage() {
                       href={`/admin/training-plans/edit/${plan.id}`}
                       className="text-sm font-bold text-slate-600 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 px-4 py-2 rounded-xl transition-all border border-slate-200 hover:border-amber-100 flex items-center gap-2"
                     >
-                      ✏️ {t.editTrainingPlan || "Edit"}
+                      <Pencil size={16} /> {t.editTrainingPlan || "Edit"}
                     </Link>
                     <button 
                       onClick={() => handleDelete(plan.id)}
                       className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center"
                       title={t.deleteTrainingPlan || "Delete"}
                     >
-                      🗑️
+                      <Trash2 size={16} />
                     </button>
                 </div>
               </div>
@@ -274,7 +275,7 @@ export default function AdminTrainingPlansPage() {
               disabled={safeCurrentPage === 1 || totalPages === 0}
               className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
             >
-              ⬅️ <span className="hidden sm:inline">{t.prev || "Prev"}</span>
+              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev || "Prev"}</span>
             </button>
             
             <div className="flex items-center gap-1.5">
@@ -320,7 +321,7 @@ export default function AdminTrainingPlansPage() {
               disabled={safeCurrentPage === totalPages || totalPages === 0}
               className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
             >
-               <span className="hidden sm:inline">{t.next || "Next"}</span> ➡️
+               <span className="hidden sm:inline">{t.next || "Next"}</span> <ChevronRight size={18} />
             </button>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { updateCourseRequest, fetchCoursesRequest } from '@/store/slices/courseS
 import { VideoItem } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { translations } from '@/utils/translations';
+import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video } from 'lucide-react';
 
 interface VideoEntry {
   title: string;
@@ -252,12 +253,12 @@ export default function EditCoursePage() {
                   <>
                     <img src={thumbnailPreview} alt="Thumbnail preview" className="absolute inset-0 w-full h-full object-cover z-0" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <span className="text-white font-semibold flex items-center gap-2"><span>✏️</span> Change Thumbnail</span>
+                      <span className="text-white font-semibold flex items-center gap-2"><Pencil size={18} /> Change Thumbnail</span>
                     </div>
                   </>
                 ) : (
                   <div className="text-center z-10">
-                    <span className="text-4xl block mb-2">🖼️</span>
+                    <ImageIcon className="text-slate-300 block mx-auto mb-2" size={48} />
                     <p className="text-sm font-medium text-slate-600">Click to upload thumbnail</p>
                     <p className="text-xs text-slate-400 mt-1">Recommended size: 1280x720 (16:9)</p>
                   </div>
@@ -272,7 +273,7 @@ export default function EditCoursePage() {
               <label className="text-sm font-semibold text-slate-700">{t.courseVideos}</label>
               <button type="button" onClick={addVideoEntry}
                 className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-bold rounded-xl hover:bg-indigo-100 transition-all flex items-center gap-1">
-                <span>+</span> {t.addVideo}
+                <Plus size={16} /> {t.addVideo}
               </button>
             </div>
 
@@ -287,12 +288,12 @@ export default function EditCoursePage() {
                       className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none bg-white text-slate-900 placeholder:text-slate-400" />
                     <div className="flex items-center gap-1">
                       <button type="button" onClick={() => moveVideo(index, 'up')} disabled={index === 0}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveUp}>↑</button>
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveUp}><ArrowUp size={16} /></button>
                       <button type="button" onClick={() => moveVideo(index, 'down')} disabled={index === videoEntries.length - 1}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveDown}>↓</button>
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveDown}><ArrowDown size={16} /></button>
                       {videoEntries.length > 1 && (
                         <button type="button" onClick={() => removeVideoEntry(index)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-white" title={t.remove}>✕</button>
+                          className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-white" title={t.remove}><X size={16} /></button>
                       )}
                     </div>
                   </div>
@@ -302,11 +303,11 @@ export default function EditCoursePage() {
                       onChange={(e) => handleFileChange(index, e)} accept="video/*" className="hidden" />
                     <p className="text-sm font-medium text-slate-600">
                       {entry.uploading ? (
-                        <span className="text-indigo-600 animate-pulse">⏳ {t.uploadingEllipsis}</span>
+                        <span className="text-indigo-600 flex items-center justify-center gap-2"><Loader2 size={16} className="animate-spin" /> {t.uploadingEllipsis}</span>
                       ) : entry.isExisting ? (
-                        <span className="text-emerald-600">✅ {t.videoAttached}</span>
+                        <span className="text-emerald-600 flex items-center justify-center gap-2"><CheckCircle2 size={16} /> {t.videoAttached}</span>
                       ) : entry.file ? (
-                        <span>🎥 {entry.file.name}</span>
+                        <span className="flex items-center justify-center gap-2"><Video size={16} /> {entry.file.name}</span>
                       ) : (
                         <span className="text-slate-400">{t.clickToSelectVideo}</span>
                       )}
