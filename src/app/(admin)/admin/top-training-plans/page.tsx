@@ -86,8 +86,8 @@ export default function TopTrainingPlansPage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm min-h-[450px]">
-          <div className="h-[400px] w-full">
+        <div className="lg:col-span-3 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
@@ -112,14 +112,16 @@ export default function TopTrainingPlansPage() {
                     borderRadius: '16px', 
                     border: 'none', 
                     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                    padding: '16px'
+                    padding: '12px 16px'
                   }}
+                  labelStyle={{ color: '#0f172a', fontWeight: '800', marginBottom: '4px', fontSize: '14px' }}
+                  itemStyle={{ color: '#8b5cf6', fontWeight: '600', fontSize: '12px' }}
                   formatter={(value: any) => [`${value} assignments`, 'Engagement']}
                 />
                 <Bar 
                   dataKey="assignments" 
                   radius={[8, 8, 0, 0]} 
-                  barSize={60}
+                  barSize={45}
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
@@ -131,17 +133,6 @@ export default function TopTrainingPlansPage() {
         </div>
 
         <div className="space-y-6">
-            <div className="bg-violet-600 rounded-3xl p-6 text-white shadow-lg shadow-violet-100">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 text-white">
-                    <TrendingUp size={20} />
-                </div>
-                <h3 className="text-lg font-bold mb-1">Growth Index</h3>
-                <p className="text-violet-100 text-sm opacity-80 mb-4">Training plans drive 40% higher retention than single course enrollments.</p>
-                <div className="text-3xl font-black">
-                    {chartData[0]?.assignments || 0} <span className="text-sm font-bold opacity-60">ACTIVE USERS</span>
-                </div>
-            </div>
-
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Leaderboard</h4>
                 <div className="space-y-4">

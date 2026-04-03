@@ -347,8 +347,8 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            <div className="flex-1 min-h-[240px] mt-4 flex items-end">
-               <AreaChart data={reportStats.dauData} height={260} />
+            <div className="flex-1 min-h-[180px] mt-4 flex items-end">
+               <AreaChart data={reportStats.dauData} height={200} />
             </div>
           </div>
 
