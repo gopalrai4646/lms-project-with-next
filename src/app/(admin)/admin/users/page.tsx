@@ -42,6 +42,9 @@ export default function AdminUsersPage() {
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
+      // Exclude admin users from the user management list
+      if (user.role === 'admin') return false;
+
       const matchesSearch = 
         (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));

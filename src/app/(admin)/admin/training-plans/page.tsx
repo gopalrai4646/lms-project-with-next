@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest, deleteTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
 import { translations } from '@/utils/translations';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function AdminTrainingPlansPage() {
   const router = useRouter();
@@ -15,15 +16,63 @@ export default function AdminTrainingPlansPage() {
   // Fallback to "en" if translations for trainingPlans are missing during dev
   const t = translations[language]?.admin || translations['en'].admin;
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
     dispatch(fetchTrainingPlansRequest());
+    const savedView = localStorage.getItem('adminTrainingPlanViewMode');
+    if (savedView === 'list' || savedView === 'grid') {
+      setViewMode(savedView);
+    }
   }, [dispatch]);
+
+  const handleViewToggle = (mode: 'list' | 'grid') => {
+    setViewMode(mode);
+    localStorage.setItem('adminTrainingPlanViewMode', mode);
+  };
 
   const handleDelete = (id: string) => {
     if (window.confirm(t.deleteTrainingPlanConfirm || "Are you sure you want to delete this training plan?")) {
       dispatch(deleteTrainingPlanRequest(id));
     }
   };
+
+  // 1. Filter training plans
+  const filteredPlans = useMemo(() => {
+    let result = trainingPlans;
+
+    if (debouncedSearchQuery) {
+      const lowerQuery = debouncedSearchQuery.toLowerCase();
+      result = result.filter((plan) => 
+        plan.name.toLowerCase().includes(lowerQuery) ||
+        (plan.description && plan.description.toLowerCase().includes(lowerQuery))
+      );
+    }
+
+    return result;
+  }, [trainingPlans, debouncedSearchQuery]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, itemsPerPage]);
+
+  // 2. Pagination logic
+  const totalItems = filteredPlans.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedPlans = filteredPlans.slice(startIndex, endIndex);
+
+  if (!isMounted) return null; // Avoid hydration mismatch for localStorage view
 
   return (
     <div className="space-y-8">
@@ -46,88 +95,236 @@ export default function AdminTrainingPlansPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left min-w-[800px]">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo || "Training Plan Info"}</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses || "Courses"}</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions || "Actions"}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading && trainingPlans.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-slate-400 font-medium italic">
-                    {t.loadingTrainingPlans || "Loading training plans..."}
-                  </td>
-                </tr>
-              ) : trainingPlans.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-slate-400 font-medium italic">
-                    {t.noTrainingPlansFound || "No training plans found. Create one!"}
-                  </td>
-                </tr>
-              ) : (
-                trainingPlans.map((plan) => (
-                    <tr 
-                      key={plan.id} 
-                      className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                      onClick={() => router.push(`/training-plans/${plan.id}`)}
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0">
-                            {plan.image ? (
-                              <img src={plan.image} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xl">📋</div>
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-900 leading-tight">{plan.name}</p>
-                            <p className="text-xs text-slate-400 mt-0.5 max-w-md truncate">{plan.description}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
-                          {plan.courseIds?.length || 0}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                          <Link 
-                            href={`/training-plans/${plan.id}`}
-                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                            title={t.viewDetails || "View"}
-                          >
-                            👁️
-                          </Link>
-                          <Link 
-                            href={`/admin/training-plans/edit/${plan.id}`}
-                            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                            title={t.editTrainingPlan || "Edit"}
-                          >
-                            ✏️
-                          </Link>
-                          <button 
-                            onClick={() => handleDelete(plan.id)}
-                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                            title={t.deleteTrainingPlan || "Delete"}
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Toolbar: Search, Items Per Page, and View toggle */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+        <div className="relative w-full lg:flex-1">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+          <input 
+            type="text"
+            placeholder={t.searchTrainingPlans || "Search training plans..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700"
+          />
+        </div>
+        
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full lg:w-auto">
+          <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0">
+            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage || "Items per page"}:</span>
+            <select 
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className="px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer"
+            >
+              <option value={8}>8</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+              <option value={48}>48</option>
+            </select>
+          </div>
+
+          <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0">
+            <button
+              onClick={() => handleViewToggle('list')}
+              className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+              title={t.listView || "List View"}
+            >
+              <span className="text-xl">📋</span> <span className="hidden sm:inline text-sm">{t.listView || "List"}</span>
+            </button>
+            <button
+              onClick={() => handleViewToggle('grid')}
+              className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+              title={t.gridView || "Grid View"}
+            >
+              <span className="text-xl">🧩</span> <span className="hidden sm:inline text-sm">{t.gridView || "Grid"}</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {loading && trainingPlans.length === 0 ? (
+        <div className="py-12 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3">
+          <div className="w-8 h-8 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
+          {t.loadingTrainingPlans || "Loading training plans..."}
+        </div>
+      ) : paginatedPlans.length === 0 ? (
+        <div className="py-16 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
+          <span className="text-5xl opacity-50 grayscale">🔍</span>
+          <p className="text-lg text-slate-500 font-semibold">{t.noTrainingPlansFound || "No training plans found"}</p>
+        </div>
+      ) : viewMode === 'list' ? (
+        /* List View */
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden text-wrap">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left min-w-[800px]">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo || "Training Plan Info"}</th>
+                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses || "Courses"}</th>
+                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions || "Actions"}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {paginatedPlans.map((plan) => (
+                  <tr 
+                    key={plan.id} 
+                    className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                    onClick={() => router.push(`/training-plans/${plan.id}`)}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200/50 flex items-center justify-center">
+                          {plan.image ? (
+                            <img src={plan.image} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="text-xl">📋</div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">{plan.name}</p>
+                          <p className="text-xs text-slate-400 mt-1 max-w-md truncate">{plan.description}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/50 shadow-sm inline-flex items-center gap-1.5">
+                         <span className="text-[10px]">👥</span> {plan.courseIds?.length || 0}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <Link 
+                          href={`/admin/training-plans/edit/${plan.id}`}
+                          className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all border border-transparent hover:border-amber-100 flex items-center gap-1"
+                          title={t.editTrainingPlan || "Edit"}
+                        >
+                          ✏️
+                        </Link>
+                        <button 
+                          onClick={() => handleDelete(plan.id)}
+                          className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1"
+                          title={t.deleteTrainingPlan || "Delete"}
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        /* Grid View */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {paginatedPlans.map((plan) => (
+            <div 
+              key={plan.id} 
+              className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 cursor-pointer"
+              onClick={() => router.push(`/training-plans/${plan.id}`)}
+            >
+              <div className="aspect-video bg-slate-50 relative overflow-hidden flex items-center justify-center text-5xl">
+                {plan.image ? (
+                  <img src={plan.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <span className="transform group-hover:scale-110 transition-transform duration-500 drop-shadow-sm">📋</span>
+                )}
+                <div className="absolute top-3 right-3 shadow-sm">
+                  <span className="text-xs font-bold px-3 py-1 bg-white/90 backdrop-blur-md text-indigo-700 rounded-full border border-indigo-100/50 flex items-center gap-1.5">
+                    📚 {plan.courseIds?.length || 0}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="font-bold text-xl text-slate-900 line-clamp-1 leading-tight mb-2 group-hover:text-indigo-600 transition-colors">{plan.name}</h3>
+                <p className="text-sm text-slate-500 line-clamp-2 mb-6 flex-grow">{plan.description}</p>
+                
+                <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+                    <Link 
+                      href={`/admin/training-plans/edit/${plan.id}`}
+                      className="text-sm font-bold text-slate-600 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 px-4 py-2 rounded-xl transition-all border border-slate-200 hover:border-amber-100 flex items-center gap-2"
+                    >
+                      ✏️ {t.editTrainingPlan || "Edit"}
+                    </Link>
+                    <button 
+                      onClick={() => handleDelete(plan.id)}
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center"
+                      title={t.deleteTrainingPlan || "Delete"}
+                    >
+                      🗑️
+                    </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 0 && totalItems > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 sm:px-6 rounded-3xl shadow-sm border border-slate-100 mt-6">
+          <p className="text-sm text-slate-500 font-medium">
+            {t.showing || "Showing"} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to || "to"} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{endIndex}</span> {t.of || "of"} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems}</span>
+          </p>
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto justify-center">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={safeCurrentPage === 1 || totalPages === 0}
+              className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+            >
+              ⬅️ <span className="hidden sm:inline">{t.prev || "Prev"}</span>
+            </button>
+            
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
+                .map((page, index, array) => {
+                  if (index > 0 && page - array[index - 1] > 1) {
+                    return (
+                      <div key={`ellipsis-${page}`} className="flex items-center gap-1.5">
+                        <span className="w-8 text-center text-slate-400 tracking-widest">...</span>
+                        <button
+                          onClick={() => setCurrentPage(page)}
+                          className={`min-w-[40px] h-10 px-2 rounded-xl font-bold transition-all active:scale-95 ${
+                            safeCurrentPage === page 
+                              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-700' 
+                              : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-[40px] h-10 px-2 rounded-xl font-bold transition-all active:scale-95 ${
+                        safeCurrentPage === page 
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-700' 
+                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+              })}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={safeCurrentPage === totalPages || totalPages === 0}
+              className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+            >
+               <span className="hidden sm:inline">{t.next || "Next"}</span> ➡️
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

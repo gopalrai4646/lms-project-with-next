@@ -114,24 +114,6 @@ export default function Sidebar() {
           })}
         </div>
 
-        {/* User Profile Section at bottom */}
-        <div className={`p-4 border-t border-slate-100 bg-slate-50/50 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white border border-slate-200 shrink-0 shadow-sm transition-transform hover:scale-110">
-            {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName || "User"} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 font-bold text-sm">
-                {(user.displayName || user.email || "U")[0].toUpperCase()}
-              </div>
-            )}
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-slate-800 truncate">{user.displayName || "User"}</p>
-              <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 truncate">{role}</p>
-            </div>
-          )}
-        </div>
       </aside>
     </>
   );
