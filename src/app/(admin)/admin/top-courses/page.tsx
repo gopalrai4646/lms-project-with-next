@@ -81,11 +81,15 @@ export default function TopCoursesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
-          <div className="h-[300px] w-full">
+          <div 
+            className="h-[250px] w-full transition-all duration-700 mx-auto"
+            style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                barCategoryGap={16}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
@@ -94,11 +98,13 @@ export default function TopCoursesPage() {
                   tickLine={false} 
                   tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
                   dy={10}
+                  padding={{ left: 12, right: 12 }}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
                   tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                  allowDecimals={false}
                 />
                 <Tooltip 
                   cursor={{ fill: '#f8fafc' }}
@@ -117,8 +123,8 @@ export default function TopCoursesPage() {
                 />
                 <Bar 
                   dataKey="enrollments" 
-                  radius={[8, 8, 0, 0]} 
-                  barSize={45}
+                  radius={[5, 5, 0, 0]} 
+                  barSize={24}
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />

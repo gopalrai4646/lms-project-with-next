@@ -7,7 +7,7 @@ import { translations } from '@/utils/translations';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { assignTrainingPlanRequest } from '@/store/slices/userSlice';
 import { useEffect, useState } from 'react';
-import { X, ClipboardList, BookOpen, Heart, Plus } from 'lucide-react';
+import { X, ClipboardList, BookOpen, Heart, Plus, Phone, Calendar } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -53,17 +53,43 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
             <X size={20} />
           </button>
         </div>
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold">
-              {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl font-bold shrink-0 shadow-sm border border-indigo-100/50 overflow-hidden">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+              )}
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">{user.name || t.noNameProvided}</h3>
-              <p className="text-slate-500 font-medium">{user.email}</p>
-              <span className={`inline-block mt-2 px-3 py-1 text-xs font-bold rounded-full ${user.role === 'admin' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-600'}`}>
-                {user.role.toUpperCase()}
-              </span>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-slate-900 leading-tight">{user.name || t.noNameProvided}</h3>
+              <p className="text-slate-500 font-medium text-sm mt-0.5">{user.email}</p>
+              
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
+                <span className={`px-2.5 py-0.5 text-[10px] font-black tracking-widest uppercase rounded-md border ${user.role === 'admin' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                  {user.role}
+                </span>
+                
+                {user.phoneNumber && (
+                  <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
+                    <Phone size={12} className="text-slate-400" />
+                    {user.phoneNumber}
+                  </div>
+                )}
+                
+                {user.createdAt && (
+                  <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
+                    <Calendar size={12} className="text-slate-400" />
+                    <span className="text-slate-400 font-medium mr-0.5">{t.joinDate}:</span>
+                    {new Date(user.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'fr-FR', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

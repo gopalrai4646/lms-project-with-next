@@ -92,36 +92,67 @@ export default function SettingsPage() {
   }, [loading, error, passError]);
 
   return (
-    <div className="max-w-2xl mx-auto py-8 space-y-8">
-      <header>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{ts.accountSettings}</h1>
-        <p className="text-slate-500">{ts.manageProfile}</p>
+    <div className="max-w-xl mx-auto py-8">
+      <header className="mb-6 px-2">
+        <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{ts.accountSettings}</h1>
+        <p className="text-sm text-slate-500">{ts.manageProfile}</p>
       </header>
 
-      {/* Profile Information */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">{ts.profileInfo}</h2>
-          
-          {error && !passError && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-xl">
-              {error}
-            </div>
-          )}
+      <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          setPassError(null);
+          setPassSuccess(false);
 
-          <form onSubmit={handleProfileSubmit} className="space-y-6">
+          const hasProfileChanges = name !== user?.displayName || phoneNumber !== (user?.phoneNumber || '') || photoFile;
+          const hasPasswordChanges = newPassword !== '' || confirmPassword !== '';
+
+          // 1. Handle Profile Update
+          if (hasProfileChanges) {
+            handleProfileSubmit(e);
+          }
+
+          // 2. Handle Password Update
+          if (hasPasswordChanges) {
+            if (newPassword !== confirmPassword) {
+              setPassError(t.passwordMismatch);
+              return;
+            }
+            if (newPassword.length < 6) {
+              setPassError(t.passwordMinLength);
+              return;
+            }
+            dispatch(updatePasswordRequest({ password: newPassword }));
+          }
+        }} className="p-6 sm:p-8">
+          
+          {/* Profile Information Section */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <UserIcon size={16} />
+              </div>
+              <h2 className="text-lg font-bold text-slate-900">{ts.profileInfo}</h2>
+            </div>
+            
+            {error && !passError && (
+              <div className="p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs rounded-r-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                {error}
+              </div>
+            )}
+
             {/* Photo Upload Area */}
-            <div className="flex flex-col items-center sm:flex-row sm:gap-8 mb-8">
-              <div className="relative group cursor-pointer" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
-                <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-400 group-hover:bg-slate-50">
+            <div className="flex items-center gap-6 p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50 transition-colors hover:bg-slate-50">
+              <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
+                <div className="w-20 h-20 rounded-full bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-400 group-hover:shadow-lg group-hover:shadow-indigo-100/50">
                   {photoPreview ? (
-                    <img src={photoPreview} alt="Profile" className="w-full h-full object-cover" />
+                    <img src={photoPreview} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <UserIcon className="text-slate-400" size={32} />
+                    <UserIcon className="text-slate-300" size={32} />
                   )}
                 </div>
-                <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="text-white" size={24} />
+                <div className="absolute inset-0 rounded-full bg-indigo-600/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
+                  <Camera className="text-white" size={18} />
                 </div>
                 <input 
                   id="settings-photo-upload"
@@ -131,115 +162,116 @@ export default function SettingsPage() {
                   onChange={handlePhotoChange}
                 />
               </div>
-              <div className="text-center sm:text-left mt-4 sm:mt-0">
-                <h3 className="text-sm font-bold text-slate-800">{ts.profilePhoto || "Profile Photo"}</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Click to upload a new profile picture.<br />
-                  JPG, PNG or GIF. Max 5MB.
+              <div className="max-w-[180px]">
+                <h3 className="text-sm font-bold text-slate-800 mb-0.5">{ts.profilePhoto || "Photo"}</h3>
+                <p className="text-[11px] text-slate-500 leading-tight">
+                  Click to update your avatar. PNG or JPG supported.
                 </p>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.fullName}</label>
-              <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder="Your name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{ts.phoneNumber || "Phone Number"}</label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{t.fullName}</label>
                 <input 
-                  type="tel" 
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                  placeholder="+1 234 567 890"
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50/30 text-slate-900 placeholder:text-slate-400 font-medium text-sm"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{ts.phoneNumber || "Phone Number"}</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input 
+                    type="tel" 
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50/30 text-slate-900 placeholder:text-slate-400 font-medium text-sm"
+                    placeholder="+1 234 567 890"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{t.email}</label>
+                <input 
+                  type="email" 
+                  value={user?.email || ''}
+                  disabled
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-none font-medium opacity-70 text-sm"
+                />
+                <p className="mt-1.5 text-[11px] text-slate-400 flex items-center gap-1.5 ml-1">
+                  {ts.emailCannotChange}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Security Separator */}
+          <div className="my-6 border-t border-slate-100 pt-6 space-y-4">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-slate-600 rounded-sm relative after:content-[''] after:absolute after:top-[-3px] after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:border-2 after:border-slate-600 after:rounded-t-full"></div>
+              </div>
+              <h2 className="text-lg font-bold text-slate-900">{t.changePassword}</h2>
+            </div>
+            
+            {(passError || (error && passError)) && (
+              <div className="p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs rounded-r-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                {passError || error}
+              </div>
+            )}
+
+            {passSuccess && (
+              <div className="p-3 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 text-xs rounded-r-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                {t.passwordUpdated}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{t.newPassword}</label>
+                <input 
+                  type="password" 
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50/30 text-slate-900 font-medium text-sm"
+                  placeholder="Leave blank to keep current"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{t.confirmPassword}</label>
+                <input 
+                  type="password" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all bg-slate-50/30 text-slate-900 font-medium text-sm"
+                  placeholder="Confirm new password"
                 />
               </div>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.email}</label>
-              <input 
-                type="email" 
-                value={user?.email || ''}
-                disabled
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-none"
-              />
-              <p className="mt-2 text-xs text-slate-400 italic">{ts.emailCannotChange}</p>
-            </div>
-
-            <div className="pt-4">
-              <button 
-                type="submit"
-                disabled={loading || uploading || (name === user?.displayName && phoneNumber === (user?.phoneNumber || '') && !photoFile)}
-                className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {uploading ? (ts.uploadingPhoto || "Uploading photo...") : (loading ? ts.saving : ts.saveChanges)}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Change Password */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">{t.changePassword}</h2>
-          
-          {(passError || (error && passError)) && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-xl">
-              {passError || error}
-            </div>
-          )}
-
-          {passSuccess && (
-            <div className="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 text-sm rounded-r-xl">
-              {t.passwordUpdated}
-            </div>
-          )}
-
-          <form onSubmit={handlePasswordSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.newPassword}</label>
-              <input 
-                type="password" 
-                required
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.confirmPassword}</label>
-              <input 
-                type="password" 
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
-              />
-            </div>
-
-            <div className="pt-4">
-              <button 
-                type="submit"
-                disabled={loading || !newPassword || !confirmPassword}
-                className="px-8 py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-100 hover:bg-slate-900 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading && newPassword ? ts.updating : t.changePassword}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="pt-6 flex justify-end">
+            <button 
+              type="submit"
+              disabled={loading || uploading || (name === user?.displayName && phoneNumber === (user?.phoneNumber || '') && !photoFile && !newPassword && !confirmPassword)}
+              className="w-full sm:w-auto px-10 py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:shadow-indigo-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group text-sm"
+            >
+              {(loading || uploading) ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  {uploading ? "Uploading..." : ts.saving}
+                </>
+              ) : ts.saveChanges}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

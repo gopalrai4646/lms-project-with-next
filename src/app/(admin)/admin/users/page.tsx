@@ -194,8 +194,12 @@ export default function AdminUsersPage() {
                   <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-xl flex items-center justify-center shrink-0 border border-indigo-100/50 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                          {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-xl flex items-center justify-center shrink-0 border border-indigo-100/50 shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                          {user.photoURL ? (
+                            <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+                          )}
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors text-base">{user.name || t.noName}</p>
@@ -260,8 +264,12 @@ export default function AdminUsersPage() {
                 </span>
               </div>
               <div className="flex flex-col items-center text-center mt-4 mb-6 relative">
-                <div className="w-20 h-20 rounded-[1.5rem] bg-indigo-50 text-indigo-600 font-bold text-3xl flex items-center justify-center border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500 mb-4 z-10 relative">
-                  {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                <div className="w-20 h-20 rounded-[1.5rem] bg-indigo-50 text-indigo-600 font-bold text-3xl flex items-center justify-center border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500 mb-4 z-10 relative overflow-hidden">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="absolute top-8 w-full h-8 bg-gradient-to-b from-indigo-50/50 to-transparent blur-xl"></div>
                 

@@ -8,6 +8,7 @@ import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { translations } from '@/utils/translations';
 import AreaChart from '@/components/charts/AreaChart';
 import DonutChart from '@/components/charts/DonutChart';
+import MiniBarChart from '@/components/charts/MiniBarChart';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { 
@@ -90,6 +91,10 @@ export default function AdminDashboard() {
     });
     const sortedPlans = [...trainingPlans].sort((a, b) => (planCounts[b.id] || 0) - (planCounts[a.id] || 0));
     const topPlanName = sortedPlans[0]?.name || 'None';
+    const topPlansData = sortedPlans.slice(0, 5).map(p => ({
+      name: p.name,
+      value: planCounts[p.id] || 0
+    }));
 
     // 6. Top Courses (Learner enrolled count only)
     const sortedCourses = [...courses].sort((a, b) => {
@@ -98,6 +103,10 @@ export default function AdminDashboard() {
         return countB - countA;
     });
     const topCourseName = sortedCourses[0]?.title || 'None';
+    const topCoursesData = sortedCourses.slice(0, 5).map(c => ({
+      name: c.title,
+      value: c.enrolledUsers?.filter(id => learnerIds.has(id)).length || 0
+    }));
 
     return {
       totalUsers,
@@ -105,7 +114,9 @@ export default function AdminDashboard() {
       totalPlans,
       totalRevenue,
       topPlanName,
-      topCourseName
+      topCourseName,
+      topPlansData,
+      topCoursesData
     };
   }, [users, courses, trainingPlans]);
 
@@ -272,7 +283,7 @@ export default function AdminDashboard() {
           href="/admin/users"
           title="Total Users"
           value={dashboardStats.totalUsers.toLocaleString()}
-          subtext="+5.2% from last month"
+          subtext="From starting time"
           icon={<Users size={24} />}
           color="indigo"
         />
@@ -307,6 +318,7 @@ export default function AdminDashboard() {
           subtext="Most assigned path"
           icon={<GraduationCap size={24} />}
           color="violet"
+          chartData={dashboardStats.topPlansData}
         />
         <AnalyticsCard 
           href="/admin/top-courses"
@@ -315,6 +327,7 @@ export default function AdminDashboard() {
           subtext="Highest enrollment"
           icon={<BarChart2 size={24} />}
           color="sky"
+          chartData={dashboardStats.topCoursesData}
         />
       </div>
 
@@ -471,9 +484,10 @@ interface AnalyticsCardProps {
   subtext: string;
   icon: React.ReactNode;
   color: 'indigo' | 'emerald' | 'amber' | 'rose' | 'violet' | 'sky';
+  chartData?: { name: string, value: number }[];
 }
 
-function AnalyticsCard({ href, title, value, subtext, icon, color }: AnalyticsCardProps) {
+function AnalyticsCard({ href, title, value, subtext, icon, color, chartData }: AnalyticsCardProps) {
   const colorMap = {
     indigo: 'bg-indigo-50 text-indigo-600',
     emerald: 'bg-emerald-50 text-emerald-600',
@@ -501,7 +515,14 @@ function AnalyticsCard({ href, title, value, subtext, icon, color }: AnalyticsCa
         <div className="text-2xl font-black text-slate-900 truncate" title={String(value)}>
           {value}
         </div>
-        <p className="text-xs text-slate-400 mt-2 font-medium flex items-center gap-1">
+        
+        {chartData && chartData.length > 0 && (
+          <div className="mt-1">
+             <MiniBarChart data={chartData} color={color === 'violet' ? '#8b5cf6' : color === 'sky' ? '#0ea5e9' : '#4f46e5'} />
+          </div>
+        )}
+        
+        <p className={`text-xs text-slate-400 font-medium flex items-center gap-1 ${chartData ? 'mt-3' : 'mt-2'}`}>
           {subtext}
         </p>
       </div>

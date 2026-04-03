@@ -193,6 +193,23 @@ function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): an
       console.log(`Saga: Successfully deleted ${progressSnap.size} progress records`);
     }
 
+    // 6. Cleanup Training Plans
+    console.log(`Saga: Cleaning up training plans for course: ${id}`);
+    const plansRef = collection(db, 'trainingPlans');
+    const plansQuery = query(plansRef, where('courseIds', 'array-contains', id));
+    const plansSnap: any = yield call(getDocs, plansQuery);
+
+    if (!plansSnap.empty) {
+      const plansBatch = writeBatch(db);
+      plansSnap.forEach((planDoc: any) => {
+        plansBatch.update(planDoc.ref, {
+          courseIds: arrayRemove(id)
+        });
+      });
+      yield call([plansBatch, plansBatch.commit]);
+      console.log(`Saga: Successfully removed course ${id} from ${plansSnap.size} training plans`);
+    }
+
     yield put(deleteCourseSuccess(id));
 
   } catch (error: any) {

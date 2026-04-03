@@ -8,7 +8,7 @@ import { fetchProgressRequest, updateProgressRequest } from '@/store/slices/prog
 import { translations } from '@/utils/translations';
 import Link from 'next/link';
 import CourseRatingModal from '@/components/common/CourseRatingModal';
-import { Star } from 'lucide-react';
+import { Star, Lock, Award, Inbox, Video as VideoIcon, Check, Play } from 'lucide-react';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '0:00';
@@ -151,7 +151,9 @@ export default function LessonPage() {
     return (
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-12 text-center">
-          <p className="text-2xl mb-2">🔒</p>
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-600">
+             <Lock size={40} />
+          </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">{t.enrollmentRequired}</h2>
           <p className="text-slate-600 mb-6">{t.enrollmentMessage}</p>
           <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all">
@@ -183,14 +185,18 @@ export default function LessonPage() {
             />
           </div>
           {coursePercentage === 100 && (
-            <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1">🎉 {t.courseCompleted}</p>
+            <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1.5 uppercase tracking-wider">
+              <Award size={14} /> {t.courseCompleted}
+            </p>
           )}
         </div>
 
       {videoList.length === 0 ? (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center">
-          <p className="text-4xl mb-3">📭</p>
-          <p className="text-slate-500 font-medium">{t.noVideosYet}</p>
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center text-slate-400">
+          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+             <Inbox size={40} />
+          </div>
+          <p className="font-medium">{t.noVideosYet}</p>
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-8 mt-10">
@@ -212,8 +218,10 @@ export default function LessonPage() {
                 </video>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white/50 text-center p-8">
-                  <div className="max-w-xs">
-                    <p className="text-4xl mb-4">📹</p>
+                  <div className="max-w-xs flex flex-col items-center">
+                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                       <VideoIcon size={40} className="text-white/20" />
+                    </div>
                     <p className="text-lg font-bold">{t.selectVideo}</p>
                   </div>
                 </div>
@@ -249,7 +257,7 @@ export default function LessonPage() {
                       <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                         completed ? 'bg-emerald-500 text-white' : isCurrent ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
                       }`}>
-                        {completed ? '✓' : isCurrent ? '▶' : index + 1}
+                        {completed ? <Check size={14} strokeWidth={3} /> : isCurrent ? <Play size={10} className="fill-current ml-0.5" /> : index + 1}
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm font-semibold truncate ${isCurrent ? 'text-indigo-700' : 'text-slate-700'}`}>

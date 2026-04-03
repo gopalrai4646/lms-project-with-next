@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { translations } from '@/utils/translations';
+import { ClipboardList, ArrowRight } from 'lucide-react';
 
 export default function UserTrainingPlansPage() {
   const dispatch = useAppDispatch();
@@ -48,7 +49,9 @@ export default function UserTrainingPlansPage() {
                   {plan.image ? (
                     <img src={plan.image} alt={plan.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">📋</div>
+                    <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
+                      <ClipboardList size={48} />
+                    </div>
                   )}
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-bold rounded-full shadow-sm">
@@ -60,8 +63,8 @@ export default function UserTrainingPlansPage() {
                   <h3 className="font-bold text-xl text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">{plan.name}</h3>
                   <p className="text-slate-500 text-sm mb-6 line-clamp-3 flex-1">{plan.description}</p>
                   
-                  <span className="text-sm font-bold text-indigo-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
-                    View Plan <span>→</span>
+                  <span className="text-sm font-bold text-indigo-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto lowercase">
+                    view plan <ArrowRight size={16} />
                   </span>
                 </div>
               </div>
@@ -70,7 +73,9 @@ export default function UserTrainingPlansPage() {
         </div>
       ) : (
         <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200 shadow-sm">
-          <div className="text-5xl mb-4">📋</div>
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+             <ClipboardList size={40} />
+          </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">{t.noTrainingPlansAssigned || 'No training plans assigned'}</h3>
           <p className="text-slate-500 max-w-md mx-auto">
             You don't have any training plans assigned yet. When an administrator assigns a learning path to you, it will appear here.

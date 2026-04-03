@@ -8,6 +8,19 @@ import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import CourseCard from '@/components/common/CourseCard';
 import ProgressRing from '@/components/charts/ProgressRing';
+import { 
+  Search, 
+  LayoutGrid, 
+  List, 
+  BookOpen, 
+  CheckCircle2, 
+  RotateCw, 
+  PauseCircle, 
+  GraduationCap,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 
 type TabFilter = 'all' | 'in-progress' | 'completed';
 
@@ -24,6 +37,8 @@ export default function MyCoursesPage() {
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());
@@ -106,6 +121,20 @@ export default function MyCoursesPage() {
 
     return filtered;
   }, [enrolledCourses, activeTab, searchQuery, progress]);
+  
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchQuery, itemsPerPage]);
+  
+  // Pagination logic
+  const totalItems = filteredCourses.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
 
   // Stat counts  
   const completedCount = enrolledCourses.filter(c => getCourseProgress(c) >= 100).length;
@@ -153,7 +182,9 @@ export default function MyCoursesPage() {
 
         {/* Search */}
         <div className="relative flex-1 w-full md:w-auto">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <Search size={18} />
+          </span>
           <input
             type="text"
             value={searchQuery}
@@ -164,19 +195,32 @@ export default function MyCoursesPage() {
         </div>
 
         {/* View Toggle */}
-        <div className="flex gap-1 bg-slate-100 rounded-xl p-1 shrink-0">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-          >
-            🧩
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-          >
-            📋
-          </button>
+        <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0 space-x-4">
+          <div className="flex items-center gap-2 whitespace-nowrap bg-white/50 px-2 rounded-lg border border-slate-200/50">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.itemsPerPage || 'Items'}:</span>
+            <select 
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className="bg-transparent border-none focus:ring-0 text-xs font-bold text-indigo-600 cursor-pointer outline-none"
+            >
+              {[8, 12, 16, 20].map(val => <option key={val} value={val}>{val}</option>)}
+            </select>
+          </div>
+
+          <div className="flex bg-slate-200/50 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+            >
+              <List size={18} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -187,10 +231,10 @@ export default function MyCoursesPage() {
             <div key={i} className="bg-slate-50 rounded-3xl h-80 animate-pulse border border-slate-100"></div>
           ))}
         </div>
-      ) : filteredCourses.length > 0 ? (
+      ) : paginatedCourses.length > 0 ? (
         viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map(course => (
+            {paginatedCourses.map(course => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
@@ -209,7 +253,7 @@ export default function MyCoursesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredCourses.map(course => {
+                  {paginatedCourses.map(course => {
                     const pct = getCourseProgress(course);
                     const status = pct >= 100 ? 'completed' : pct > 0 ? 'in-progress' : 'not-started';
                     return (
@@ -217,7 +261,11 @@ export default function MyCoursesPage() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
-                              {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : '📚'}
+                              {course.thumbnail ? (
+                                <img src={course.thumbnail} className="w-full h-full object-cover" />
+                              ) : (
+                                <BookOpen size={24} className="text-slate-300" />
+                              )}
                             </div>
                             <div className="min-w-0">
                               <p className="font-bold text-slate-900 text-sm truncate group-hover:text-indigo-600 transition-colors">{course.title}</p>
@@ -243,15 +291,21 @@ export default function MyCoursesPage() {
                             status === 'in-progress' ? 'bg-amber-100 text-amber-600' :
                             'bg-slate-100 text-slate-500'
                           }`}>
-                            {status === 'completed' ? '✅ Completed' : status === 'in-progress' ? '🔄 In Progress' : '⏸️ Not Started'}
+                            {status === 'completed' ? (
+                              <span className="flex items-center gap-1.5"><CheckCircle2 size={14} /> {t.completedLabel || 'Completed'}</span>
+                            ) : status === 'in-progress' ? (
+                              <span className="flex items-center gap-1.5"><RotateCw size={14} className="animate-spin-slow" /> {t.inProgress || 'In Progress'}</span>
+                            ) : (
+                              <span className="flex items-center gap-1.5"><PauseCircle size={14} /> {t.notStarted || 'Not Started'}</span>
+                            )}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
                             href={`/dashboard/courses/${course.id}`}
-                            className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all"
+                            className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-1"
                           >
-                            {pct > 0 ? (t.continue || 'Continue') : (t.viewCourse || 'Start')} →
+                            {pct > 0 ? (t.continue || 'Continue') : (t.viewCourse || 'Start')} <ArrowRight size={14} />
                           </Link>
                         </td>
                       </tr>
@@ -264,7 +318,9 @@ export default function MyCoursesPage() {
         )
       ) : (
         <div className="text-center py-16 bg-white rounded-[28px] border border-dashed border-slate-200 shadow-sm">
-          <div className="text-5xl mb-4">{activeTab === 'completed' ? '🎓' : activeTab === 'in-progress' ? '📖' : '📚'}</div>
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+             {activeTab === 'completed' ? <GraduationCap size={48} /> : <BookOpen size={48} />}
+          </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">
             {activeTab === 'all' ? (t.noEnrolledCourses || 'No courses enrolled yet') :
              activeTab === 'in-progress' ? (t.noInProgress || 'No courses in progress') :
@@ -277,9 +333,73 @@ export default function MyCoursesPage() {
           </p>
           {activeTab === 'all' && (
             <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center gap-2">
-              <span>🔍</span> {t.discover || 'Browse Courses'}
+              <Search size={18} /> {t.discover || 'Browse Courses'}
             </Link>
           )}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 mt-12 animate-in slide-in-from-bottom duration-500">
+          <p className="text-sm text-slate-500 font-medium">
+            {t.showing || 'Showing'} <span className="font-bold text-slate-900 mx-1">{startIndex + 1}</span> {t.to || 'to'} <span className="font-bold text-slate-900 mx-1">{endIndex}</span> {t.of || 'of'} <span className="font-bold text-slate-900 mx-1">{totalItems}</span>
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={safeCurrentPage === 1}
+              className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm flex items-center gap-2"
+            >
+              <ChevronLeft size={16} /> {t.prev || 'Prev'}
+            </button>
+            
+            <div className="flex items-center gap-1.5 px-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
+                .map((page, index, array) => {
+                  if (index > 0 && page - array[index - 1] > 1) {
+                    return (
+                      <div key={`ellipsis-${page}`} className="flex items-center gap-1">
+                        <span className="w-6 text-center text-slate-400 font-bold tracking-widest text-xs">...</span>
+                        <button
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-10 h-10 rounded-xl font-bold transition-all text-sm ${
+                            safeCurrentPage === page 
+                              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                              : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-xl font-bold transition-all text-sm ${
+                        safeCurrentPage === page 
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                          : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+              })}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={safeCurrentPage === totalPages}
+              className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm flex items-center gap-2"
+            >
+              {t.next || 'Next'} <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       )}
     </div>

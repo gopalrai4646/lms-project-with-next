@@ -86,12 +86,15 @@ export default function CourseCard({ course }: CourseCardProps) {
           
           <button
             onClick={handleSave}
-            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all ${
-              isSaved ? 'bg-rose-500 text-white border-rose-600' : 'bg-white text-slate-500 hover:text-rose-500 border-slate-200'
-            } border`}
+            className="p-2 transition-all hover:scale-110 active:scale-95 group/heart outline-none"
             title={isSaved ? t.saved : t.save}
           >
-            <Heart size={20} className={isSaved ? 'fill-current' : ''} />
+            <Heart 
+              size={26} 
+              className={`transition-colors duration-300 ${
+                isSaved ? 'text-rose-500 fill-rose-500' : 'text-slate-400 group-hover/heart:text-rose-500'
+              }`} 
+            />
           </button>
         </div>
 

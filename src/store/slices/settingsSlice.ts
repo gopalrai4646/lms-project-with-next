@@ -5,6 +5,7 @@ export type Language = 'en' | 'de' | 'fr';
 interface SettingsState {
   language: Language;
   isMobileMenuOpen: boolean;
+  isSidebarCollapsed: boolean;
 }
 
 const getInitialLanguage = (): Language => {
@@ -16,6 +17,7 @@ const getInitialLanguage = (): Language => {
 const initialState: SettingsState = {
   language: getInitialLanguage(),
   isMobileMenuOpen: false,
+  isSidebarCollapsed: false,
 };
 
 const settingsSlice = createSlice({
@@ -34,8 +36,20 @@ const settingsSlice = createSlice({
     setMobileMenuOpen: (state, action: PayloadAction<boolean>) => {
       state.isMobileMenuOpen = action.payload;
     },
+    toggleSidebar: (state) => {
+      state.isSidebarCollapsed = !state.isSidebarCollapsed;
+    },
+    setSidebarCollapsed: (state, action: PayloadAction<boolean>) => {
+      state.isSidebarCollapsed = action.payload;
+    },
   },
 });
 
-export const { setLanguage, toggleMobileMenu, setMobileMenuOpen } = settingsSlice.actions;
+export const { 
+  setLanguage, 
+  toggleMobileMenu, 
+  setMobileMenuOpen, 
+  toggleSidebar, 
+  setSidebarCollapsed 
+} = settingsSlice.actions;
 export default settingsSlice.reducer;

@@ -189,7 +189,7 @@ export default function AdminTrainingPlansPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/50 shadow-sm inline-flex items-center gap-1.5">
-                         <Users size={14} className="opacity-60" /> {plan.courseIds?.length || 0}
+                         <BookOpen size={14} className="opacity-60" /> {plan.courseIds?.length || 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
