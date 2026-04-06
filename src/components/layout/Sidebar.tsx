@@ -25,7 +25,7 @@ import { setMobileMenuOpen, setSidebarCollapsed } from '@/store/slices/settingsS
 export default function Sidebar() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { user, role } = useAppSelector((state) => state.auth);
+  const { user, role, isImpersonating } = useAppSelector((state) => state.auth);
   const { language, isMobileMenuOpen, isSidebarCollapsed } = useAppSelector((state) => state.settings);
 
   // Restore collapsed state from localStorage on mount
@@ -82,7 +82,7 @@ export default function Sidebar() {
       )}
       
       <aside 
-        className={`fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 flex flex-col ${
+        className={`fixed left-0 ${isImpersonating ? 'top-[104px]' : 'top-16'} bottom-0 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 flex flex-col ${
           isSidebarCollapsed ? 'md:w-20' : 'md:w-64'
         } ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >

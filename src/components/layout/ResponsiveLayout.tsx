@@ -7,11 +7,14 @@ interface Props {
 }
 
 export default function ResponsiveLayout({ children }: Props) {
-  const { isSidebarCollapsed, isMobileMenuOpen } = useAppSelector((state) => state.settings);
+  const { isImpersonating } = useAppSelector((state) => state.auth);
+  const { isSidebarCollapsed } = useAppSelector((state) => state.settings);
 
   return (
     <main 
-      className={`transition-all duration-300 pt-16 min-h-screen ${
+      className={`transition-all duration-300 min-h-screen ${
+        isImpersonating ? 'pt-[104px]' : 'pt-16'
+      } ${
         isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'
       } pl-0`}
     >

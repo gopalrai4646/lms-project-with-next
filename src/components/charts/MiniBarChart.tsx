@@ -47,7 +47,7 @@ export default function MiniBarChart({
               <Cell 
                 key={`cell-${index}`} 
                 fill={color} 
-                fillOpacity={0.4 + (index / (data.length - 1)) * 0.6}
+                fillOpacity={data.length > 1 ? 0.4 + (index / (data.length - 1)) * 0.6 : 0.8}
               />
             ))}
           </Bar>
