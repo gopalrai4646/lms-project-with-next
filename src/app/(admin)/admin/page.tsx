@@ -254,10 +254,69 @@ export default function AdminDashboard() {
     return { totalLearners, completionRate, velocity, satisfaction, dauData, popularity, attentionNeeded, stalledStats: { percent: stalledPercent, stalled: stalledCount, active: activeCount } };
   }, [users, courses, allProgress, dauTimeframe]);
 
-  if (loadingProgress || courses.length === 0) {
+  const isPlatformEmpty = !loadingProgress && courses.length === 0 && trainingPlans.length === 0;
+
+  if (loadingProgress) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      <div className="flex h-96 items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+          <p className="text-slate-500 font-medium animate-pulse">Loading platform analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isPlatformEmpty) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <header className="w-full max-w-4xl relative overflow-hidden rounded-[40px] bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 p-10 md:p-16 text-white mb-12 shadow-2xl shadow-indigo-200">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl"></div>
+          
+          <div className="relative z-10 text-center">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 leading-tight">
+              Welcome to Your <br/> Learning Empire
+            </h1>
+            <p className="text-indigo-100 text-lg md:text-xl max-w-2xl mx-auto opacity-90 leading-relaxed mb-10">
+              Your dashboard is ready and waiting. Start by building your curriculum to see real-time engagement and growth analytics.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link 
+                href="/admin/courses"
+                className="w-full sm:w-auto px-8 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <BookOpen size={20} />
+                Create First Course
+              </Link>
+              <Link 
+                href="/admin/training-plans"
+                className="w-full sm:w-auto px-8 py-4 bg-indigo-500/20 border border-white/30 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-sm"
+              >
+                <Award size={20} />
+                Setup Training Plan
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
+              <Zap size={32} />
+            </div>
+            <h3 className="font-bold text-slate-900 mb-2">Interactive Dashboard</h3>
+            <p className="text-sm text-slate-500 leading-relaxed">Once you have active courses, this page will transform into a rich analytics hub.</p>
+          </div>
+          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
+              <BarChart2 size={32} />
+            </div>
+            <h3 className="font-bold text-slate-900 mb-2">Track Progress</h3>
+            <p className="text-sm text-slate-500 leading-relaxed">Monitor completion rates, satisfaction scores, and daily active user trends.</p>
+          </div>
+        </div>
       </div>
     );
   }

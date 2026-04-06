@@ -1,19 +1,29 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchUsersRequest, User, deleteUserRequest } from '@/store/slices/userSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
+import { impersonateUserRequest } from '@/store/slices/authSlice';
 import UserDetailsModal from '@/components/admin/UserDetailsModal';
 import { translations } from '@/utils/translations';
-import { Search, List, LayoutGrid, Users, Trash2, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Search, List, LayoutGrid, Users, Trash2, ChevronLeft, ChevronRight, Eye, UserSquare2 } from 'lucide-react';
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { users, loading, error } = useAppSelector(state => state.users);
+  const { isImpersonating } = useAppSelector(state => state.auth);
   const { courses } = useAppSelector(state => state.courses);
   const { language } = useAppSelector(state => state.settings);
   const t = translations[language].admin;
+
+  useEffect(() => {
+    if (isImpersonating) {
+      router.push('/dashboard');
+    }
+  }, [isImpersonating, router]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
@@ -239,6 +249,12 @@ export default function AdminUsersPage() {
                           <Eye size={14} className="opacity-70" /> {t.viewDetails}
                         </button>
                         <button 
+                          onClick={() => dispatch(impersonateUserRequest(user.id))}
+                          className="px-4 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
+                        >
+                          <UserSquare2 size={14} /> {t.loginAsUser || "Impersonate"}
+                        </button>
+                        <button 
                           onClick={() => handleDelete(user.id)}
                           className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 shadow-sm hover:shadow-rose-50"
                           title={t.deleteUser}
@@ -304,6 +320,12 @@ export default function AdminUsersPage() {
                     className="flex-1 py-2.5 bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm"
                   >
                     {t.viewDetails}
+                  </button>
+                  <button 
+                    onClick={() => dispatch(impersonateUserRequest(user.id))}
+                    className="flex-1 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5"
+                  >
+                    <UserSquare2 size={14} /> {t.loginAsUser || "Impersonate"}
                   </button>
                   <button 
                     onClick={() => handleDelete(user.id)}

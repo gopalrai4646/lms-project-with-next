@@ -4,11 +4,11 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { logoutRequest } from '@/store/slices/authSlice';
+import { logoutRequest, stopImpersonationRequest } from '@/store/slices/authSlice';
 import { setLanguage, Language, toggleMobileMenu } from '@/store/slices/settingsSlice';
 import { translations } from '@/utils/translations';
 
-import { Menu, LogOut, ChevronDown, Shield, User } from 'lucide-react';
+import { Menu, LogOut, ChevronDown, Shield, User, UserSquare2, XCircle } from 'lucide-react';
 
 const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: string }[] = [
   { code: 'en', flag: 'https://flagcdn.com/w40/gb.png', label: 'English', short: 'EN' },
@@ -18,9 +18,10 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 
 export default function Navbar() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, role, isImpersonating } = useAppSelector((state) => state.auth);
   const { language } = useAppSelector((state) => state.settings);
   const t = translations[language].nav;
+  const adminT = translations[language].admin;
   const router = useRouter();
 
   const [langOpen, setLangOpen] = useState(false);
@@ -28,7 +29,7 @@ export default function Navbar() {
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
-  const { role } = useAppSelector((state) => state.auth);
+
 
   useEffect(() => {
     const savedLang = localStorage.getItem('app_language') as Language;
@@ -63,8 +64,29 @@ export default function Navbar() {
 
   const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === language) || LANGUAGE_OPTIONS[0];
 
+  const handleStopImpersonation = () => {
+    dispatch(stopImpersonationRequest());
+    router.push('/admin/users');
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-2 sm:px-4 md:px-6 shadow-sm">
+    <>
+      {isImpersonating && (
+        <div className="fixed top-0 left-0 right-0 h-10 bg-indigo-600 text-white z-[60] flex items-center justify-center px-4 shadow-md">
+          <div className="flex items-center gap-3 text-xs sm:text-sm font-black uppercase tracking-widest">
+            <UserSquare2 size={16} className="animate-pulse" />
+            <span>{adminT.impersonating}: <span className="underline decoration-2 underline-offset-4">{user?.displayName || user?.email}</span></span>
+            <button 
+              onClick={handleStopImpersonation}
+              className="ml-4 px-3 py-1 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+            >
+              <XCircle size={14} />
+              <span className="hidden sm:inline">{adminT.stopImpersonation}</span>
+            </button>
+          </div>
+        </div>
+      )}
+      <nav className={`fixed ${isImpersonating ? 'top-10' : 'top-0'} left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-2 sm:px-4 md:px-6 shadow-sm transition-all duration-300`}>
       <div className="flex items-center gap-1 sm:gap-4">
         {user && (
           <button
@@ -220,6 +242,7 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+    </>
   );
 }
 

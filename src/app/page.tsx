@@ -19,25 +19,25 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#fafbff] font-manrope">
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform">
+            <Link href="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform">
               Mentora
             </Link>
           </div>
-          <Link href="/signup" className="bg-blue-700 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-blue-800 transition-all shadow-md shadow-blue-200">
+          <Link href="/signup" className="bg-blue-700 text-white px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold hover:bg-blue-800 transition-all shadow-md shadow-blue-200">
             Get Started
           </Link>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
-        <div className="flex-1 text-left">
+      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-8 overflow-x-hidden">
+        <div className="flex-1 text-center lg:text-left">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-block px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-sm font-bold tracking-wide mb-6 shadow-sm border border-purple-100"
+            className="inline-block px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs sm:text-sm font-bold tracking-wide mb-6 shadow-sm border border-purple-100"
           >
             EVOLUTION OF LEARNING
           </motion.div>
@@ -45,34 +45,34 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-bold text-slate-900 leading-[1.15] mb-6"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.2] lg:leading-[1.15] mb-6"
           >
-            Mentora: Master Your Craft <span className="text-blue-700 italic border-b-[6px] border-blue-200/50 pb-1 inline-block">with</span> <span className="text-purple-600">Precision</span>
+            Mentora: Master Your Craft <span className="text-blue-700 italic border-b-[4px] sm:border-b-[6px] border-blue-200/50 pb-1 inline-block">with</span> <span className="text-purple-600">Precision</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-slate-500 max-w-xl leading-relaxed"
+            className="text-lg lg:text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed"
           >
             The ultimate high-density platform for professionals. Strategic training meets immersive technology in a digital sanctuary for growth.
           </motion.p>
         </div>
 
         {/* Dashboard Preview */}
-        <div className="flex-1 w-full mx-auto relative group mt-10 lg:mt-0">
+        <div className="flex-1 w-full relative group mt-8 lg:mt-0 px-2 sm:px-0">
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, type: 'spring' }}
-            className="absolute -top-6 -left-6 sm:-top-10 sm:-left-10 bg-white shadow-2xl rounded-3xl p-4 z-10 flex items-center gap-4 animate-bounce-slow border border-slate-100"
+            className="absolute -top-4 -left-2 sm:-top-10 sm:-left-10 bg-white shadow-2xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 z-10 flex items-center gap-3 sm:gap-4 animate-bounce-slow border border-slate-100"
           >
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center shrink-0">
-              <BarChart3 className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-full flex items-center justify-center shrink-0">
+              <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
             <div className="text-left">
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Current Velocity</div>
-              <div className="text-lg font-black text-slate-900 drop-shadow-sm">+128% Accuracy</div>
+              <div className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Current Velocity</div>
+              <div className="text-sm sm:text-lg font-black text-slate-900 drop-shadow-sm">+128% Accuracy</div>
             </div>
           </motion.div>
           
@@ -119,19 +119,19 @@ export default function LandingPage() {
       </section>
 
       {/* Global Advantage */}
-      <section className="py-32 bg-gradient-to-b from-blue-50/50 to-white px-6 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-blue-100/50 blur-[120px] rounded-full pointer-events-none"></div>
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="w-20 h-20 bg-blue-700 rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-blue-300">
-            <Globe className="w-10 h-10 text-white" />
+      <section className="py-20 sm:py-32 bg-gradient-to-b from-blue-50/50 to-white px-4 sm:px-6 relative overflow-hidden text-center">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[300px] bg-blue-100/50 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-700 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-8 sm:mb-10 shadow-2xl shadow-blue-300">
+            <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight">Global Advantage</h2>
-          <p className="text-lg md:text-xl text-slate-600 mb-14 leading-relaxed max-w-3xl mx-auto font-medium">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 sm:mb-8 tracking-tight">Global Advantage</h2>
+          <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 sm:mb-14 leading-relaxed max-w-3xl mx-auto font-medium">
             Breaking barriers through linguistic precision. Our platform delivers <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md">EN/DE/FR Native Translations</span>, ensuring technical nuances are never lost.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
             {['English (Global)', 'Deutsch (Native)', 'Français (Native)'].map(lang => (
-              <span key={lang} className="px-6 py-3.5 bg-white border border-slate-100 rounded-full text-slate-700 font-bold shadow-xl shadow-slate-200/40 hover:scale-105 transition-transform cursor-default">
+              <span key={lang} className="px-5 py-3 sm:px-6 sm:py-3.5 bg-white border border-slate-100 rounded-full text-slate-700 text-sm sm:text-base font-bold shadow-xl shadow-slate-200/40 hover:scale-105 transition-transform cursor-default">
                 {lang}
               </span>
             ))}

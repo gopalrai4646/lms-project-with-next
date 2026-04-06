@@ -1,4 +1,4 @@
-import { call, put, takeLatest, all, take, fork, cancel } from 'redux-saga/effects';
+import { call, put, takeLatest, all, take, fork, cancel, select } from 'redux-saga/effects';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -31,7 +31,11 @@ import {
   enrollCourseSuccess,
   saveCourseRequest,
   saveCourseSuccess,
-  updateUserData
+  updateUserData,
+  impersonateUserRequest,
+  impersonateUserSuccess,
+  stopImpersonationRequest,
+  stopImpersonationSuccess,
 } from '../slices/authSlice';
 import { enrollUserInCourseSuccess } from '../slices/courseSlice';
 import { clearProgress } from '../slices/progressSlice';
@@ -229,8 +233,12 @@ function* handleGoogleLogin(): any {
 function* handleUpdatePassword(action: ReturnType<typeof updatePasswordRequest>): any {
   try {
     const { password } = action.payload;
-    const currentUser: User = auth.currentUser!;
+    const state: any = yield select();
+    if (state.auth.isImpersonating) {
+      throw new Error('Password updates are disabled while impersonating for security reasons.');
+    }
     
+    const currentUser: User = auth.currentUser!;
     yield call(updatePassword, currentUser, password);
     yield put(updatePasswordSuccess());
   } catch (error: any) {
@@ -245,21 +253,34 @@ function* handleUpdatePassword(action: ReturnType<typeof updatePasswordRequest>)
 function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): any {
   try {
     const { displayName, photoURL, phoneNumber } = action.payload;
+    const state: any = yield select();
+    const targetUid = state.auth.user?.uid;
+    const isImpersonating = state.auth.isImpersonating;
+    
+    if (!targetUid) throw new Error('User context not found.');
+
     const currentUser: User = auth.currentUser!;
     
-    // Update Firebase Auth profile
-    const updates: any = { displayName };
-    if (photoURL !== undefined) updates.photoURL = photoURL;
-    yield call(updateProfile, currentUser, updates);
+    // 1. Update Firebase Auth profile (ONLY if NOT impersonating)
+    // We don't want to change the Admin's identity while they are acting as a student
+    if (!isImpersonating) {
+      const authUpdates: any = { displayName };
+      if (photoURL !== undefined) authUpdates.photoURL = photoURL;
+      yield call(updateProfile, currentUser, authUpdates);
+    }
     
-    // Update Firestore user document
+    // 2. Update Firestore user document (Target the user currently in state)
     const firestoreUpdates: any = { displayName };
     if (photoURL !== undefined) firestoreUpdates.photoURL = photoURL;
     if (phoneNumber !== undefined) firestoreUpdates.phoneNumber = phoneNumber;
     
-    yield call(setDoc as any, doc(db, 'users', currentUser.uid), firestoreUpdates, { merge: true });
+    yield call(setDoc as any, doc(db, 'users', targetUid), firestoreUpdates, { merge: true });
     
-    yield put(updateProfileSuccess({ displayName }));
+    yield put(updateProfileSuccess({ 
+      displayName, 
+      photoURL: photoURL !== undefined ? photoURL : state.auth.user?.photoURL, 
+      phoneNumber: phoneNumber !== undefined ? phoneNumber : state.auth.user?.phoneNumber 
+    }));
   } catch (error: any) {
     yield put(authFailure(error.message));
   }
@@ -268,23 +289,24 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
 function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): any {
   try {
     const courseId = action.payload;
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      yield put(authFailure('You must be logged in to enroll in a course.'));
+    const state: any = yield select();
+    const targetUid = state.auth.user?.uid;
+    if (!targetUid) {
+      yield put(authFailure('User context not found.'));
       return;
     }
 
-    const userRef = doc(db, 'users', currentUser.uid);
+    const userRef = doc(db, 'users', targetUid);
     yield call(setDoc as any, userRef, {
       enrolledCourses: arrayUnion(courseId)
     }, { merge: true });
     
     const courseRef = doc(db, 'courses', courseId);
     yield call(setDoc as any, courseRef, {
-      enrolledUsers: arrayUnion(currentUser.uid)
+      enrolledUsers: arrayUnion(targetUid)
     }, { merge: true });
     
-    yield put(enrollUserInCourseSuccess({ courseId, userId: currentUser.uid }));
+    yield put(enrollUserInCourseSuccess({ courseId, userId: targetUid }));
     yield put(enrollCourseSuccess(courseId));
   } catch (error: any) {
     yield put(authFailure(error.message));
@@ -294,13 +316,14 @@ function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): an
 function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
   try {
     const courseId = action.payload;
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      yield put(authFailure('You must be logged in to save a course.'));
+    const state: any = yield select();
+    const targetUid = state.auth.user?.uid;
+    if (!targetUid) {
+      yield put(authFailure('User context not found.'));
       return;
     }
 
-    const userRef = doc(db, 'users', currentUser.uid);
+    const userRef = doc(db, 'users', targetUid);
     const userDoc: any = yield call(getDoc, userRef);
     const savedCourses = userDoc.exists() ? userDoc.data().savedCourses || [] : [];
     
@@ -315,7 +338,58 @@ function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
     yield put(authFailure(error.message));
   }
 }
+ 
+function* handleImpersonateUser(action: ReturnType<typeof impersonateUserRequest>): any {
+  try {
+    const targetUid = action.payload;
+    const userDoc: any = yield call(getDoc, doc(db, 'users', targetUid));
+    
+    if (!userDoc.exists()) {
+      throw new Error('User not found in Firestore.');
+    }
+ 
+    const userData = userDoc.data();
+    const user = {
+      uid: targetUid,
+      email: userData.email || null,
+      displayName: userData.displayName || null,
+      enrolledCourses: userData.enrolledCourses || [],
+      savedCourses: userData.savedCourses || [],
+      assignedTrainingPlans: userData.assignedTrainingPlans || [],
+      photoURL: userData.photoURL || null,
+      phoneNumber: userData.phoneNumber || null,
+    };
+ 
+    yield put(impersonateUserSuccess({ user, role: userData.role || 'student' }));
+    
+    // Stop the original user's sync and start sync for the impersonated user
+    // (This ensures UI updates if someone else modifies the impersonated user's data)
+    if (userSyncTask) yield cancel(userSyncTask);
+    userSyncTask = yield fork(syncUserSession, targetUid);
+ 
+  } catch (error: any) {
+    yield put(authFailure(error.message));
+  }
+}
+ 
+function* handleStopImpersonation(): any {
+  try {
+    // 1. Stop the student's sync task IMMEDIATELY before state changes
+    if (userSyncTask) yield cancel(userSyncTask);
 
+    // 2. Dispatch success to restore the admin user state
+    yield put(stopImpersonationSuccess());
+    
+    // 3. Restart sync for the original admin (using auth.currentUser which is still the admin)
+    const adminUser = auth.currentUser;
+    if (adminUser) {
+      userSyncTask = yield fork(syncUserSession, adminUser.uid);
+    }
+  } catch (error: any) {
+    yield put(authFailure(error.message));
+  }
+}
+ 
 function* handleForgotPassword(action: ReturnType<typeof forgotPasswordRequest>): any {
   try {
     const { email } = action.payload;
@@ -336,6 +410,8 @@ export function* watchAuth() {
   yield takeLatest(forgotPasswordRequest.type, handleForgotPassword);
   yield takeLatest(enrollCourseRequest.type, handleEnrollCourse);
   yield takeLatest(saveCourseRequest.type, handleSaveCourse);
+  yield takeLatest(impersonateUserRequest.type, handleImpersonateUser);
+  yield takeLatest(stopImpersonationRequest.type, handleStopImpersonation);
 }
 
 export function* authSaga() {

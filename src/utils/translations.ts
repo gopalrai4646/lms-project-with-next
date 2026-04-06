@@ -18,6 +18,7 @@ export const translations = {
       proPlan: "Pro Plan",
       unlockPremium: "Unlock all premium courses",
       upgradeNow: "Upgrade Now",
+      join: "Join",
     },
     dashboard: {
       welcome: "Welcome back",
@@ -256,6 +257,9 @@ export const translations = {
       public: "Public (Visible to everyone)",
       private: "Private (Training Plans only)",
       savingEllipsis: "Saving...",
+      loginAsUser: "Login as User",
+      impersonating: "Impersonating",
+      stopImpersonation: "Exit Impersonation",
     },
     coursePlayer: {
       loadingCourse: "Loading course...",
@@ -295,6 +299,7 @@ export const translations = {
       proPlan: "Pro-Plan",
       unlockPremium: "Alle Premium-Kurse freischalten",
       upgradeNow: "Jetzt upgraden",
+      join: "Beitreten",
     },
     dashboard: {
       welcome: "Willkommen zurück",
@@ -530,6 +535,9 @@ export const translations = {
       public: "Öffentlich (Für alle sichtbar)",
       private: "Privat (Nur über Trainingspläne)",
       savingEllipsis: "Speichern...",
+      loginAsUser: "Als Benutzer anmelden",
+      impersonating: "Angemeldet als",
+      stopImpersonation: "Impersonation beenden",
     },
     coursePlayer: {
       loadingCourse: "Kurs wird geladen...",
@@ -569,6 +577,7 @@ export const translations = {
       proPlan: "Plan Pro",
       unlockPremium: "Débloquez tous les cours premium",
       upgradeNow: "Mettre à niveau maintenant",
+      join: "S'inscrire",
     },
     dashboard: {
       welcome: "Bon retour",
@@ -804,6 +813,9 @@ export const translations = {
       public: "Public (Visible par tous)",
       private: "Privé (Plans de formation uniquement)",
       savingEllipsis: "Enregistrement...",
+      loginAsUser: "Se connecter en tant qu'utilisateur",
+      impersonating: "Connecté en tant que",
+      stopImpersonation: "Arrêter l'impersonnalisation",
     },
     coursePlayer: {
       loadingCourse: "Chargement du cours...",
