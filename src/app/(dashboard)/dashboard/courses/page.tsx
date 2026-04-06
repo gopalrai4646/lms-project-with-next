@@ -157,69 +157,76 @@ export default function MyCoursesPage() {
 
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-4 flex flex-col md:flex-row gap-4 items-start md:items-center">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-slate-100 rounded-2xl p-1">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                activeTab === tab.key
-                  ? 'bg-white text-indigo-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {tab.label}
-              <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
-                activeTab === tab.key ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-500'
-              }`}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-3 md:p-4 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+        {/* Tabs - Scrollable on mobile */}
+        <div className="overflow-x-auto no-scrollbar -mx-1 px-1 shrink-0 lg:w-auto">
+          <div className="flex justify-between gap-1 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-white text-indigo-600 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {tab.label}
+                <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
+                  activeTab === tab.key ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Search */}
-        <div className="relative flex-1 w-full md:w-auto">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-            <Search size={18} />
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t.searchCourses || 'Search your courses...'}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all"
-          />
-        </div>
-
-        {/* View Toggle */}
-        <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0 space-x-4">
-          <div className="flex items-center gap-2 whitespace-nowrap bg-white/50 px-2 rounded-lg border border-slate-200/50">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.itemsPerPage || 'Items'}:</span>
-            <select 
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="bg-transparent border-none focus:ring-0 text-xs font-bold text-indigo-600 cursor-pointer outline-none"
-            >
-              {[8, 12, 16, 20].map(val => <option key={val} value={val}>{val}</option>)}
-            </select>
+        {/* Global Controls Wrapper - Search and View Toggle share a row on tablet */}
+        <div className="flex flex-col sm:flex-row gap-4 flex-1 items-stretch sm:items-center">
+          {/* Search */}
+          <div className="relative flex-1">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+              <Search size={18} />
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t.searchCourses || 'Search your courses...'}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all bg-slate-50/30"
+            />
           </div>
 
-          <div className="flex bg-slate-200/50 p-1 rounded-lg">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-            >
-              <LayoutGrid size={18} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-            >
-              <List size={18} />
-            </button>
+          {/* View Toggle - Professional Layout */}
+          <div className="flex bg-slate-100 p-1.5 rounded-xl gap-2 items-center sm:shrink-0">
+            <div className="flex items-center grow sm:grow-0 gap-2 whitespace-nowrap bg-white/50 px-2 h-10 rounded-lg border border-slate-200/50 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.itemsPerPage || 'Items'}:</span>
+              <select 
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                className="bg-transparent border-none focus:ring-0 text-xs font-bold text-indigo-600 cursor-pointer outline-none grow"
+              >
+                {[8, 12, 16, 20].map(val => <option key={val} value={val}>{val}</option>)}
+              </select>
+            </div>
+
+            <div className="flex bg-slate-200/50 p-1 rounded-lg shrink-0">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                title={adminT?.gridView || 'Grid View'}
+              >
+                <LayoutGrid size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                title={adminT?.listView || 'List View'}
+              >
+                <List size={18} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
