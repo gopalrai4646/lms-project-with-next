@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchProgressRequest, updateProgressRequest } from '@/store/slices/progressSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import CourseRatingModal from '@/components/common/CourseRatingModal';
 import { Star, Lock, Award, Inbox, Video as VideoIcon, Check, Play } from 'lucide-react';
@@ -28,8 +28,8 @@ export default function LessonPage() {
   const { courses } = useAppSelector(state => state.courses);
   const { user } = useAppSelector(state => state.auth);
   const { progress } = useAppSelector(state => state.progress);
-  const { language } = useAppSelector(state => state.settings);
-  const t = translations[language].coursePlayer;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('coursePlayer', { returnObjects: true }) as any;
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSyncRef = useRef<number>(0);
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginRequest, googleLoginRequest, clearError } from '@/store/slices/authSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,8 +13,8 @@ export default function LoginPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, role, loading, error } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].auth;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('auth', { returnObjects: true }) as any;
 
   useEffect(() => {
     if (user) {

@@ -4,16 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { ClipboardList, ArrowRight } from 'lucide-react';
 
 export default function UserTrainingPlansPage() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
   const { trainingPlans, loading } = useAppSelector((state) => state.trainingPlans);
-  const t = translations[language].admin; // Reusing admin translations for plan names
-  const coursePlayerT = translations[language].coursePlayer;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any; // Reusing admin translations for plan names
+  const coursePlayerT = i18nT('coursePlayer', { returnObjects: true }) as any;
 
   const [initialized, setInitialized] = useState(false);
 

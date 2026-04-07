@@ -19,14 +19,15 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { setMobileMenuOpen, setSidebarCollapsed } from '@/store/slices/settingsSlice';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { user, role, isImpersonating } = useAppSelector((state) => state.auth);
-  const { language, isMobileMenuOpen, isSidebarCollapsed } = useAppSelector((state) => state.settings);
+  const { isMobileMenuOpen, isSidebarCollapsed } = useAppSelector((state) => state.settings);
+  const { t: i18nT } = useTranslation();
 
   // Restore collapsed state from localStorage on mount
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function Sidebar() {
     }
   };
 
-  const t = translations[language].nav;
+  const t = i18nT('nav', { returnObjects: true }) as any;
 
   if (!user) return null;
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest, deleteTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Plus, Search, List, LayoutGrid, Users, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -13,9 +13,8 @@ export default function AdminTrainingPlansPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { trainingPlans, loading, error } = useAppSelector((state) => state.trainingPlans);
-  const { language } = useAppSelector((state) => state.settings);
-  // Fallback to "en" if translations for trainingPlans are missing during dev
-  const t = translations[language]?.admin || translations['en'].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -39,7 +38,7 @@ export default function AdminTrainingPlansPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(t.deleteTrainingPlanConfirm || "Are you sure you want to delete this training plan?")) {
+    if (window.confirm(t.deleteTrainingPlanConfirm)) {
       dispatch(deleteTrainingPlanRequest(id));
     }
   };
@@ -79,14 +78,14 @@ export default function AdminTrainingPlansPage() {
     <div className="space-y-8">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageTrainingPlans || "Manage Training Plans"}</h1>
-          <p className="text-slate-500 mt-1">{t.manageTrainingPlansSubtitle || "Create and manage curated learning paths"}</p>
+          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageTrainingPlans}</h1>
+          <p className="text-slate-500 mt-1">{t.manageTrainingPlansSubtitle}</p>
         </div>
         <Link 
           href="/admin/training-plans/new" 
           className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-2"
         >
-          <Plus size={20} /> {t.newTrainingPlan || "New Training Plan"}
+          <Plus size={20} /> {t.newTrainingPlan}
         </Link>
       </header>
 
@@ -102,7 +101,7 @@ export default function AdminTrainingPlansPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text"
-            placeholder={t.searchTrainingPlans || "Search training plans..."}
+            placeholder={t.searchTrainingPlans}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700"
@@ -111,7 +110,7 @@ export default function AdminTrainingPlansPage() {
         
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full lg:w-auto">
           <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0">
-            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage || "Items per page"}:</span>
+            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage}:</span>
             <select 
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -128,16 +127,16 @@ export default function AdminTrainingPlansPage() {
             <button
               onClick={() => handleViewToggle('list')}
               className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-              title={t.listView || "List View"}
+              title={t.listView}
             >
-              <List size={20} /> <span className="hidden sm:inline text-sm">{t.listView || "List"}</span>
+              <List size={20} /> <span className="hidden sm:inline text-sm">{t.listView}</span>
             </button>
             <button
               onClick={() => handleViewToggle('grid')}
               className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-              title={t.gridView || "Grid View"}
+              title={t.gridView}
             >
-              <LayoutGrid size={20} /> <span className="hidden sm:inline text-sm">{t.gridView || "Grid"}</span>
+              <LayoutGrid size={20} /> <span className="hidden sm:inline text-sm">{t.gridView}</span>
             </button>
           </div>
         </div>
@@ -146,12 +145,12 @@ export default function AdminTrainingPlansPage() {
       {loading && trainingPlans.length === 0 ? (
         <div className="py-12 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-          {t.loadingTrainingPlans || "Loading training plans..."}
+          {t.loadingTrainingPlans}
         </div>
       ) : paginatedPlans.length === 0 ? (
         <div className="py-16 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
           <Search className="opacity-50 grayscale" size={48} />
-          <p className="text-lg text-slate-500 font-semibold">{t.noTrainingPlansFound || "No training plans found"}</p>
+          <p className="text-lg text-slate-500 font-semibold">{t.noTrainingPlansFound}</p>
         </div>
       ) : viewMode === 'list' ? (
         /* List View */
@@ -160,9 +159,9 @@ export default function AdminTrainingPlansPage() {
             <table className="w-full text-left min-w-[800px]">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo || "Training Plan Info"}</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses || "Courses"}</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions || "Actions"}</th>
+                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo}</th>
+                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses}</th>
+                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -197,14 +196,14 @@ export default function AdminTrainingPlansPage() {
                         <Link 
                           href={`/admin/training-plans/edit/${plan.id}`}
                           className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all border border-transparent hover:border-amber-100 flex items-center gap-1"
-                          title={t.editTrainingPlan || "Edit"}
+                          title={t.editTrainingPlan}
                         >
                           <Pencil size={18} />
                         </Link>
                         <button 
                           onClick={() => handleDelete(plan.id)}
                           className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1"
-                          title={t.deleteTrainingPlan || "Delete"}
+                          title={t.deleteTrainingPlan}
                         >
                           <Trash2 size={18} />
                         </button>
@@ -247,12 +246,12 @@ export default function AdminTrainingPlansPage() {
                       href={`/admin/training-plans/edit/${plan.id}`}
                       className="text-sm font-bold text-slate-600 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 px-4 py-2 rounded-xl transition-all border border-slate-200 hover:border-amber-100 flex items-center gap-2"
                     >
-                      <Pencil size={16} /> {t.editTrainingPlan || "Edit"}
+                      <Pencil size={16} /> {t.editTrainingPlan}
                     </Link>
                     <button 
                       onClick={() => handleDelete(plan.id)}
                       className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center"
-                      title={t.deleteTrainingPlan || "Delete"}
+                      title={t.deleteTrainingPlan}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -267,7 +266,7 @@ export default function AdminTrainingPlansPage() {
       {totalPages > 0 && totalItems > 0 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 sm:px-6 rounded-3xl shadow-sm border border-slate-100 mt-6">
           <p className="text-sm text-slate-500 font-medium">
-            {t.showing || "Showing"} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to || "to"} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{endIndex}</span> {t.of || "of"} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems}</span>
+            {t.showing} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{endIndex}</span> {t.of} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems}</span>
           </p>
           <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto justify-center">
             <button
@@ -275,7 +274,7 @@ export default function AdminTrainingPlansPage() {
               disabled={safeCurrentPage === 1 || totalPages === 0}
               className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
             >
-              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev || "Prev"}</span>
+              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
             
             <div className="flex items-center gap-1.5">
@@ -321,7 +320,7 @@ export default function AdminTrainingPlansPage() {
               disabled={safeCurrentPage === totalPages || totalPages === 0}
               className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
             >
-               <span className="hidden sm:inline">{t.next || "Next"}</span> <ChevronRight size={18} />
+               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={18} />
             </button>
           </div>
         </div>

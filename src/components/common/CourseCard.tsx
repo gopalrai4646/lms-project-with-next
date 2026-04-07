@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Course } from '@/store/slices/courseSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { enrollCourseRequest, saveCourseRequest } from '@/store/slices/authSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { Video, Heart, BookOpen, Play } from 'lucide-react';
 
 interface CourseCardProps {
@@ -15,8 +15,8 @@ interface CourseCardProps {
 export default function CourseCard({ course }: CourseCardProps) {
   const dispatch = useAppDispatch();
   const { user, loading: authLoading } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].dashboard;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('dashboard', { returnObjects: true }) as any;
 
   const isEnrolled = user?.enrolledCourses?.includes(course.id);
   const isSaved = user?.savedCourses?.includes(course.id);

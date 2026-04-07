@@ -14,9 +14,9 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setLanguage, Language } from '@/store/slices/settingsSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
+
+export type Language = 'en' | 'de' | 'fr';
 
 const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: string }[] = [
   { code: 'en', flag: 'https://flagcdn.com/w40/gb.png', label: 'English', short: 'EN' },
@@ -26,10 +26,9 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 
 
 export default function LandingPage() {
-  const dispatch = useAppDispatch();
-  const { language } = useAppSelector((state) => state.settings);
-  const landingT = translations[language].landing;
-  const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === language) || LANGUAGE_OPTIONS[0];
+  const { t, i18n } = useTranslation();
+  const landingT = t('landing', { returnObjects: true }) as any;
+  const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === i18n.language) || LANGUAGE_OPTIONS[0];
 
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -45,7 +44,7 @@ export default function LandingPage() {
   }, []);
 
   const handleLanguageChange = (lang: Language) => {
-    dispatch(setLanguage(lang));
+    i18n.changeLanguage(lang);
     setLangOpen(false);
   };
 
@@ -87,7 +86,7 @@ export default function LandingPage() {
                     <button
                       key={opt.code}
                       onClick={() => handleLanguageChange(opt.code)}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-[10px] tracking-widest uppercase transition-all ${language === opt.code
+                      className={`w-full flex items-center justify-between px-3 py-2 text-[10px] tracking-widest uppercase transition-all ${i18n.language === opt.code
                           ? 'bg-blue-50 text-blue-700 font-extrabold'
                           : 'text-slate-500 hover:bg-slate-50 font-bold'
                         }`}

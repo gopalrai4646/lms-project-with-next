@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logoutRequest, stopImpersonationRequest } from '@/store/slices/authSlice';
-import { setLanguage, Language, toggleMobileMenu } from '@/store/slices/settingsSlice';
-import { translations } from '@/utils/translations';
+import { toggleMobileMenu } from '@/store/slices/settingsSlice';
+import { useTranslation } from 'react-i18next';
 
 import { Menu, LogOut, ChevronDown, Shield, User, UserSquare2, XCircle } from 'lucide-react';
+
+type Language = 'en' | 'de' | 'fr';
 
 const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: string }[] = [
   { code: 'en', flag: 'https://flagcdn.com/w40/gb.png', label: 'English', short: 'EN' },
@@ -19,24 +21,16 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 export default function Navbar() {
   const dispatch = useAppDispatch();
   const { user, role, isImpersonating } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].nav;
-  const adminT = translations[language].admin;
+  const { t, i18n } = useTranslation();
+  
+  const navT = t('nav', { returnObjects: true }) as any;
+  const adminT = t('admin', { returnObjects: true }) as any;
   const router = useRouter();
 
   const [langOpen, setLangOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
-
-
-
-  useEffect(() => {
-    const savedLang = localStorage.getItem('app_language') as Language;
-    if (savedLang && ['en', 'de', 'fr'].includes(savedLang) && savedLang !== language) {
-      dispatch(setLanguage(savedLang));
-    }
-  }, [dispatch, language]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -58,11 +52,11 @@ export default function Navbar() {
   };
 
   const handleLanguageChange = (lang: Language) => {
-    dispatch(setLanguage(lang));
+    i18n.changeLanguage(lang);
     setLangOpen(false);
   };
 
-  const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === language) || LANGUAGE_OPTIONS[0];
+  const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === i18n.language) || LANGUAGE_OPTIONS[0];
 
   const handleStopImpersonation = () => {
     dispatch(stopImpersonationRequest());
@@ -137,7 +131,7 @@ export default function Navbar() {
                   key={opt.code}
                   id={`lang-option-${opt.code}`}
                   onClick={() => handleLanguageChange(opt.code)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 text-xs tracking-widest uppercase transition-all ${language === opt.code
+                  className={`w-full flex items-center justify-between px-3 py-2.5 text-xs tracking-widest uppercase transition-all ${i18n.language === opt.code
                       ? 'bg-indigo-50 text-indigo-700 font-extrabold'
                       : 'text-slate-500 hover:bg-slate-50 font-bold'
                     }`}
@@ -226,7 +220,7 @@ export default function Navbar() {
                       <div className="w-8 h-7 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
                         <LogOut size={14} />
                       </div>
-                      <span>{t.signOut}</span>
+                      <span>{navT.signOut}</span>
                     </button>
                   </div>
                 </div>
@@ -235,9 +229,9 @@ export default function Navbar() {
           </div>
         ) : (
           <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
-            <Link href="/login" className="px-2 sm:px-4 py-2 text-slate-600 hover:text-indigo-600 transition-all font-bold text-xs sm:text-sm whitespace-nowrap">{t.signIn}</Link>
-            <Link href="/signup" className="hidden sm:block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold text-sm shadow-md shadow-indigo-100 whitespace-nowrap">{t.getStarted}</Link>
-            <Link href="/signup" className="sm:hidden px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold text-xs shadow-md shadow-indigo-100 whitespace-nowrap">{t.join || "Join"}</Link>
+            <Link href="/login" className="px-2 sm:px-4 py-2 text-slate-600 hover:text-indigo-600 transition-all font-bold text-xs sm:text-sm whitespace-nowrap">{navT.signIn}</Link>
+            <Link href="/signup" className="hidden sm:block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold text-sm shadow-md shadow-indigo-100 whitespace-nowrap">{navT.getStarted}</Link>
+            <Link href="/signup" className="sm:hidden px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold text-xs shadow-md shadow-indigo-100 whitespace-nowrap">{navT.join || "Join"}</Link>
           </div>
         )}
       </div>

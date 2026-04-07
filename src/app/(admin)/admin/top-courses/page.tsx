@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { 
   BarChart, 
   Bar, 
@@ -21,8 +21,8 @@ export default function TopCoursesPage() {
   const dispatch = useAppDispatch();
   const { courses, loading: coursesLoading } = useAppSelector(state => state.courses);
   const { users, loading: usersLoading } = useAppSelector(state => state.users);
-  const { language } = useAppSelector(state => state.settings);
-  const adminT = translations[language].admin;
+  const { t } = useTranslation();
+  const adminT = t('admin', { returnObjects: true }) as any;
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());

@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { enrollCourseRequest } from '@/store/slices/authSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { ClipboardList, BookOpen, Target, GraduationCap, Video, Play } from 'lucide-react';
 
 export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -16,12 +16,12 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
   const { id } = use(params);
 
   const { user, role, loading: authLoading } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
   const { trainingPlans, loading: planLoading } = useAppSelector((state) => state.trainingPlans);
   const { courses, loading: coursesLoading } = useAppSelector((state) => state.courses);
   
-  const t = translations[language].dashboard;
-  const adminT = translations[language].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('dashboard', { returnObjects: true }) as any;
+  const adminT = i18nT('admin', { returnObjects: true }) as any;
 
   const [initialized, setInitialized] = useState(false);
 

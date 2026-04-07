@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import AreaChart from '@/components/charts/AreaChart';
 import DonutChart from '@/components/charts/DonutChart';
 import { collection, getDocs } from 'firebase/firestore';
@@ -16,8 +16,8 @@ export default function AdminReport() {
   const dispatch = useAppDispatch();
   const { users } = useAppSelector(state => state.users);
   const { courses } = useAppSelector(state => state.courses);
-  const { language } = useAppSelector(state => state.settings);
-  const t = translations[language].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
 
   const [allProgress, setAllProgress] = useState<any[]>([]);
   const [loadingProgress, setLoadingProgress] = useState(true);

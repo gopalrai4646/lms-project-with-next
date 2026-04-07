@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createCourseRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video } from 'lucide-react';
 
 interface VideoEntry {
@@ -21,8 +21,8 @@ export default function NewCoursePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.courses);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 

@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, BookOpen, ChevronUp, ChevronDown, Trash2, Search, X } from 'lucide-react';
 
 export default function NewTrainingPlanPage() {
@@ -14,8 +14,8 @@ export default function NewTrainingPlanPage() {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.trainingPlans);
   const { courses } = useAppSelector((state) => state.courses);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language]?.admin || translations['en'].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
 
   const imageInputRef = useRef<HTMLInputElement>(null);
 

@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateProfileRequest, updatePasswordRequest, clearError } from '@/store/slices/authSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { Camera, Phone, User as UserIcon } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user, loading, error } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
   const dispatch = useAppDispatch();
-  
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('auth', { returnObjects: true }) as any;
+  const adminT = i18nT('admin', { returnObjects: true }) as any;
+
   const [name, setName] = useState(user?.displayName || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -21,9 +23,7 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passError, setPassError] = useState<string | null>(null);
   const [passSuccess, setPassSuccess] = useState(false);
-
-  const t = translations[language].auth;
-  const ts = translations[language].settings;
+  const ts = i18nT('settings', { returnObjects: true }) as any;
 
   useEffect(() => {
     if (user) {

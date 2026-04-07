@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest, deleteCourseRequest } from '@/store/slices/courseSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Plus, Search, Eye, ChevronDown, List, LayoutGrid, BookOpen, GraduationCap, Users, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -36,8 +36,9 @@ const formatIndianDate = (dateVal: any) => {
 export default function AdminCoursesPage() {
   const dispatch = useAppDispatch();
   const { courses, loading, error } = useAppSelector((state) => state.courses);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].admin;
+  const { user, role } = useAppSelector((state) => state.auth);
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -205,8 +206,8 @@ export default function AdminCoursesPage() {
                 <tr>
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.courseInfo}</th>
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.instructor}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courseVisibility || 'VISIBILITY'}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.createdAt || 'CREATED AT'}</th>
+                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.visibility}</th>
+                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.created_at}</th>
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.user}</th>
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
                 </tr>
@@ -290,7 +291,7 @@ export default function AdminCoursesPage() {
                 </div>
                 <div className="absolute bottom-4 left-4">
                    <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white text-[10px] font-black flex items-center gap-1.5 shadow-lg">
-                      <Users size={12} className="opacity-80" /> {course.enrolledUsers?.length || 0} Learners
+                      <Users size={12} className="opacity-80" /> {course.enrolledUsers?.length || 0} {t.learners}
                    </div>
                 </div>
               </div>

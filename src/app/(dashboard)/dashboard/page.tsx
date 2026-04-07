@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import CourseCard from '@/components/common/CourseCard';
@@ -15,12 +15,13 @@ import { ArrowRight, BookOpen, ClipboardList } from 'lucide-react';
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const { user, isNewUser } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
   const { courses, loading: coursesLoading } = useAppSelector((state) => state.courses);
   const { trainingPlans, loading: trainingPlansLoading } = useAppSelector((state) => state.trainingPlans);
   const { progress } = useAppSelector((state) => state.progress);
-  const t = translations[language].dashboard;
-  const adminT = translations[language].admin;
+  const { t: i18nT, i18n } = useTranslation();
+  const t = i18nT('dashboard', { returnObjects: true }) as any;
+  const adminT = i18nT('admin', { returnObjects: true }) as any;
+  const language = i18n.language;
 
   const [showAllEnrolled, setShowAllEnrolled] = useState(false);
   const [showAllDiscover, setShowAllDiscover] = useState(false);

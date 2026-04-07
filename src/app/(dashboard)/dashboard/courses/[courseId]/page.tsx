@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 
 export default function CourseRedirectPage() {
   const params = useParams();
@@ -13,8 +13,8 @@ export default function CourseRedirectPage() {
   const courseId = params.courseId as string;
   const dispatch = useAppDispatch();
   const { courses, loading } = useAppSelector(state => state.courses);
-  const { language } = useAppSelector(state => state.settings);
-  const t = translations[language].coursePlayer;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('coursePlayer', { returnObjects: true }) as any;
   const planId = searchParams.get('planId');
 
   useEffect(() => {

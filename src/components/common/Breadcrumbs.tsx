@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
 
 export default function Breadcrumbs() {
@@ -11,10 +11,10 @@ export default function Breadcrumbs() {
   const searchParams = useSearchParams();
   const planId = searchParams.get('planId');
   
-  const { language } = useAppSelector((state) => state.settings);
   const { courses } = useAppSelector((state) => state.courses);
   const { trainingPlans } = useAppSelector((state) => state.trainingPlans);
-  const languageNav = translations[language].nav;
+  const { t } = useTranslation();
+  const languageNav = t('nav', { returnObjects: true }) as any;
   
   if (!pathname || pathname === '/') return null;
 

@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import AreaChart from '@/components/charts/AreaChart';
 import DonutChart from '@/components/charts/DonutChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
@@ -34,8 +34,8 @@ export default function AdminDashboard() {
   const { courses } = useAppSelector(state => state.courses);
   const { trainingPlans } = useAppSelector(state => state.trainingPlans);
   const { user } = useAppSelector(state => state.auth);
-  const { language } = useAppSelector(state => state.settings);
-  const t = translations[language].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
 
   const [allProgress, setAllProgress] = useState<any[]>([]);
   const [loadingProgress, setLoadingProgress] = useState(true);
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-          <p className="text-slate-500 font-medium animate-pulse">Loading platform analytics...</p>
+          <p className="text-slate-500 font-medium animate-pulse">{t.loadingAnalytics}</p>
         </div>
       </div>
     );
@@ -276,10 +276,10 @@ export default function AdminDashboard() {
           
           <div className="relative z-10 text-center">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 leading-tight">
-              Welcome to Your <br/> Learning Empire
+              {t.welcomeEmpire}
             </h1>
             <p className="text-indigo-100 text-lg md:text-xl max-w-2xl mx-auto opacity-90 leading-relaxed mb-10">
-              Your dashboard is ready and waiting. Start by building your curriculum to see real-time engagement and growth analytics.
+              {t.welcomeEmpireSub}
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -288,14 +288,14 @@ export default function AdminDashboard() {
                 className="w-full sm:w-auto px-8 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 active:scale-95 flex items-center justify-center gap-2"
               >
                 <BookOpen size={20} />
-                Create First Course
+                {t.createFirstCourse}
               </Link>
               <Link 
                 href="/admin/training-plans"
                 className="w-full sm:w-auto px-8 py-4 bg-indigo-500/20 border border-white/30 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-sm"
               >
                 <Award size={20} />
-                Setup Training Plan
+                {t.setupTrainingPlan}
               </Link>
             </div>
           </div>
@@ -306,15 +306,15 @@ export default function AdminDashboard() {
             <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
               <Zap size={32} />
             </div>
-            <h3 className="font-bold text-slate-900 mb-2">Interactive Dashboard</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Once you have active courses, this page will transform into a rich analytics hub.</p>
+            <h3 className="font-bold text-slate-900 mb-2">{t.interactiveDashboard}</h3>
+            <p className="text-sm text-slate-500 leading-relaxed">{t.interactiveDashboardDesc}</p>
           </div>
           <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
               <BarChart2 size={32} />
             </div>
-            <h3 className="font-bold text-slate-900 mb-2">Track Progress</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Monitor completion rates, satisfaction scores, and daily active user trends.</p>
+            <h3 className="font-bold text-slate-900 mb-2">{t.trackProgress}</h3>
+            <p className="text-sm text-slate-500 leading-relaxed">{t.trackProgressDesc}</p>
           </div>
         </div>
       </div>
@@ -329,10 +329,10 @@ export default function AdminDashboard() {
         
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
-            Admin Performance Overview
+            {t.performanceOverview}
           </h1>
           <p className="text-indigo-100 text-lg max-w-2xl opacity-90">
-            Welcome back, {user?.displayName || 'Admin'}. Here is how your platform is performing today.
+            {i18nT('admin.welcomeAdmin', { name: user?.displayName || 'Admin' })}
           </p>
         </div>
       </header>
@@ -340,50 +340,50 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnalyticsCard 
           href="/admin/users"
-          title="Total Users"
+          title={t.totalUsers}
           value={dashboardStats.totalUsers.toLocaleString()}
-          subtext="From starting time"
+          subtext={t.totalUsersSub}
           icon={<Users size={24} />}
           color="indigo"
         />
         <AnalyticsCard 
           href="/admin/courses"
-          title="Total Courses"
+          title={t.totalCourses}
           value={dashboardStats.totalCourses.toLocaleString()}
-          subtext="Active learning modules"
+          subtext={t.activeLearningModules}
           icon={<BookOpen size={24} />}
           color="emerald"
         />
         <AnalyticsCard 
           href="/admin/training-plans"
-          title="Total Training Plans"
+          title={t.totalTrainingPlans}
           value={dashboardStats.totalPlans.toLocaleString()}
-          subtext="Curated paths"
+          subtext={t.curatedPaths}
           icon={<Award size={24} />}
           color="amber"
         />
         <AnalyticsCard 
           href={null}
-          title="Total Revenue"
+          title={t.totalRevenue}
           value={`$${dashboardStats.totalRevenue.toLocaleString()}`}
-          subtext="Lifetime platform income"
+          subtext={t.lifetimeRevenue}
           icon={<DollarSign size={24} />}
           color="rose"
         />
         <AnalyticsCard 
           href="/admin/top-training-plans"
-          title="Top Training Plans"
+          title={t.topTrainingPlansTitle}
           value={dashboardStats.topPlanName}
-          subtext="Most assigned path"
+          subtext={t.mostAssignedPath}
           icon={<GraduationCap size={24} />}
           color="violet"
           chartData={dashboardStats.topPlansData}
         />
         <AnalyticsCard 
           href="/admin/top-courses"
-          title="Top Courses"
+          title={t.topCourses}
           value={dashboardStats.topCourseName}
-          subtext="Highest enrollment"
+          subtext={t.highestEnrollment}
           icon={<BarChart2 size={24} />}
           color="sky"
           chartData={dashboardStats.topCoursesData}
@@ -397,8 +397,8 @@ export default function AdminDashboard() {
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col">
             <div className="flex justify-between items-start mb-2">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Daily Active Users (DAU)</h2>
-                <p className="text-sm text-slate-500 mt-1">Weekly engagement performance across all regions</p>
+                <h2 className="text-xl font-bold text-slate-900">{t.dauTitle}</h2>
+                <p className="text-sm text-slate-500 mt-1">{t.dauSub}</p>
               </div>
               <div className="flex bg-slate-100 p-1 rounded-full cursor-pointer transition-colors relative">
                 <div 
@@ -409,13 +409,13 @@ export default function AdminDashboard() {
                   onClick={() => setDauTimeframe('week')}
                   className={`w-[70px] py-1.5 text-xs font-bold relative z-10 transition-colors ${dauTimeframe === 'week' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
                 >
-                  Week
+                  {t.week}
                 </button>
                 <button 
                   onClick={() => setDauTimeframe('month')}
                   className={`w-[70px] py-1.5 text-xs font-bold relative z-10 transition-colors ${dauTimeframe === 'month' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
                 >
-                  Month
+                  {t.month}
                 </button>
               </div>
             </div>
@@ -425,7 +425,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Popularity Heatmap</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-6">{t.popularityHeatmap}</h2>
             <div className="space-y-6 flex-1">
               {reportStats.popularity.map((course, i) => {
                 const colors = ['bg-indigo-600', 'bg-emerald-600', 'bg-amber-600', 'bg-violet-500'];
@@ -437,7 +437,7 @@ export default function AdminDashboard() {
                   <div key={course.id}>
                     <div className="flex justify-between text-sm mb-2">
                       <span className="font-bold text-slate-700 truncate max-w-[70%]">{course.title}</span>
-                      <span className="font-bold text-slate-900">{course.percent}% <span className="text-slate-400 font-normal text-xs ml-1">Assigned</span></span>
+                      <span className="font-bold text-slate-900">{course.percent}% <span className="text-slate-400 font-normal text-xs ml-1">{t.assigned}</span></span>
                     </div>
                     <div className={`w-full h-2.5 ${bgColor} rounded-full overflow-hidden`}>
                       <div className={`h-full ${color} rounded-full`} style={{ width: `${course.percent}%` }}></div>
@@ -457,14 +457,14 @@ export default function AdminDashboard() {
                   <AlertTriangle size={20} />
                </div>
                <div>
-                 <h2 className="text-xl font-bold text-slate-900">Attention Needed</h2>
-                 <p className="text-sm text-slate-500 mt-1">Courses with ratings below 3.5</p>
+                 <h2 className="text-xl font-bold text-slate-900">{t.attentionNeeded}</h2>
+                 <p className="text-sm text-slate-500 mt-1">{t.attentionNeededSub}</p>
                </div>
             </div>
 
             <div className="space-y-4">
               {reportStats.attentionNeeded.length === 0 ? (
-                 <div className="p-8 text-center text-slate-400 italic">All courses are performing well!</div>
+                 <div className="p-8 text-center text-slate-400 italic">{t.allCoursesWell}</div>
               ) : (
                   reportStats.attentionNeeded.map((course) => (
                     <div key={course.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
@@ -480,7 +480,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <Link href={`/admin/courses`} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors px-4 py-2 hover:bg-indigo-50 rounded-lg">
-                        Revise
+                        {t.revise}
                       </Link>
                     </div>
                   ))
@@ -494,8 +494,8 @@ export default function AdminDashboard() {
                   <Hourglass size={20} />
                </div>
                <div>
-                 <h2 className="text-xl font-bold text-slate-900">Stalled Learners</h2>
-                 <p className="text-sm text-slate-500 mt-1">Inactive for 7+ days</p>
+                 <h2 className="text-xl font-bold text-slate-900">{t.stalledLearners}</h2>
+                 <p className="text-sm text-slate-500 mt-1">{t.stalledLearnersSub}</p>
                </div>
             </div>
 
@@ -507,7 +507,7 @@ export default function AdminDashboard() {
                    strokeWidth={14} 
                    color="#A16207"
                    label={`${reportStats.stalledStats.percent}%`}
-                   sublabel="COHORT AVERAGE"
+                   sublabel={t.cohortAverage}
                  />
                </div>
                
@@ -516,16 +516,16 @@ export default function AdminDashboard() {
                     <div className="flex flex-col gap-3 text-sm">
                       <div className="flex items-center gap-2">
                          <span className="w-3 h-3 rounded-full bg-amber-700"></span>
-                         <span className="font-medium text-slate-700">Stalled ({reportStats.stalledStats.stalled.toLocaleString()})</span>
+                         <span className="font-medium text-slate-700">{t.stalledLabel} ({reportStats.stalledStats.stalled.toLocaleString()})</span>
                       </div>
                       <div className="flex items-center gap-2">
                          <span className="w-3 h-3 rounded-full bg-slate-200"></span>
-                         <span className="font-medium text-slate-500">Active ({reportStats.stalledStats.active.toLocaleString()})</span>
+                         <span className="font-medium text-slate-500">{t.activeLabel} ({reportStats.stalledStats.active.toLocaleString()})</span>
                       </div>
                     </div>
                   </div>
                   <button className="w-full mt-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold py-2.5 px-4 rounded-xl border border-amber-200 transition-colors shadow-sm text-sm">
-                    Send Nudge
+                    {t.sendNudge}
                   </button>
                </div>
             </div>

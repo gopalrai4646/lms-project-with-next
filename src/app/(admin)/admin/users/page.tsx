@@ -7,7 +7,7 @@ import { fetchUsersRequest, User, deleteUserRequest } from '@/store/slices/userS
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { impersonateUserRequest } from '@/store/slices/authSlice';
 import UserDetailsModal from '@/components/admin/UserDetailsModal';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { Search, List, LayoutGrid, Users, Trash2, ChevronLeft, ChevronRight, Eye, UserSquare2 } from 'lucide-react';
 
 export default function AdminUsersPage() {
@@ -16,8 +16,8 @@ export default function AdminUsersPage() {
   const { users, loading, error } = useAppSelector(state => state.users);
   const { isImpersonating } = useAppSelector(state => state.auth);
   const { courses } = useAppSelector(state => state.courses);
-  const { language } = useAppSelector(state => state.settings);
-  const t = translations[language].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
 
   useEffect(() => {
     if (isImpersonating) {
@@ -139,7 +139,7 @@ export default function AdminUsersPage() {
         
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0 shadow-sm w-full sm:w-auto justify-center">
-            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage || "Items per page"}:</span>
+            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage}:</span>
             <select 
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
           </div>
           <div>
             <p className="text-xl text-slate-500 font-bold">{t.noUsersFound}</p>
-            <p className="text-slate-400 mt-1 max-w-xs mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
+            <p className="text-slate-400 mt-1 max-w-xs mx-auto">{t.tryAdjustingFilters}</p>
           </div>
         </div>
       ) : viewMode === 'list' ? (
@@ -252,7 +252,7 @@ export default function AdminUsersPage() {
                           onClick={() => dispatch(impersonateUserRequest(user.id))}
                           className="px-4 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
                         >
-                          <UserSquare2 size={14} /> {t.loginAsUser || "Impersonate"}
+                          <UserSquare2 size={14} /> {t.impersonate}
                         </button>
                         <button 
                           onClick={() => handleDelete(user.id)}
@@ -325,7 +325,7 @@ export default function AdminUsersPage() {
                     onClick={() => dispatch(impersonateUserRequest(user.id))}
                     className="flex-1 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5"
                   >
-                    <UserSquare2 size={14} /> {t.loginAsUser || "Impersonate"}
+                    <UserSquare2 size={14} /> {t.impersonate}
                   </button>
                   <button 
                     onClick={() => handleDelete(user.id)}

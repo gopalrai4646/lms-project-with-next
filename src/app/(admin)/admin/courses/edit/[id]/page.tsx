@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateCourseRequest, fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { VideoItem } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video } from 'lucide-react';
 
 interface VideoEntry {
@@ -25,8 +25,8 @@ export default function EditCoursePage() {
   const courseId = params.id as string;
   const dispatch = useAppDispatch();
   const { courses, loading, error } = useAppSelector((state) => state.courses);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].admin;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('admin', { returnObjects: true }) as any;
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0, visibility: 'public' as 'public' | 'private' });

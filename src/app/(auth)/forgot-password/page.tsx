@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { forgotPasswordRequest, clearError } from '@/store/slices/authSlice';
-import { translations } from '@/utils/translations';
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
-  const { language } = useAppSelector((state) => state.settings);
-  const t = translations[language].auth;
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('auth', { returnObjects: true }) as any;
 
   useEffect(() => {
     return () => {
