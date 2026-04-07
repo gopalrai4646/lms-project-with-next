@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
+import { translations } from '@/utils/translations';
 import { 
   BarChart, 
   Bar, 
@@ -20,6 +21,8 @@ export default function TopCoursesPage() {
   const dispatch = useAppDispatch();
   const { courses, loading: coursesLoading } = useAppSelector(state => state.courses);
   const { users, loading: usersLoading } = useAppSelector(state => state.users);
+  const { language } = useAppSelector(state => state.settings);
+  const adminT = translations[language].admin;
 
   useEffect(() => {
     dispatch(fetchCoursesRequest());
@@ -58,9 +61,9 @@ export default function TopCoursesPage() {
         <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
           <BookOpen size={40} />
         </div>
-        <h2 className="text-2xl font-bold text-slate-400">No courses available</h2>
+        <h2 className="text-2xl font-bold text-slate-400">{adminT.noCoursesAvailable}</h2>
         <p className="text-slate-400 mt-2 max-w-sm">
-          Once you create courses and learners enroll, analytic data will appear here.
+          {adminT.noCoursesAvailableSubtitle}
         </p>
       </div>
     );
@@ -73,10 +76,10 @@ export default function TopCoursesPage() {
       <header>
         <div className="flex items-center gap-3 mb-2 text-indigo-600 font-bold text-sm uppercase tracking-widest">
             <BarChart2 size={20} />
-            Analytics
+            {adminT.analytics}
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900">Top Performing Courses</h1>
-        <p className="text-slate-500 mt-1 max-w-2xl">This chart displays the top 5 most popular courses based on total user enrollments across the entire platform.</p>
+        <h1 className="text-3xl font-extrabold text-slate-900">{adminT.topPerformingCourses}</h1>
+        <p className="text-slate-500 mt-1 max-w-2xl">{adminT.topCoursesSubtitle}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -117,8 +120,8 @@ export default function TopCoursesPage() {
                   labelStyle={{ color: '#0f172a', fontWeight: '800', marginBottom: '4px', fontSize: '14px' }}
                   itemStyle={{ color: '#4f46e5', fontWeight: '600', fontSize: '12px' }}
                   formatter={(value: any) => [
-                    `${value} students`, 
-                    'Enrollments'
+                    `${value} ${adminT.studentsCount}`, 
+                    adminT.enrollments
                   ]}
                 />
                 <Bar 
@@ -137,7 +140,7 @@ export default function TopCoursesPage() {
 
         <div className="space-y-6">
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Current Top 5</h4>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{adminT.currentTop5}</h4>
                 <div className="space-y-4">
                     {chartData.map((c, i) => (
                         <div key={i} className="flex items-center justify-between">

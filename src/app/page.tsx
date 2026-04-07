@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ArrowRight, 
@@ -10,24 +10,111 @@ import {
   ShieldCheck, 
   Globe, 
   RefreshCcw, 
-  Lock 
+  Lock,
+  ChevronDown
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setLanguage, Language } from '@/store/slices/settingsSlice';
+import { translations } from '@/utils/translations';
+
+const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: string }[] = [
+  { code: 'en', flag: 'https://flagcdn.com/w40/gb.png', label: 'English', short: 'EN' },
+  { code: 'de', flag: 'https://flagcdn.com/w40/de.png', label: 'Deutsch', short: 'DE' },
+  { code: 'fr', flag: 'https://flagcdn.com/w40/fr.png', label: 'Français', short: 'FR' },
+];
+
 
 export default function LandingPage() {
+  const dispatch = useAppDispatch();
+  const { language } = useAppSelector((state) => state.settings);
+  const landingT = translations[language].landing;
+  const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === language) || LANGUAGE_OPTIONS[0];
+
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLanguageChange = (lang: Language) => {
+    dispatch(setLanguage(lang));
+    setLangOpen(false);
+  };
+
   return (
+
     <div className="min-h-screen bg-[#fafbff] font-manrope">
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform">
-              Mentora
+        <div className="max-w-7xl mx-auto px-1.5 xxs:px-4 sm:px-6 h-16 sm:h-20 flex justify-between items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-6">
+            <Link href="/" className="text-[13px] xxs:text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform whitespace-nowrap">
+              {landingT.nav.mentora}
+            </Link>
+
+            {/* Custom Language Switcher */}
+            <div className="relative" ref={langRef}>
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-1.5 bg-white/80 border border-slate-200 rounded-full px-2 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer focus:outline-none"
+              >
+                <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-sm border border-slate-100">
+                  <img
+                    src={currentLang.flag}
+                    alt={currentLang.label}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="hidden xxs:inline uppercase tracking-widest">{currentLang.short}</span>
+                <ChevronDown
+                  size={12}
+                  className={`text-slate-400 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* Dropdown */}
+              {langOpen && (
+                <div className="absolute left-0 mt-2 w-28 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-[60] py-1 animate-in fade-in zoom-in duration-200">
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.code}
+                      onClick={() => handleLanguageChange(opt.code)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-[10px] tracking-widest uppercase transition-all ${language === opt.code
+                          ? 'bg-blue-50 text-blue-700 font-extrabold'
+                          : 'text-slate-500 hover:bg-slate-50 font-bold'
+                        }`}
+                    >
+                      <span>{opt.short}</span>
+                      <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-sm border border-slate-100">
+                        <img
+                          src={opt.flag}
+                          alt={opt.label}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link href="/login" className="text-[10px] xxs:text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors">
+              {landingT.nav.login}
+            </Link>
+            <Link href="/signup" className="bg-blue-700 text-white px-3 xxs:px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[8px] xxs:text-[10px] xs:text-xs sm:text-base font-bold hover:bg-blue-800 transition-all shadow-md shadow-blue-200 shrink-0 whitespace-nowrap">
+              {landingT.nav.getStarted}
             </Link>
           </div>
-          <Link href="/signup" className="bg-blue-700 text-white px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold hover:bg-blue-800 transition-all shadow-md shadow-blue-200">
-            Get Started
-          </Link>
         </div>
       </nav>
 
@@ -39,7 +126,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-block px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs sm:text-sm font-bold tracking-wide mb-6 shadow-sm border border-purple-100"
           >
-            EVOLUTION OF LEARNING
+            {landingT.hero.badge}
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -47,7 +134,7 @@ export default function LandingPage() {
             transition={{ delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.2] lg:leading-[1.15] mb-6"
           >
-            Mentora: Master Your Craft <span className="text-blue-700 italic border-b-[4px] sm:border-b-[6px] border-blue-200/50 pb-1 inline-block">with</span> <span className="text-purple-600">Precision</span>
+            {landingT.hero.title_1} <span className="text-blue-700 italic border-b-[4px] sm:border-b-[6px] border-blue-200/50 pb-1 inline-block">{landingT.hero.title_with}</span> <span className="text-purple-600">{landingT.hero.title_2}</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -55,7 +142,7 @@ export default function LandingPage() {
             transition={{ delay: 0.2 }}
             className="text-lg lg:text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed"
           >
-            The ultimate high-density platform for professionals. Strategic training meets immersive technology in a digital sanctuary for growth.
+            {landingT.hero.subtitle}
           </motion.p>
         </div>
 
@@ -71,8 +158,8 @@ export default function LandingPage() {
               <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
             <div className="text-left">
-              <div className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Current Velocity</div>
-              <div className="text-sm sm:text-lg font-black text-slate-900 drop-shadow-sm">+128% Accuracy</div>
+              <div className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest">{landingT.hero.velocity}</div>
+              <div className="text-sm sm:text-lg font-black text-slate-900 drop-shadow-sm">{landingT.hero.accuracy}</div>
             </div>
           </motion.div>
           
@@ -92,19 +179,24 @@ export default function LandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 bg-white px-6">
+      <section className="py-20 sm:py-24 bg-white px-4 sm:px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-slate-900 mb-4">Precision Engineering for Growth</h2>
-            <p className="text-slate-500 font-medium">Designed by scholars, built for performers. Every pixel serves a pedagogical purpose.</p>
+          <div className="text-center mb-12 sm:mb-16 px-2">
+            <h2 
+              className="font-black text-slate-900 mb-4 tracking-tight leading-tight sm:text-3xl lg:text-4xl"
+              style={{ fontSize: 'clamp(1.25rem, 6vw, 2.25rem)' }}
+            >
+              {landingT.features.title}
+            </h2>
+            <p className="text-slate-500 font-medium text-[11px] xxs:text-xs sm:text-base max-w-2xl mx-auto leading-relaxed">{landingT.features.subtitle}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: BarChart3, title: 'Analytics Dashboard', desc: 'Real-time telemetry of your progress. Visualize cognitive retention rates with millisecond precision.' },
-              { icon: Play, title: 'Immersive Video Player', desc: 'Powered by Cloudinary for seamless 4K streaming. Adaptive bitrate focus.' },
-              { icon: FileText, title: 'Strategic Training Plans', desc: 'AI-curated pathways that adjust to your pace. Evolution as you do.' },
-              { icon: ShieldCheck, title: 'Admin Command Center', desc: 'Centralized control for teams. Manage licenses and monitor performance in real-time.' }
+              { icon: BarChart3, title: landingT.features.feature_1.title, desc: landingT.features.feature_1.desc },
+              { icon: Play, title: landingT.features.feature_2.title, desc: landingT.features.feature_2.desc },
+              { icon: FileText, title: landingT.features.feature_3.title, desc: landingT.features.feature_3.desc },
+              { icon: ShieldCheck, title: landingT.features.feature_4.title, desc: landingT.features.feature_4.desc }
             ].map((feature, i) => (
               <div key={i} className="p-8 rounded-[2rem] bg-slate-50 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-slate-100 group">
                 <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md shadow-slate-200/50 mb-6 group-hover:scale-110 group-hover:text-blue-600 transition-transform">
@@ -125,12 +217,12 @@ export default function LandingPage() {
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-700 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-8 sm:mb-10 shadow-2xl shadow-blue-300">
             <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 sm:mb-8 tracking-tight">Global Advantage</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 sm:mb-8 tracking-tight">{landingT.advantage.title}</h2>
           <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 sm:mb-14 leading-relaxed max-w-3xl mx-auto font-medium">
-            Breaking barriers through linguistic precision. Our platform delivers <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md">EN/DE/FR Native Translations</span>, ensuring technical nuances are never lost.
+            {landingT.advantage.subtitle_1} <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md">{landingT.advantage.subtitle_2}</span>
           </p>
           <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-            {['English (Global)', 'Deutsch (Native)', 'Français (Native)'].map(lang => (
+            {landingT.advantage.langs.map(lang => (
               <span key={lang} className="px-5 py-3 sm:px-6 sm:py-3.5 bg-white border border-slate-100 rounded-full text-slate-700 text-sm sm:text-base font-bold shadow-xl shadow-slate-200/40 hover:scale-105 transition-transform cursor-default">
                 {lang}
               </span>
@@ -145,19 +237,22 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-widest mb-6">
-              <Lock size={14} className="text-blue-400" /> Enterprise Grade
+              <Lock size={14} className="text-blue-400" /> {landingT.security.badge}
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">Security by Design</h2>
+            <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">{landingT.security.title}</h2>
             <p className="text-lg text-slate-400 mb-10 leading-relaxed max-w-xl">
-              Experience a unified compact layout where performance meets protection. We prioritize your data integrity above all else.
+              {landingT.security.subtitle}
             </p>
             <ul className="space-y-5">
-              {['Zero-trust architecture', 'Automated vulnerability scanning'].map(item => (
-                <li key={item} className="flex items-center gap-4 text-slate-200 font-semibold text-lg">
+              {[
+                { label: landingT.security.zeroTrust },
+                { label: landingT.security.automatedScanning }
+              ].map(item => (
+                <li key={item.label} className="flex items-center gap-4 text-slate-200 font-semibold text-lg">
                   <div className="w-8 h-8 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center p-1.5 shrink-0">
                     <ShieldCheck className="w-full h-full" />
                   </div>
-                  {item}
+                  {item.label}
                 </li>
               ))}
             </ul>
@@ -166,16 +261,16 @@ export default function LandingPage() {
           <div className="bg-slate-800/50 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] border border-slate-700 shadow-2xl relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-[2.5rem] sm:rounded-[3rem] pointer-events-none" />
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-700 relative z-10">
-              <span className="text-white font-bold text-lg">System Status</span>
+              <span className="text-white font-bold text-lg">{landingT.security.systemStatus}</span>
               <span className="px-4 py-1.5 bg-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                Secure
+                {landingT.security.secure}
               </span>
             </div>
             <div className="space-y-4 relative z-10">
               {[
-                { icon: RefreshCcw, label: 'Frictionless Updates', status: 'Live' },
-                { icon: Lock, label: '256-bit Encryption', status: 'Active' }
+                { icon: RefreshCcw, label: landingT.security.updates, status: landingT.security.live },
+                { icon: Lock, label: landingT.security.encryption, status: landingT.security.active }
               ].map((row, i) => (
                 <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-slate-800/80 rounded-2xl border border-slate-700 hover:bg-slate-700/50 transition-colors gap-4">
                   <div className="flex items-center gap-4">
@@ -196,15 +291,15 @@ export default function LandingPage() {
       <footer className="py-16 bg-[#fafbff] border-t border-slate-200 px-6 text-center">
         <div className="mb-8">
           <div className="flex items-center justify-center gap-2 cursor-pointer hover:scale-105 transition-transform mb-3">
-            <div className="text-2xl font-black bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">Mentora.</div>
+            <div className="text-2xl font-black bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">{landingT.nav.mentora}.</div>
           </div>
-          <div className="text-sm text-slate-500 font-medium">© 2026 Mentora. The Luminous Scholar.</div>
+          <div className="text-sm text-slate-500 font-medium">{landingT.footer.copyright}</div>
         </div>
         <div className="flex justify-center gap-8 text-sm font-bold text-slate-400">
-          <a href="#" className="hover:text-blue-700 transition-colors">Terms</a>
-          <a href="#" className="hover:text-blue-700 transition-colors">Privacy</a>
-          <a href="#" className="hover:text-blue-700 transition-colors">Twitter</a>
-          <a href="#" className="hover:text-blue-700 transition-colors">LinkedIn</a>
+          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.terms}</a>
+          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.privacy}</a>
+          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.twitter}</a>
+          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.linkedin}</a>
         </div>
       </footer>
     </div>

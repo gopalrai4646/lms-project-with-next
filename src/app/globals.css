@@ -10,7 +10,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --breakpoint-xs: 400px;
+  --breakpoint-xxs: 360px;
+  --breakpoint-xs: 420px;
 
   /* ── Primary (#4A55E2) ── */
   --color-indigo-50: #ECEDFB;

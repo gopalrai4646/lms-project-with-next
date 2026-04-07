@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
+import { translations } from '@/utils/translations';
 import { 
   BarChart, 
   Bar, 
@@ -20,6 +21,8 @@ export default function TopTrainingPlansPage() {
   const dispatch = useAppDispatch();
   const { trainingPlans, loading: plansLoading } = useAppSelector(state => state.trainingPlans);
   const { users, loading: usersLoading } = useAppSelector(state => state.users);
+  const { language } = useAppSelector(state => state.settings);
+  const adminT = translations[language].admin;
 
   useEffect(() => {
     dispatch(fetchTrainingPlansRequest());
@@ -64,9 +67,9 @@ export default function TopTrainingPlansPage() {
         <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
           <Award size={40} />
         </div>
-        <h2 className="text-2xl font-bold text-slate-400">No training plans available</h2>
+        <h2 className="text-2xl font-bold text-slate-400">{adminT.noTrainingPathsAvailable}</h2>
         <p className="text-slate-400 mt-2 max-w-sm">
-          Create curated learning paths to see performance analytics here.
+          {adminT.noTrainingPathsAvailableSubtitle}
         </p>
       </div>
     );
@@ -79,10 +82,10 @@ export default function TopTrainingPlansPage() {
       <header>
         <div className="flex items-center gap-3 mb-2 text-violet-600 font-bold text-sm uppercase tracking-widest">
             <Award size={20} />
-            Training paths
+            {adminT.trainingPaths}
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900">Top Training Plans</h1>
-        <p className="text-slate-500 mt-1 max-w-2xl">This chart summarizes the distribution of learners across your most curated training paths.</p>
+        <h1 className="text-3xl font-extrabold text-slate-900">{adminT.topTrainingPlansTitle}</h1>
+        <p className="text-slate-500 mt-1 max-w-2xl">{adminT.topTrainingPlansSubtitle}</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -122,7 +125,7 @@ export default function TopTrainingPlansPage() {
                   }}
                   labelStyle={{ color: '#0f172a', fontWeight: '800', marginBottom: '4px', fontSize: '14px' }}
                   itemStyle={{ color: '#8b5cf6', fontWeight: '600', fontSize: '12px' }}
-                  formatter={(value: any) => [`${value} assignments`, 'Engagement']}
+                  formatter={(value: any) => [`${value} ${adminT.assignmentsCount}`, adminT.engagement]}
                 />
                 <Bar 
                   dataKey="assignments" 
@@ -140,7 +143,7 @@ export default function TopTrainingPlansPage() {
 
         <div className="space-y-6">
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Leaderboard</h4>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{adminT.leaderboard}</h4>
                 <div className="space-y-4">
                     {chartData.map((tp, i) => (
                         <div key={i} className="flex items-center justify-between">
@@ -150,7 +153,7 @@ export default function TopTrainingPlansPage() {
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-sm font-bold text-slate-700 truncate max-w-[100px]">{tp.name}</p>
-                                    <p className="text-[10px] text-slate-400 font-bold">{tp.courses} Courses</p>
+                                    <p className="text-[10px] text-slate-400 font-bold">{tp.courses} {adminT.tpCoursesCount}</p>
                                 </div>
                             </div>
                             <span className="text-sm font-black text-slate-900">{tp.assignments}</span>
