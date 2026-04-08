@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/components/ReduxProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { DataSyncProvider } from "@/components/DataSyncProvider";
 import I18nProvider from "@/components/I18nProvider";
 
 const geistSans = Geist({
@@ -37,7 +38,9 @@ export default function RootLayout({
         <ReduxProvider>
           <I18nProvider>
             <AuthProvider>
-              {children}
+              <DataSyncProvider>
+                {children}
+              </DataSyncProvider>
             </AuthProvider>
           </I18nProvider>
         </ReduxProvider>

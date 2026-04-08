@@ -45,10 +45,6 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    dispatch(fetchUsersRequest());
-    if (courses.length === 0) {
-      dispatch(fetchCoursesRequest());
-    }
     const savedView = localStorage.getItem('adminUserViewMode');
     if (savedView === 'list' || savedView === 'grid') {
       setViewMode(savedView);
@@ -95,7 +91,7 @@ export default function AdminUsersPage() {
   if (!isMounted) return null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">{t.manageUsers}</h1>
@@ -110,7 +106,7 @@ export default function AdminUsersPage() {
       )}
 
       {/* Toolbar: Search, Course Filter, and Items Per Page */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
         <div className="flex flex-col md:flex-row gap-4 w-full lg:flex-1">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -202,7 +198,7 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-slate-100">
                 {paginatedUsers.map((user: User) => (
                   <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-xl flex items-center justify-center shrink-0 border border-indigo-100/50 shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden">
                           {user.photoURL ? (
@@ -217,12 +213,12 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <span className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest ${user.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-slate-50 text-slate-500 border border-slate-200/50'}`}>
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {user.enrolledCourses.slice(0, 2).map((courseId: string) => (
@@ -240,13 +236,14 @@ export default function AdminUsersPage() {
                         <span className="text-xs font-medium text-slate-400 italic bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">{t.noEnrollments}</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-2 text-right">
                       <div className="flex items-center justify-end gap-2 text-sm">
                         <button 
                           onClick={() => setSelectedUserId(user.id)}
-                          className="px-4 py-2.5 bg-white border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-black uppercase tracking-wider rounded-xl transition-all shadow-sm flex items-center gap-2"
+                          className="p-2.5 bg-white border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                          title={t.viewDetails}
                         >
-                          <Eye size={14} className="opacity-70" /> {t.viewDetails}
+                          <Eye size={18} />
                         </button>
                         <button 
                           onClick={() => dispatch(impersonateUserRequest(user.id))}
@@ -317,9 +314,10 @@ export default function AdminUsersPage() {
                 <div className="flex items-center justify-between gap-2 mt-1">
                   <button 
                     onClick={() => setSelectedUserId(user.id)}
-                    className="flex-1 py-2.5 bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm"
+                    className="flex-1 py-2.5 bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                    title={t.viewDetails}
                   >
-                    {t.viewDetails}
+                    <Eye size={18} />
                   </button>
                   <button 
                     onClick={() => dispatch(impersonateUserRequest(user.id))}
@@ -343,33 +341,33 @@ export default function AdminUsersPage() {
 
       {/* Pagination Controls */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-5 sm:px-8 rounded-[32px] shadow-sm border border-slate-100 mt-10 animate-in slide-in-from-bottom duration-500">
-          <p className="text-sm text-slate-500 font-bold">
-            {t.showing} <span className="font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full text-xs mx-1">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full text-xs mx-1">{endIndex}</span> {t.of} <span className="font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full text-xs mx-1">{totalItems}</span>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
+          <p className="text-xs text-slate-500 font-medium">
+            {t.showing} <span className="font-bold text-slate-700">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-700">{endIndex}</span> {t.of} <span className="font-bold text-slate-700">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto justify-center">
+          <div className="flex items-center gap-1 overflow-x-auto">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={safeCurrentPage === 1 || totalPages === 0}
-              className="px-4 sm:px-5 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev}</span>
+              <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
             
-            <div className="flex items-center gap-1.5 px-1">
+            <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
                 .map((page, index, array) => {
                   if (index > 0 && page - array[index - 1] > 1) {
                     return (
-                      <div key={`ellipsis-${page}`} className="flex items-center gap-1.5">
-                        <span className="w-6 text-center text-slate-400 font-black tracking-widest text-xs">...</span>
+                      <div key={`ellipsis-${page}`} className="flex items-center gap-1">
+                        <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[44px] h-11 px-2 rounded-2xl font-black transition-all active:scale-95 text-sm ${
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                             safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 border border-indigo-700' 
-                              : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                              ? 'bg-indigo-600 text-white border border-indigo-700' 
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                           }`}
                         >
                           {page}
@@ -382,10 +380,10 @@ export default function AdminUsersPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[44px] h-11 px-2 rounded-2xl font-black transition-all active:scale-95 text-sm ${
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                         safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 border border-indigo-700' 
-                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          ? 'bg-indigo-600 text-white border border-indigo-700' 
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {page}
@@ -397,9 +395,9 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={safeCurrentPage === totalPages || totalPages === 0}
-              className="px-4 sm:px-5 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={18} />
+               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
             </button>
           </div>
         </div>

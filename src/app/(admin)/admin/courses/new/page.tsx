@@ -20,7 +20,7 @@ interface VideoEntry {
 export default function NewCoursePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.courses);
+  const { createLoading, error } = useAppSelector((state) => state.courses);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
@@ -338,16 +338,16 @@ export default function NewCoursePage() {
           <div className="pt-4 flex flex-col sm:flex-row gap-4">
             <button
               type="submit"
-              disabled={loading || submitting}
+              disabled={createLoading || submitting}
               className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto"
             >
-              {(loading || submitting) && (
+              {(createLoading || submitting) && (
                 <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               )}
-              {submitting ? t.uploadingVideo : loading ? t.savingCourse : t.createCourseBtn}
+              {submitting ? t.uploadingVideo : createLoading ? t.savingCourse : t.createCourseBtn}
             </button>
             <button
               type="button"

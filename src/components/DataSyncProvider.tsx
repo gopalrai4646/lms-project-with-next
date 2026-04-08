@@ -1,0 +1,54 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchCoursesRequest } from '@/store/slices/courseSlice';
+import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
+import { fetchUsersRequest } from '@/store/slices/userSlice';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+import { db, auth } from '@/lib/firebase/config';
+import { logoutSuccess } from '@/store/slices/authSlice';
+
+/**
+ * DataSyncProvider is a non-visual component that ensures 
+ * critical data (courses, training plans, and users for admins) 
+ * is synchronized in real-time across the entire application.
+ * 
+ * It dispatches the initial fetch requests which trigger 
+ * persistent Firestore listeners (onSnapshot) in the Redux Sagas.
+ */
+export function DataSyncProvider({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch();
+  const { user, role } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user?.uid) {
+      // 1. Instant Logout Listener: Monitor own profile for deletion
+      const profileRef = doc(db, 'users', user.uid);
+      const unsubscribe = onSnapshot(profileRef, (doc) => {
+        if (!doc.exists()) {
+          console.warn('Real-time logout: Profile no longer exists.');
+          signOut(auth).then(() => {
+            dispatch(logoutSuccess());
+          });
+        }
+      });
+
+      // 2. Always sync courses for any authenticated user
+      dispatch(fetchCoursesRequest());
+      
+      // 3. Sync training plans for everyone
+      dispatch(fetchTrainingPlansRequest());
+
+      // 4. Sync users ONLY if the current user is an admin
+      if (role === 'admin') {
+        dispatch(fetchUsersRequest());
+      }
+
+      return () => unsubscribe();
+    }
+  }, [dispatch, user?.uid, role]);
+
+  return <>{children}</>;
+}

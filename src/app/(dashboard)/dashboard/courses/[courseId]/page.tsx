@@ -24,7 +24,7 @@ export default function CourseRedirectPage() {
   }, [dispatch, courses.length]);
 
   useEffect(() => {
-    if (!loading && courses.length > 0) {
+    if (courses.length > 0) {
       const course = courses.find(c => c.id === courseId);
       if (course) {
         // Redirect to the first video

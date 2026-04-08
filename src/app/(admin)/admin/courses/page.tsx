@@ -8,30 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Plus, Search, Eye, ChevronDown, List, LayoutGrid, BookOpen, GraduationCap, Users, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const formatIndianDate = (dateVal: any) => {
-  if (!dateVal) return 'N/A';
-  try {
-    let d: Date;
-    if (typeof dateVal === 'object' && dateVal.seconds) {
-      d = new Date(dateVal.seconds * 1000);
-    } else if (typeof dateVal === 'number') {
-      d = new Date(dateVal < 10000000000 ? dateVal * 1000 : dateVal);
-    } else {
-      d = new Date(dateVal);
-    }
-    
-    // Check for invalid date
-    if (isNaN(d.getTime())) return 'N/A';
-    
-    return d.toLocaleDateString('en-IN', {
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric'
-    });
-  } catch (e) {
-    return 'N/A';
-  }
-};
+import { formatDate } from '@/utils/dateUtils';
 
 export default function AdminCoursesPage() {
   const dispatch = useAppDispatch();
@@ -50,7 +27,6 @@ export default function AdminCoursesPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    dispatch(fetchCoursesRequest());
     const savedView = localStorage.getItem('adminCourseViewMode');
     if (savedView === 'list' || savedView === 'grid') {
       setViewMode(savedView);
@@ -104,7 +80,7 @@ export default function AdminCoursesPage() {
   if (!isMounted) return null; // Avoid hydration mismatch for localStorage view
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-in fade-in duration-700">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">{t.manageCoursesTitle}</h1>
@@ -125,7 +101,7 @@ export default function AdminCoursesPage() {
       )}
 
       {/* Toolbar: Search, Filters, and Items Per Page */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
         <div className="flex flex-col lg:flex-row gap-4 w-full xl:flex-1">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -215,7 +191,7 @@ export default function AdminCoursesPage() {
               <tbody className="divide-y divide-slate-100">
                 {paginatedCourses.map((course) => (
                   <tr key={course.id} className="hover:bg-slate-50/30 transition-colors group">
-                    <td className="px-6 py-4 w-1/3">
+                    <td className="px-6 py-2 w-1/3">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center text-2xl relative border border-slate-200/50 shadow-sm group-hover:scale-105 transition-transform duration-300">
                           {course.thumbnail ? <img src={course.thumbnail} alt="" className="w-full h-full object-cover" /> : <BookOpen size={32} className="text-slate-300" />}
@@ -226,7 +202,7 @@ export default function AdminCoursesPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex items-center gap-2.5">
                          <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs shrink-0 shadow-sm text-indigo-600">
                            <GraduationCap size={16} />
@@ -234,22 +210,22 @@ export default function AdminCoursesPage() {
                          <span className="text-sm font-bold text-slate-700">{course.instructor}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-2 text-center">
                       <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap border ${course.visibility === 'private' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                         {course.visibility === 'private' ? (t.private?.split(' ')[0] || 'Private') : (t.public?.split(' ')[0] || 'Public')}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <span className="text-xs font-bold text-slate-500 font-mono bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
-                        {formatIndianDate(course.createdAt)}
+                        {formatDate(course.createdAt)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-2 text-center">
                       <span className="text-xs font-black text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-full inline-flex items-center justify-center gap-1.5 w-fit border border-slate-200/50 shadow-sm">
                         <Users size={14} className="opacity-60" /> {course.enrolledUsers?.length || 0}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-2 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <Link 
                           href={`/admin/courses/edit/${course.id}`}
@@ -336,33 +312,33 @@ export default function AdminCoursesPage() {
 
       {/* Pagination Controls */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-5 sm:px-8 rounded-[32px] shadow-sm border border-slate-100 mt-10 animate-in slide-in-from-bottom duration-500">
-          <p className="text-sm text-slate-500 font-bold">
-            {t.showing} <span className="font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full text-xs mx-1">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full text-xs mx-1">{endIndex}</span> {t.of} <span className="font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full text-xs mx-1">{totalItems}</span>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
+          <p className="text-xs text-slate-500 font-medium">
+            {t.showing} <span className="font-bold text-slate-700">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-700">{endIndex}</span> {t.of} <span className="font-bold text-slate-700">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto justify-center">
+          <div className="flex items-center gap-1 overflow-x-auto">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={safeCurrentPage === 1 || totalPages === 0}
-              className="px-4 sm:px-5 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev}</span>
+              <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
             
-            <div className="flex items-center gap-1.5 px-1">
+            <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
                 .map((page, index, array) => {
                   if (index > 0 && page - array[index - 1] > 1) {
                     return (
-                      <div key={`ellipsis-${page}`} className="flex items-center gap-1.5">
-                        <span className="w-6 text-center text-slate-400 font-black tracking-widest text-xs">...</span>
+                      <div key={`ellipsis-${page}`} className="flex items-center gap-1">
+                        <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[44px] h-11 px-2 rounded-2xl font-black transition-all active:scale-95 text-sm ${
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                             safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 border border-indigo-700' 
-                              : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                              ? 'bg-indigo-600 text-white border border-indigo-700' 
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                           }`}
                         >
                           {page}
@@ -375,10 +351,10 @@ export default function AdminCoursesPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[44px] h-11 px-2 rounded-2xl font-black transition-all active:scale-95 text-sm ${
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                         safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 border border-indigo-700' 
-                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          ? 'bg-indigo-600 text-white border border-indigo-700' 
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {page}
@@ -390,9 +366,9 @@ export default function AdminCoursesPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={safeCurrentPage === totalPages || totalPages === 0}
-              className="px-4 sm:px-5 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={18} />
+               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
             </button>
           </div>
         </div>

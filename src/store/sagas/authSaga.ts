@@ -87,7 +87,15 @@ let userSyncTask: any = null;
 function* handleLogin(action: ReturnType<typeof loginRequest>): any {
   try {
     const { email, pass } = action.payload;
-    const userCredential: UserCredential = yield call(signInWithEmailAndPassword, auth, email, pass);
+    const normalizedEmail = email.toLowerCase();
+
+    // Check if email is banned
+    const bannedDoc = yield call(getDoc, doc(db, 'bannedEmails', normalizedEmail));
+    if (bannedDoc.exists()) {
+      throw new Error('This account has been permanently disabled by an administrator.');
+    }
+
+    const userCredential: UserCredential = yield call(signInWithEmailAndPassword, auth, normalizedEmail, pass);
     const { uid, email: userEmail, displayName } = userCredential.user;
     
     // Initial fetch to establish roles and profile
@@ -133,7 +141,15 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
 function* handleSignup(action: ReturnType<typeof signupRequest>): any {
   try {
     const { email, pass, name, role, photoURL, phoneNumber } = action.payload;
-    const userCredential: UserCredential = yield call(createUserWithEmailAndPassword, auth, email, pass);
+    const normalizedEmail = email.toLowerCase();
+
+    // Check if email is banned
+    const bannedDoc = yield call(getDoc, doc(db, 'bannedEmails', normalizedEmail));
+    if (bannedDoc.exists()) {
+      throw new Error('This email is banned and cannot be used to create an account.');
+    }
+
+    const userCredential: UserCredential = yield call(createUserWithEmailAndPassword, auth, normalizedEmail, pass);
     yield call(updateProfile, userCredential.user, { displayName: name, photoURL });
     const { uid, email: userEmail } = userCredential.user;
     
@@ -197,6 +213,16 @@ function* handleGoogleLogin(): any {
     const provider = new GoogleAuthProvider();
     const userCredential: UserCredential = yield call(signInWithPopup, auth, provider);
     const { uid, email, displayName, metadata } = userCredential.user;
+
+    // Check if email is banned
+    if (email) {
+      const normalizedEmail = email.toLowerCase();
+      const bannedDoc = yield call(getDoc, doc(db, 'bannedEmails', normalizedEmail));
+      if (bannedDoc.exists()) {
+        yield call(signOut, auth);
+        throw new Error('This Google account has been permanently disabled on this platform.');
+      }
+    }
     const isNew = metadata.creationTime === metadata.lastSignInTime;
     
     if (isNew) {

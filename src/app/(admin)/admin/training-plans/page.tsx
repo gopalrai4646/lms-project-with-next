@@ -25,7 +25,6 @@ export default function AdminTrainingPlansPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    dispatch(fetchTrainingPlansRequest());
     const savedView = localStorage.getItem('adminTrainingPlanViewMode');
     if (savedView === 'list' || savedView === 'grid') {
       setViewMode(savedView);
@@ -75,7 +74,7 @@ export default function AdminTrainingPlansPage() {
   if (!isMounted) return null; // Avoid hydration mismatch for localStorage view
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">{t.manageTrainingPlans}</h1>
@@ -96,7 +95,7 @@ export default function AdminTrainingPlansPage() {
       )}
 
       {/* Toolbar: Search, Items Per Page, and View toggle */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
         <div className="relative w-full lg:flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
@@ -159,9 +158,9 @@ export default function AdminTrainingPlansPage() {
             <table className="w-full text-left min-w-[800px]">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo}</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses}</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
+                  <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo}</th>
+                  <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses}</th>
+                  <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -171,7 +170,7 @@ export default function AdminTrainingPlansPage() {
                     className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
                     onClick={() => router.push(`/training-plans/${plan.id}`)}
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200/50 flex items-center justify-center">
                           {plan.image ? (
@@ -186,12 +185,12 @@ export default function AdminTrainingPlansPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-2 text-center">
                       <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/50 shadow-sm inline-flex items-center gap-1.5">
                          <BookOpen size={14} className="opacity-60" /> {plan.courseIds?.length || 0}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-2 text-right">
                       <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <Link 
                           href={`/admin/training-plans/edit/${plan.id}`}
@@ -264,33 +263,33 @@ export default function AdminTrainingPlansPage() {
 
       {/* Pagination Controls */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 sm:px-6 rounded-3xl shadow-sm border border-slate-100 mt-6">
-          <p className="text-sm text-slate-500 font-medium">
-            {t.showing} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{endIndex}</span> {t.of} <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{totalItems}</span>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
+          <p className="text-xs text-slate-500 font-medium">
+            {t.showing} <span className="font-bold text-slate-700">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-700">{endIndex}</span> {t.of} <span className="font-bold text-slate-700">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto justify-center">
+          <div className="flex items-center gap-1 overflow-x-auto">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={safeCurrentPage === 1 || totalPages === 0}
-              className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-              <ChevronLeft size={18} /> <span className="hidden sm:inline">{t.prev}</span>
+              <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
             
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
                 .map((page, index, array) => {
                   if (index > 0 && page - array[index - 1] > 1) {
                     return (
-                      <div key={`ellipsis-${page}`} className="flex items-center gap-1.5">
-                        <span className="w-8 text-center text-slate-400 tracking-widest">...</span>
+                      <div key={`ellipsis-${page}`} className="flex items-center gap-1">
+                        <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[40px] h-10 px-2 rounded-xl font-bold transition-all active:scale-95 ${
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                             safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-700' 
-                              : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                              ? 'bg-indigo-600 text-white border border-indigo-700' 
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                           }`}
                         >
                           {page}
@@ -303,10 +302,10 @@ export default function AdminTrainingPlansPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[40px] h-10 px-2 rounded-xl font-bold transition-all active:scale-95 ${
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                         safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-700' 
-                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          ? 'bg-indigo-600 text-white border border-indigo-700' 
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {page}
@@ -318,9 +317,9 @@ export default function AdminTrainingPlansPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={safeCurrentPage === totalPages || totalPages === 0}
-              className="px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={18} />
+               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
             </button>
           </div>
         </div>

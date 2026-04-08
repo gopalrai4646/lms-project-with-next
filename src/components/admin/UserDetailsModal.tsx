@@ -4,10 +4,11 @@ import { User } from '@/store/slices/userSlice';
 import { Course } from '@/store/slices/courseSlice';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
-import { assignTrainingPlanRequest } from '@/store/slices/userSlice';
+import { assignTrainingPlanRequest, unassignTrainingPlanRequest } from '@/store/slices/userSlice';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ClipboardList, BookOpen, Heart, Plus, Phone, Calendar } from 'lucide-react';
+import { X, ClipboardList, BookOpen, Heart, Plus, Phone, Calendar, Trash2 } from 'lucide-react';
+import { formatDate } from '@/utils/dateUtils';
 
 interface Props {
   user: User;
@@ -42,6 +43,13 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
     }));
     setIsAssigning(false);
     setSelectedPlanId('');
+  };
+
+  const handleUnassignPlan = (planId: string) => {
+    dispatch(unassignTrainingPlanRequest({
+      userId: user.id,
+      trainingPlanId: planId
+    }));
   };
 
   return (
@@ -83,7 +91,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                   <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
                     <Calendar size={12} className="text-slate-400" />
                     <span className="text-slate-400 font-medium mr-0.5">{t.joinDate}:</span>
-                    {new Date(user.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : language === 'de' ? 'de-DE' : 'fr-FR', {
+                    {formatDate(user.createdAt, i18n.language, {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
@@ -132,9 +140,18 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
             {user.assignedTrainingPlans && user.assignedTrainingPlans.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                 {user.assignedTrainingPlans.map(id => (
-                  <li key={id} className="flex items-center gap-2 p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-slate-700 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-slate-400"></span> 
-                    {getPlanName(id)}
+                  <li key={id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-slate-700 shadow-sm group">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span> 
+                      <span className="truncate">{getPlanName(id)}</span>
+                    </div>
+                    <button
+                      onClick={() => handleUnassignPlan(id)}
+                      className="text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-md hover:bg-rose-50"
+                      title={t.remove || "Remove"}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </li>
                 ))}
               </ul>

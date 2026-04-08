@@ -92,7 +92,7 @@ export default function SettingsPage() {
   }, [loading, error, passError]);
 
   return (
-    <div className="max-w-xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-8">
       <header className="mb-6 px-2">
         <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{ts.accountSettings}</h1>
         <p className="text-sm text-slate-500">{ts.manageProfile}</p>
@@ -141,36 +141,36 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Photo Upload Area */}
-            <div className="flex items-center gap-6 p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50 transition-colors hover:bg-slate-50">
-              <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
-                <div className="w-20 h-20 rounded-full bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-400 group-hover:shadow-lg group-hover:shadow-indigo-100/50">
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <UserIcon className="text-slate-300" size={32} />
-                  )}
+            {/* Row 1: Photo + Full Name side by side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50 transition-colors hover:bg-slate-50">
+                <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
+                  <div className="w-20 h-20 rounded-full bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-400 group-hover:shadow-lg group-hover:shadow-indigo-100/50">
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <UserIcon className="text-slate-300" size={32} />
+                    )}
+                  </div>
+                  <div className="absolute inset-0 rounded-full bg-indigo-600/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
+                    <Camera className="text-white" size={18} />
+                  </div>
+                  <input 
+                    id="settings-photo-upload"
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                  />
                 </div>
-                <div className="absolute inset-0 rounded-full bg-indigo-600/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
-                  <Camera className="text-white" size={18} />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 mb-0.5">{ts.profilePhoto || "Photo"}</h3>
+                  <p className="text-[11px] text-slate-500 leading-tight">
+                    Click to update your avatar. PNG or JPG supported.
+                  </p>
                 </div>
-                <input 
-                  id="settings-photo-upload"
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                />
               </div>
-              <div className="max-w-[180px]">
-                <h3 className="text-sm font-bold text-slate-800 mb-0.5">{ts.profilePhoto || "Photo"}</h3>
-                <p className="text-[11px] text-slate-500 leading-tight">
-                  Click to update your avatar. PNG or JPG supported.
-                </p>
-              </div>
-            </div>
 
-            <div className="space-y-4">
               <div>
                 <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{t.fullName}</label>
                 <input 
@@ -181,7 +181,10 @@ export default function SettingsPage() {
                   placeholder="Your name"
                 />
               </div>
+            </div>
 
+            {/* Row 2: Phone + Email side by side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{ts.phoneNumber || "Phone Number"}</label>
                 <div className="relative">
@@ -232,7 +235,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[13px] font-bold text-slate-700 mb-1.5 ml-1">{t.newPassword}</label>
                 <input 

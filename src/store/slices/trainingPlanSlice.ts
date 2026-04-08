@@ -12,12 +12,18 @@ export interface TrainingPlan {
 interface TrainingPlanState {
   trainingPlans: TrainingPlan[];
   loading: boolean;
+  createLoading: boolean;
+  updateLoading: boolean;
+  deleteLoading: boolean;
   error: string | null;
 }
 
 const initialState: TrainingPlanState = {
   trainingPlans: [],
   loading: false,
+  createLoading: false,
+  updateLoading: false,
+  deleteLoading: false,
   error: null,
 };
 
@@ -35,34 +41,40 @@ const trainingPlanSlice = createSlice({
     },
     fetchTrainingPlansFailure: (state, action: PayloadAction<string>) => {
       state.loading = false;
+      state.createLoading = false;
+      state.updateLoading = false;
+      state.deleteLoading = false;
       state.error = action.payload;
     },
     createTrainingPlanRequest: (state, _action: PayloadAction<Omit<TrainingPlan, 'id' | 'createdAt'>>) => {
-      state.loading = true;
+      state.createLoading = true;
+      state.error = null;
     },
     createTrainingPlanSuccess: (state, action: PayloadAction<TrainingPlan>) => {
       const exists = state.trainingPlans.some(tp => tp.id === action.payload.id);
       if (!exists) {
         state.trainingPlans.unshift(action.payload);
       }
-      state.loading = false;
+      state.createLoading = false;
     },
     updateTrainingPlanRequest: (state, _action: PayloadAction<Partial<TrainingPlan> & { id: string }>) => {
-      state.loading = true;
+      state.updateLoading = true;
+      state.error = null;
     },
     updateTrainingPlanSuccess: (state, action: PayloadAction<TrainingPlan>) => {
       const index = state.trainingPlans.findIndex(tp => tp.id === action.payload.id);
       if (index !== -1) {
         state.trainingPlans[index] = action.payload;
       }
-      state.loading = false;
+      state.updateLoading = false;
     },
     deleteTrainingPlanRequest: (state, _action: PayloadAction<string>) => {
-      state.loading = true;
+      state.deleteLoading = true;
+      state.error = null;
     },
     deleteTrainingPlanSuccess: (state, action: PayloadAction<string>) => {
       state.trainingPlans = state.trainingPlans.filter(tp => tp.id !== action.payload);
-      state.loading = false;
+      state.deleteLoading = false;
     },
     clearTrainingPlanError: (state) => {
       state.error = null;

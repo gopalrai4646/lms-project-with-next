@@ -63,6 +63,18 @@ const userSlice = createSlice({
       }
       state.loading = false;
     },
+    unassignTrainingPlanRequest: (state, _action: PayloadAction<{ userId: string; trainingPlanId: string }>) => {
+      state.loading = true;
+    },
+    unassignTrainingPlanSuccess: (state, action: PayloadAction<{ userId: string; trainingPlanId: string }>) => {
+      const user = state.users.find(u => u.id === action.payload.userId);
+      if (user) {
+        user.assignedTrainingPlans = (user.assignedTrainingPlans || []).filter(
+          id => id !== action.payload.trainingPlanId
+        );
+      }
+      state.loading = false;
+    },
     clearUsers: (state) => {
       state.users = [];
       state.loading = false;
@@ -79,6 +91,8 @@ export const {
   deleteUserSuccess,
   assignTrainingPlanRequest,
   assignTrainingPlanSuccess,
+  unassignTrainingPlanRequest,
+  unassignTrainingPlanSuccess,
   clearUsers,
 } = userSlice.actions;
 

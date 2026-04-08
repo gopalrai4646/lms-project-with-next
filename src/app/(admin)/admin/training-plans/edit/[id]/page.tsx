@@ -14,7 +14,7 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
   const dispatch = useAppDispatch();
   const { id } = use(params);
   
-  const { trainingPlans, loading, error: planError } = useAppSelector((state) => state.trainingPlans);
+  const { trainingPlans, updateLoading, error: planError } = useAppSelector((state) => state.trainingPlans);
   const { courses, error: courseError } = useAppSelector((state) => state.courses);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
@@ -248,7 +248,7 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
                       </div>
                       <p className="text-xs text-slate-500 truncate">{course.instructor}</p>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 shrink-0 transition-opacity">
                       <button
                         type="button"
                         onClick={() => moveCourse(index, 'up')}
@@ -285,10 +285,10 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
           <div className="pt-6 flex flex-col sm:flex-row gap-4 border-t border-slate-100">
             <button
               type="submit"
-              disabled={loading || submitting}
+              disabled={updateLoading || submitting}
               className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto text-lg"
             >
-              {submitting || loading ? t.savingEllipsis || "Saving..." : t.saveChanges || "Save Changes"}
+              {submitting || updateLoading ? t.savingEllipsis || "Saving..." : t.saveChanges || "Save Changes"}
             </button>
             <button
               type="button"

@@ -12,7 +12,7 @@ import { Pencil, Image as ImageIcon, Plus, BookOpen, ChevronUp, ChevronDown, Tra
 export default function NewTrainingPlanPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.trainingPlans);
+  const { createLoading, error } = useAppSelector((state) => state.trainingPlans);
   const { courses } = useAppSelector((state) => state.courses);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
@@ -262,10 +262,10 @@ export default function NewTrainingPlanPage() {
           <div className="pt-6 flex flex-col sm:flex-row gap-4 border-t border-slate-100">
             <button
               type="submit"
-              disabled={loading || submitting}
+              disabled={createLoading || submitting}
               className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto text-lg"
             >
-              {submitting || loading ? t.savingEllipsis || "Saving..." : t.createTrainingPlan || "Create Training Plan"}
+              {submitting || createLoading ? t.savingEllipsis || "Saving..." : t.createTrainingPlan || "Create Training Plan"}
             </button>
             <button
               type="button"

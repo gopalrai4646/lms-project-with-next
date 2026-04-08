@@ -25,12 +25,18 @@ export interface Course {
 interface CourseState {
   courses: Course[];
   loading: boolean;
+  createLoading: boolean;
+  updateLoading: boolean;
+  deleteLoading: boolean;
   error: string | null;
 }
 
 const initialState: CourseState = {
   courses: [],
   loading: false,
+  createLoading: false,
+  updateLoading: false,
+  deleteLoading: false,
   error: null,
 };
 
@@ -50,34 +56,40 @@ const courseSlice = createSlice({
     },
     fetchCoursesFailure: (state, action: PayloadAction<string>) => {
       state.loading = false;
+      state.createLoading = false;
+      state.updateLoading = false;
+      state.deleteLoading = false;
       state.error = action.payload;
     },
     createCourseRequest: (state, _action: PayloadAction<Omit<Course, 'id' | 'createdAt'>>) => {
-      state.loading = true;
+      state.createLoading = true;
+      state.error = null;
     },
     createCourseSuccess: (state, action: PayloadAction<Course>) => {
       const exists = state.courses.some(c => c.id === action.payload.id);
       if (!exists) {
         state.courses.unshift(action.payload);
       }
-      state.loading = false;
+      state.createLoading = false;
     },
     updateCourseRequest: (state, _action: PayloadAction<Partial<Course> & { id: string }>) => {
-      state.loading = true;
+      state.updateLoading = true;
+      state.error = null;
     },
     updateCourseSuccess: (state, action: PayloadAction<Course>) => {
       const index = state.courses.findIndex(c => c.id === action.payload.id);
       if (index !== -1) {
         state.courses[index] = action.payload;
       }
-      state.loading = false;
+      state.updateLoading = false;
     },
     deleteCourseRequest: (state, _action: PayloadAction<string>) => {
-      state.loading = true;
+      state.deleteLoading = true;
+      state.error = null;
     },
     deleteCourseSuccess: (state, action: PayloadAction<string>) => {
       state.courses = state.courses.filter(c => c.id !== action.payload);
-      state.loading = false;
+      state.deleteLoading = false;
     },
     clearCourseError: (state) => {
       state.error = null;

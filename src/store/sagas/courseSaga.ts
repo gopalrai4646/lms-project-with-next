@@ -57,6 +57,7 @@ function* handleFetchCourses(): any {
   } catch (error: any) {
     yield put(fetchCoursesFailure(error.message));
   } finally {
+    // This finally block only runs if the saga is cancelled (e.g. on logout)
     channel.close();
   }
 }
@@ -219,7 +220,10 @@ function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): an
 }
 
 export function* watchCourses() {
+  // Use takeLatest for the persistent listener so every request ensures a response
   yield takeLatest(fetchCoursesRequest.type, handleFetchCourses);
+
+  // Keep takeLatest for mutations so they are always active from the start
   yield takeLatest(createCourseRequest.type, handleCreateCourse);
   yield takeLatest(updateCourseRequest.type, handleUpdateCourse);
   yield takeLatest(deleteCourseRequest.type, handleDeleteCourse);

@@ -29,14 +29,8 @@ export default function DashboardPage() {
   const [showAllPlans, setShowAllPlans] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchCoursesRequest());
-    if (user?.assignedTrainingPlans?.length) {
-      dispatch(fetchTrainingPlansRequest());
-    }
-  }, [dispatch, user?.assignedTrainingPlans]);
-
-  // Fetch progress for all enrolled courses
-  useEffect(() => {
+    // We only fetch progress here. 
+    // Courses and Training Plans are now handled globally by DataSyncProvider.
     if (user?.uid && user?.enrolledCourses?.length) {
       user.enrolledCourses.forEach(courseId => {
         if (!progress[courseId]) {
@@ -51,6 +45,7 @@ export default function DashboardPage() {
   // Training plan data
   const assignedPlanIds = user?.assignedTrainingPlans || [];
   const assignedPlans = trainingPlans.filter(tp => assignedPlanIds.includes(tp.id));
+  const discoverPlans = trainingPlans.filter(tp => !assignedPlanIds.includes(tp.id));
   const planCourseIds = new Set(assignedPlans.flatMap(tp => tp.courseIds || []));
 
   // Course categories

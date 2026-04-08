@@ -9,7 +9,10 @@ import {
   serverTimestamp,
   query,
   orderBy,
-  onSnapshot
+  onSnapshot,
+  where,
+  writeBatch,
+  arrayRemove
 } from 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
 import { take, fork, cancel } from 'redux-saga/effects';
@@ -29,7 +32,7 @@ import {
 
 function createTrainingPlansChannel() {
   return eventChannel(emit => {
-    const q = query(collection(db, 'trainingPlans'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'trainingPlans'));
     return onSnapshot(q, (snapshot) => {
       const plans: TrainingPlan[] = [];
       snapshot.forEach((doc: any) => {
@@ -88,8 +91,28 @@ function* handleUpdateTrainingPlan(action: ReturnType<typeof updateTrainingPlanR
 function* handleDeleteTrainingPlan(action: ReturnType<typeof deleteTrainingPlanRequest>): any {
   try {
     const id = action.payload;
+    
+    // 1. Delete the training plan itself
     const planRef = doc(db, 'trainingPlans', id);
     yield call(deleteDoc, planRef);
+
+    // 2. Automatically Remove from all users' assigned lists
+    // We find all users who have this ID in their assignedTrainingPlans array
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('assignedTrainingPlans', 'array-contains', id));
+    const querySnapshot = yield call(getDocs, q);
+    
+    if (!querySnapshot.empty) {
+      const batch = writeBatch(db);
+      querySnapshot.forEach((userDoc: any) => {
+        batch.update(userDoc.ref, {
+          assignedTrainingPlans: arrayRemove(id)
+        });
+      });
+      yield call([batch, batch.commit]);
+      console.log(`Cleaned up deleted training plan ${id} from ${querySnapshot.size} users.`);
+    }
+
     yield put(deleteTrainingPlanSuccess(id));
   } catch (error: any) {
     yield put(fetchTrainingPlansFailure(error.message));
@@ -97,7 +120,9 @@ function* handleDeleteTrainingPlan(action: ReturnType<typeof deleteTrainingPlanR
 }
 
 export function* watchTrainingPlans() {
+  // Use takeLatest for the persistent listener so every request ensures a response
   yield takeLatest(fetchTrainingPlansRequest.type, handleFetchTrainingPlans);
+
   yield takeLatest(createTrainingPlanRequest.type, handleCreateTrainingPlan);
   yield takeLatest(updateTrainingPlanRequest.type, handleUpdateTrainingPlan);
   yield takeLatest(deleteTrainingPlanRequest.type, handleDeleteTrainingPlan);

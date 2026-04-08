@@ -147,7 +147,7 @@ export default function MyCoursesPage() {
   ];
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 pb-16">
       {/* Header */}
       <header>
         <h1 className="text-3xl font-extrabold text-slate-900">{t.myCourses || 'My Courses'}</h1>
@@ -157,7 +157,7 @@ export default function MyCoursesPage() {
 
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-3 md:p-4 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 py-2.5 px-4 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
         {/* Tabs - Scrollable on mobile */}
         <div className="overflow-x-auto no-scrollbar -mx-1 px-1 shrink-0 lg:w-auto">
           <div className="flex justify-between gap-1 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
@@ -252,11 +252,11 @@ export default function MyCoursesPage() {
               <table className="w-full text-left min-w-[700px]">
                 <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                    <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{adminT?.courseInfo || 'Course'}</th>
-                    <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{adminT?.instructor || 'Instructor'}</th>
-                    <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">{t.yourProgress || 'Progress'}</th>
-                    <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.statusLabel || 'Status'}</th>
-                    <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{adminT?.actions || 'Action'}</th>
+                    <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest">{adminT?.courseInfo || 'Course'}</th>
+                    <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest">{adminT?.instructor || 'Instructor'}</th>
+                    <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest">{t.yourProgress || 'Progress'}</th>
+                    <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.statusLabel || 'Status'}</th>
+                    <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{adminT?.actions || 'Action'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -265,7 +265,7 @@ export default function MyCoursesPage() {
                     const status = pct >= 100 ? 'completed' : pct > 0 ? 'in-progress' : 'not-started';
                     return (
                       <tr key={course.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-2">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
                               {course.thumbnail ? (
@@ -280,8 +280,8 @@ export default function MyCoursesPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-600">{course.instructor}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-2 text-sm font-medium text-slate-600">{course.instructor}</td>
+                        <td className="px-6 py-2">
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden max-w-[120px]">
                               <div
@@ -292,7 +292,7 @@ export default function MyCoursesPage() {
                             <span className="text-xs font-bold text-slate-600 w-8">{pct}%</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-6 py-2 text-center">
                           <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${
                             status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
                             status === 'in-progress' ? 'bg-amber-100 text-amber-600' :
@@ -307,7 +307,7 @@ export default function MyCoursesPage() {
                             )}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-2 text-right">
                           <Link
                             href={`/dashboard/courses/${course.id}`}
                             className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-1"
@@ -347,34 +347,34 @@ export default function MyCoursesPage() {
       )}
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 mt-12 animate-in slide-in-from-bottom duration-500">
-          <p className="text-sm text-slate-500 font-medium">
-            {t.showing || 'Showing'} <span className="font-bold text-slate-900 mx-1">{startIndex + 1}</span> {t.to || 'to'} <span className="font-bold text-slate-900 mx-1">{endIndex}</span> {t.of || 'of'} <span className="font-bold text-slate-900 mx-1">{totalItems}</span>
+      {totalPages > 0 && totalItems > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
+          <p className="text-xs text-slate-500 font-medium">
+            {t.showing || 'Showing'} <span className="font-bold text-slate-700">{startIndex + 1}</span> {t.to || 'to'} <span className="font-bold text-slate-700">{endIndex}</span> {t.of || 'of'} <span className="font-bold text-slate-700">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 overflow-x-auto">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={safeCurrentPage === 1}
-              className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm flex items-center gap-2"
+              disabled={safeCurrentPage === 1 || totalPages === 0}
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-              <ChevronLeft size={16} /> {t.prev || 'Prev'}
+              <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev || 'Prev'}</span>
             </button>
             
-            <div className="flex items-center gap-1.5 px-2">
+            <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
                 .map((page, index, array) => {
                   if (index > 0 && page - array[index - 1] > 1) {
                     return (
                       <div key={`ellipsis-${page}`} className="flex items-center gap-1">
-                        <span className="w-6 text-center text-slate-400 font-bold tracking-widest text-xs">...</span>
+                        <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`w-10 h-10 rounded-xl font-bold transition-all text-sm ${
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                             safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
-                              : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50'
+                              ? 'bg-indigo-600 text-white border border-indigo-700' 
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                           }`}
                         >
                           {page}
@@ -387,10 +387,10 @@ export default function MyCoursesPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`w-10 h-10 rounded-xl font-bold transition-all text-sm ${
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
                         safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
-                          : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50'
+                          ? 'bg-indigo-600 text-white border border-indigo-700' 
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {page}
@@ -401,10 +401,10 @@ export default function MyCoursesPage() {
 
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={safeCurrentPage === totalPages}
-              className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm flex items-center gap-2"
+              disabled={safeCurrentPage === totalPages || totalPages === 0}
+              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-              {t.next || 'Next'} <ChevronRight size={16} />
+              <span className="hidden sm:inline">{t.next || 'Next'}</span> <ChevronRight size={14} />
             </button>
           </div>
         </div>
