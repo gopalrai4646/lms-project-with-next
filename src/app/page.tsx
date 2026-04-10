@@ -221,7 +221,7 @@ export default function LandingPage() {
             {landingT.advantage.subtitle_1} <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md">{landingT.advantage.subtitle_2}</span>
           </p>
           <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-            {landingT.advantage.langs.map(lang => (
+            {landingT.advantage.langs.map((lang: string) => (
               <span key={lang} className="px-5 py-3 sm:px-6 sm:py-3.5 bg-white border border-slate-100 rounded-full text-slate-700 text-sm sm:text-base font-bold shadow-xl shadow-slate-200/40 hover:scale-105 transition-transform cursor-default">
                 {lang}
               </span>
