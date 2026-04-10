@@ -61,7 +61,7 @@ export default function Sidebar() {
   ];
 
   const adminMenuItems = [
-    { name: t.adminDashboard, href: '/admin', icon: <BarChart3 size={22} /> },
+    { name: t.adminDashboard, href: '/admin', icon: <LayoutDashboard size={22} /> },
     { name: t.topCourses, href: '/admin/top-courses', icon: <BarChart3 size={22} /> },
     { name: t.topTrainingPlans, href: '/admin/top-training-plans', icon: <Award size={22} /> },
     { name: t.manageCourses, href: '/admin/courses', icon: <Wrench size={22} /> },

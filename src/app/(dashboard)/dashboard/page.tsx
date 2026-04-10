@@ -172,7 +172,7 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
 
   return (
-    <div className="space-y-10 pb-16">
+    <div className="space-y-10 pb-5">
       {/* ─── Welcome Hero Banner ─── */}
       <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>

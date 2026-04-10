@@ -31,18 +31,22 @@ export default function Breadcrumbs() {
   // ─── Breadcrumb Stack Generation ───
   let breadcrumbItems: { label: string; href: string; isLast: boolean }[] = [];
 
+  const isAdmin = paths[0] === 'admin';
+  const trainingPlansBase = isAdmin ? '/admin/training-plans' : '/training-plans';
+  const planDetailBase = isAdmin ? '/admin/training-plans/edit' : '/training-plans';
+
   // 1. Add Training Plan Context if planId is present
   if (planId) {
     const plan = trainingPlans.find(tp => tp.id === planId);
     breadcrumbItems.push({ 
       label: languageNav.trainingPlans, 
-      href: '/training-plans', 
+      href: trainingPlansBase, 
       isLast: false 
     });
     if (plan) {
       breadcrumbItems.push({ 
         label: plan.name, 
-        href: `/training-plans/${planId}`, 
+        href: `${planDetailBase}/${planId}`, 
         isLast: false 
       });
     }

@@ -147,7 +147,7 @@ export default function MyCoursesPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-6 pb-1">
       {/* Header */}
       <header>
         <h1 className="text-3xl font-extrabold text-slate-900">{t.myCourses || 'My Courses'}</h1>

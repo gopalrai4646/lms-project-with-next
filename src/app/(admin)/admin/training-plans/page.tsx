@@ -168,7 +168,7 @@ export default function AdminTrainingPlansPage() {
                   <tr 
                     key={plan.id} 
                     className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                    onClick={() => router.push(`/training-plans/${plan.id}`)}
+                    onClick={() => router.push(`/admin/training-plans/edit/${plan.id}`)}
                   >
                     <td className="px-6 py-2">
                       <div className="flex items-center gap-4">
@@ -221,7 +221,7 @@ export default function AdminTrainingPlansPage() {
             <div 
               key={plan.id} 
               className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 cursor-pointer"
-              onClick={() => router.push(`/training-plans/${plan.id}`)}
+              onClick={() => router.push(`/admin/training-plans/edit/${plan.id}`)}
             >
               <div className="aspect-video bg-slate-50 relative overflow-hidden flex items-center justify-center text-5xl">
                 {plan.image ? (

@@ -25,9 +25,9 @@ export default function TopCoursesPage() {
   const adminT = t('admin', { returnObjects: true }) as any;
 
   useEffect(() => {
-    dispatch(fetchCoursesRequest());
-    dispatch(fetchUsersRequest());
-  }, [dispatch]);
+    if (courses.length === 0) dispatch(fetchCoursesRequest());
+    if (users.length === 0) dispatch(fetchUsersRequest());
+  }, [dispatch, courses.length, users.length]);
 
   const chartData = useMemo(() => {
     const learnerIds = new Set(users.filter(u => u.role !== 'admin').map(u => u.id));
@@ -47,7 +47,9 @@ export default function TopCoursesPage() {
       }));
   }, [courses, users]);
 
-  if (coursesLoading || usersLoading) {
+  const isInitialLoading = (coursesLoading || usersLoading) && (courses.length === 0 || users.length === 0);
+
+  if (isInitialLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>

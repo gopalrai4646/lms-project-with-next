@@ -25,9 +25,9 @@ export default function TopTrainingPlansPage() {
   const adminT = t('admin', { returnObjects: true }) as any;
 
   useEffect(() => {
-    dispatch(fetchTrainingPlansRequest());
-    dispatch(fetchUsersRequest());
-  }, [dispatch]);
+    if (trainingPlans.length === 0) dispatch(fetchTrainingPlansRequest());
+    if (users.length === 0) dispatch(fetchUsersRequest());
+  }, [dispatch, trainingPlans.length, users.length]);
 
   const chartData = useMemo(() => {
     const planCounts: Record<string, number> = {};
@@ -53,7 +53,9 @@ export default function TopTrainingPlansPage() {
       }));
   }, [trainingPlans, users]);
 
-  if (plansLoading || usersLoading) {
+  const isInitialLoading = (plansLoading || usersLoading) && (trainingPlans.length === 0 || users.length === 0);
+
+  if (isInitialLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>

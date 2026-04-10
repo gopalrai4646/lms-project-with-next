@@ -42,11 +42,13 @@ export default function AdminDashboard() {
   const [dauTimeframe, setDauTimeframe] = useState<'week' | 'month'>('week');
 
   useEffect(() => {
-    dispatch(fetchUsersRequest());
-    dispatch(fetchCoursesRequest());
-    dispatch(fetchTrainingPlansRequest());
+    if (users.length === 0) dispatch(fetchUsersRequest());
+    if (courses.length === 0) dispatch(fetchCoursesRequest());
+    if (trainingPlans.length === 0) dispatch(fetchTrainingPlansRequest());
 
     const fetchGlobalProgress = async () => {
+      // If we already have some progress data and we're just navigating back, 
+      // we can skip the heavy fetch or do it silently
       try {
         const querySnapshot = await getDocs(collection(db, 'userProgress'));
         const progressDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -59,7 +61,7 @@ export default function AdminDashboard() {
     };
     
     fetchGlobalProgress();
-  }, [dispatch]);
+  }, [dispatch, users.length, courses.length, trainingPlans.length]);
 
   const dashboardStats = useMemo(() => {
     // 1. Total Users (Excluding admins)
@@ -256,7 +258,12 @@ export default function AdminDashboard() {
 
   const isPlatformEmpty = !loadingProgress && courses.length === 0 && trainingPlans.length === 0;
 
-  if (loadingProgress) {
+  // Optimization: Only show full-page loading if we have absolutely no data yet.
+  // If we have courses/users/plans but progress is still loading, we can show the dashboard
+  // with a small loading indicator for specific charts if needed.
+  const isInitialLoading = users.length === 0 || courses.length === 0;
+
+  if (isInitialLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -322,7 +329,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-5">
       <header className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white mb-6 shadow-xl shadow-indigo-100">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
