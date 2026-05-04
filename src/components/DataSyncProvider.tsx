@@ -33,6 +33,12 @@ export function DataSyncProvider({ children }: { children: React.ReactNode }) {
             dispatch(logoutSuccess());
           });
         }
+      }, (error) => {
+        if (error.code === 'permission-denied') {
+          console.debug('Profile listener disconnected (permission-denied). This is normal during logout.');
+        } else {
+          console.error('Real-time logout listener error:', error);
+        }
       });
 
       // 2. Always sync courses for any authenticated user

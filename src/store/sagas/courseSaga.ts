@@ -41,8 +41,12 @@ function createCoursesChannel() {
         courses.push({ id: doc.id, ...doc.data() });
       });
       emit(courses);
-    }, (error) => {
-      console.error("Courses listener error:", error);
+    }, (error: any) => {
+      if (error.code === 'permission-denied') {
+        console.debug("Courses listener disconnected (permission-denied). Normal during logout.");
+      } else {
+        console.error("Courses listener error:", error);
+      }
     });
   });
 }

@@ -39,8 +39,12 @@ function createTrainingPlansChannel() {
         plans.push({ id: doc.id, ...doc.data() });
       });
       emit(plans);
-    }, (error) => {
-      console.error("Training plans listener error:", error);
+    }, (error: any) => {
+      if (error.code === 'permission-denied') {
+        console.debug("Training plans listener disconnected (permission-denied). Normal during logout.");
+      } else {
+        console.error("Training plans listener error:", error);
+      }
     });
   });
 }

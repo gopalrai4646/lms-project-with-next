@@ -29,8 +29,12 @@ function createUsersChannel() {
         } as User);
       });
       emit(users);
-    }, (error) => {
-      console.error("Users listener error:", error);
+    }, (error: any) => {
+      if (error.code === 'permission-denied') {
+        console.debug("Users listener disconnected (permission-denied). Normal during logout.");
+      } else {
+        console.error("Users listener error:", error);
+      }
     });
   });
 }

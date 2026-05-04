@@ -62,8 +62,12 @@ function createUserChannel(uid: string) {
           role: data.role || 'student'
         });
       }
-    }, (error) => {
-      console.error("Firestore listener error:", error);
+    }, (error: any) => {
+      if (error.code === 'permission-denied') {
+        console.debug("Firestore listener disconnected (permission-denied). Normal during logout.");
+      } else {
+        console.error("Firestore listener error:", error);
+      }
     });
   });
 }
@@ -126,13 +130,18 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     userSyncTask = yield fork(syncUserSession, uid);
 
   } catch (error: any) {
+    console.error('Login error details:', { code: error.code, message: error.message });
     let message = 'An unexpected error occurred. Please try again.';
     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
       message = 'Invalid email or password.';
-    } else if (error.code === 'auth/network-request-failed' || error.message.includes('offline')) {
+    } else if (error.code === 'auth/network-request-failed' || error.message?.includes('offline')) {
       message = 'Please check your internet connection.';
     } else if (error.code === 'auth/too-many-requests') {
       message = 'Too many failed attempts. Please try again later.';
+    } else if (error.code === 'permission-denied') {
+      message = 'Database access denied. Please check your Firestore Security Rules in the Firebase Console.';
+    } else if (error.message) {
+      message = error.message;
     }
     yield put(authFailure(message));
   }
