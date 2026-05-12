@@ -69,7 +69,14 @@ export default function DonutChart({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-extrabold text-slate-900">{Math.round(animatedPct)}%</span>
         {label && <span className="text-xs font-semibold text-slate-500 mt-0.5">{label}</span>}
-        {sublabel && <span className="text-[10px] text-slate-400">{sublabel}</span>}
+        {sublabel && (
+          <span 
+            className="text-[9px] font-bold text-slate-400 text-center leading-tight mt-1 px-4 max-w-full line-clamp-2"
+            style={{ maxWidth: size * 0.75 }}
+          >
+            {sublabel}
+          </span>
+        )}
       </div>
     </div>
   );
