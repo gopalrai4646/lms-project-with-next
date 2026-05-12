@@ -8,10 +8,12 @@ import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Plus, Search, Eye, ChevronDown, List, LayoutGrid, BookOpen, GraduationCap, Users, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { useRouter } from 'next/navigation';
 import { formatDate } from '@/utils/dateUtils';
 import { hasPermission } from '@/lib/permissions';
 
 export default function AdminCoursesPage() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { courses, loading, error } = useAppSelector((state) => state.courses);
   const { user, role, permissions } = useAppSelector((state) => state.auth);
