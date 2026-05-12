@@ -8,6 +8,7 @@ import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, BookOpen, ChevronUp, ChevronDown, Trash2, Search, X } from 'lucide-react';
+import { hasPermission } from '@/lib/permissions';
 
 export default function EditTrainingPlanPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -16,8 +17,11 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
   
   const { trainingPlans, updateLoading, error: planError } = useAppSelector((state) => state.trainingPlans);
   const { courses, error: courseError } = useAppSelector((state) => state.courses);
+  const { role, permissions } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
+
+  const canEdit = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_edit'));
 
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,13 +39,18 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
   const [isAddingCourse, setIsAddingCourse] = useState(false);
 
   useEffect(() => {
+    if (role && !canEdit) {
+      router.push('/admin');
+      return;
+    }
+
     if (trainingPlans.length === 0) {
       dispatch(fetchTrainingPlansRequest());
     }
     if (courses.length === 0) {
       dispatch(fetchCoursesRequest());
     }
-  }, [dispatch, trainingPlans.length, courses.length]);
+  }, [dispatch, trainingPlans.length, courses.length, role, canEdit, router]);
 
   useEffect(() => {
     if (trainingPlans.length > 0) {
@@ -131,6 +140,8 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
   const curriculumCourses = selectedCourseIds.map(id => courses.find(c => c.id === id)).filter(Boolean);
 
   const error = planError || courseError || uploadError;
+
+  if (role && !canEdit) return null;
 
   return (
     <div className="max-w-4xl mx-auto py-8">

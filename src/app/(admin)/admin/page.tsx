@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { useTranslation } from 'react-i18next';
+import { hasPermission } from '@/lib/permissions';
 import AreaChart from '@/components/charts/AreaChart';
 import DonutChart from '@/components/charts/DonutChart';
 import MiniBarChart from '@/components/charts/MiniBarChart';
@@ -33,9 +35,11 @@ export default function AdminDashboard() {
   const { users } = useAppSelector(state => state.users);
   const { courses } = useAppSelector(state => state.courses);
   const { trainingPlans } = useAppSelector(state => state.trainingPlans);
-  const { user } = useAppSelector(state => state.auth);
+  const { user, role, permissions } = useAppSelector(state => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
+
+  const canManageUsers = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'users_read'));
 
   const [allProgress, setAllProgress] = useState<any[]>([]);
   const [loadingProgress, setLoadingProgress] = useState(true);
@@ -65,7 +69,7 @@ export default function AdminDashboard() {
 
   const dashboardStats = useMemo(() => {
     // 1. Total Users (Excluding admins)
-    const totalUsers = users.filter(u => u.role !== 'admin').length;
+    const totalUsers = users.filter(u => u.role !== 'admin' && u.role !== 'staff').length;
 
     // 2. Total Courses
     const totalCourses = courses.length;
@@ -74,7 +78,7 @@ export default function AdminDashboard() {
     const totalPlans = trainingPlans.length;
 
     // Filtered learner IDs for accurate enrollment counts
-    const learnerIds = new Set(users.filter(u => u.role !== 'admin').map(u => u.id));
+    const learnerIds = new Set(users.filter(u => u.role !== 'admin' && u.role !== 'staff').map(u => u.id));
 
     // 4. Total Revenue (Sum of course.price * learner enrollment count)
     const totalRevenue = courses.reduce((sum, course) => {
@@ -82,20 +86,24 @@ export default function AdminDashboard() {
       return sum + (course.price * enrollments);
     }, 0);
 
-    // 5. Top Training Plans (Count assignments in learners)
-    const planCounts: Record<string, number> = {};
-    trainingPlans.forEach(tp => { planCounts[tp.id] = 0; });
-    
-    users.filter(u => u.role !== 'admin').forEach(u => {
-      u.assignedTrainingPlans?.forEach(tpId => {
-        if (planCounts[tpId] !== undefined) planCounts[tpId]++;
-      });
+    // 5. Top Training Plans (By Revenue)
+    const planRevenue: Record<string, number> = {};
+    trainingPlans.forEach(tp => { 
+      const planValue = (tp.courseIds || []).reduce((sum, cId) => {
+        const course = courses.find(c => c.id === cId);
+        return sum + (course?.price || 0);
+      }, 0);
+      
+      const learners = users.filter(u => u.role !== 'admin' && u.role !== 'staff');
+      const assignments = learners.filter(u => u.assignedTrainingPlans?.includes(tp.id)).length;
+      planRevenue[tp.id] = planValue * assignments;
     });
-    const sortedPlans = [...trainingPlans].sort((a, b) => (planCounts[b.id] || 0) - (planCounts[a.id] || 0));
-    const topPlanName = sortedPlans[0]?.name || 'None';
+    
+    const sortedPlans = [...trainingPlans].sort((a, b) => (planRevenue[b.id] || 0) - (planRevenue[a.id] || 0));
+    const topPlanName = sortedPlans[0] ? `${sortedPlans[0].name} ($${planRevenue[sortedPlans[0].id].toLocaleString()})` : 'None';
     const topPlansData = sortedPlans.slice(0, 5).map(p => ({
       name: p.name,
-      value: planCounts[p.id] || 0
+      value: planRevenue[p.id] || 0
     }));
 
     // 6. Top Courses (Learner enrolled count only)
@@ -123,7 +131,7 @@ export default function AdminDashboard() {
   }, [users, courses, trainingPlans]);
 
   const reportStats = useMemo(() => {
-    const learners = users.filter(u => u.role !== 'admin');
+    const learners = users.filter(u => u.role !== 'admin' && u.role !== 'staff');
     const totalLearners = learners.length;
 
     let totalCompletionSum = 0;
@@ -223,7 +231,7 @@ export default function AdminDashboard() {
       })
       .filter(c => c.avg > 0 && c.avg < 3.5)
       .sort((a, b) => a.avg - b.avg)
-      .slice(0, 3);
+      .slice(0, 10);
 
     const now = new Date().getTime();
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -330,72 +338,76 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-5">
-      <header className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white mb-6 shadow-xl shadow-indigo-100">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
-        
-        <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
-            {t.performanceOverview}
-          </h1>
-          <p className="text-indigo-100 text-lg max-w-2xl opacity-90">
-            {i18nT('admin.welcomeAdmin', { name: user?.displayName || 'Admin' })}
-          </p>
-        </div>
-      </header>
+      {role === 'admin' && (
+        <>
+          <header className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white mb-6 shadow-xl shadow-indigo-100">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
+            
+            <div className="relative z-10">
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+                {t.performanceOverview}
+              </h1>
+              <p className="text-indigo-100 text-lg max-w-2xl opacity-90">
+                {i18nT('admin.welcomeAdmin', { name: user?.displayName || 'Admin' })}
+              </p>
+            </div>
+          </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnalyticsCard 
-          href="/admin/users"
-          title={t.totalUsers}
-          value={dashboardStats.totalUsers.toLocaleString()}
-          subtext={t.totalUsersSub}
-          icon={<Users size={24} />}
-          color="indigo"
-        />
-        <AnalyticsCard 
-          href="/admin/courses"
-          title={t.totalCourses}
-          value={dashboardStats.totalCourses.toLocaleString()}
-          subtext={t.activeLearningModules}
-          icon={<BookOpen size={24} />}
-          color="emerald"
-        />
-        <AnalyticsCard 
-          href="/admin/training-plans"
-          title={t.totalTrainingPlans}
-          value={dashboardStats.totalPlans.toLocaleString()}
-          subtext={t.curatedPaths}
-          icon={<Award size={24} />}
-          color="amber"
-        />
-        <AnalyticsCard 
-          href={null}
-          title={t.totalRevenue}
-          value={`$${dashboardStats.totalRevenue.toLocaleString()}`}
-          subtext={t.lifetimeRevenue}
-          icon={<DollarSign size={24} />}
-          color="rose"
-        />
-        <AnalyticsCard 
-          href="/admin/top-training-plans"
-          title={t.topTrainingPlansTitle}
-          value={dashboardStats.topPlanName}
-          subtext={t.mostAssignedPath}
-          icon={<GraduationCap size={24} />}
-          color="violet"
-          chartData={dashboardStats.topPlansData}
-        />
-        <AnalyticsCard 
-          href="/admin/top-courses"
-          title={t.topCourses}
-          value={dashboardStats.topCourseName}
-          subtext={t.highestEnrollment}
-          icon={<BarChart2 size={24} />}
-          color="sky"
-          chartData={dashboardStats.topCoursesData}
-        />
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnalyticsCard 
+              href="/admin/users"
+              title={t.totalUsers}
+              value={dashboardStats.totalUsers.toLocaleString()}
+              subtext={t.totalUsersSub}
+              icon={<Users size={24} />}
+              color="indigo"
+            />
+            <AnalyticsCard 
+              href="/admin/courses"
+              title={t.totalCourses}
+              value={dashboardStats.totalCourses.toLocaleString()}
+              subtext={t.activeLearningModules}
+              icon={<BookOpen size={24} />}
+              color="emerald"
+            />
+            <AnalyticsCard 
+              href="/admin/training-plans"
+              title={t.totalTrainingPlans}
+              value={dashboardStats.totalPlans.toLocaleString()}
+              subtext={t.curatedPaths}
+              icon={<Award size={24} />}
+              color="amber"
+            />
+            <AnalyticsCard 
+              href={null}
+              title={t.totalRevenue}
+              value={`$${dashboardStats.totalRevenue.toLocaleString()}`}
+              subtext={t.lifetimeRevenue}
+              icon={<DollarSign size={24} />}
+              color="rose"
+            />
+            <AnalyticsCard 
+              href="/admin/top-training-plans"
+              title={t.topTrainingPlansTitle}
+              value={dashboardStats.topPlanName}
+              subtext={t.mostAssignedPath}
+              icon={<GraduationCap size={24} />}
+              color="violet"
+              chartData={dashboardStats.topPlansData}
+            />
+            <AnalyticsCard 
+              href="/admin/top-courses"
+              title={t.topCourses}
+              value={dashboardStats.topCourseName}
+              subtext={t.highestEnrollment}
+              icon={<BarChart2 size={24} />}
+              color="sky"
+              chartData={dashboardStats.topCoursesData}
+            />
+          </div>
+        </>
+      )}
 
       {/* ─── Integrated Report Sections ─── */}
       <div className="space-y-8">
@@ -469,7 +481,16 @@ export default function AdminDashboard() {
                </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[230px] overflow-y-auto pr-1 no-scrollbar">
+              <style jsx>{`
+                .no-scrollbar::-webkit-scrollbar {
+                  display: none;
+                }
+                .no-scrollbar {
+                  -ms-overflow-style: none;
+                  scrollbar-width: none;
+                }
+              `}</style>
               {reportStats.attentionNeeded.length === 0 ? (
                  <div className="p-8 text-center text-slate-400 italic">{t.allCoursesWell}</div>
               ) : (
@@ -513,7 +534,6 @@ export default function AdminDashboard() {
                    size={160} 
                    strokeWidth={14} 
                    color="#A16207"
-                   label={`${reportStats.stalledStats.percent}%`}
                    sublabel={t.cohortAverage}
                  />
                </div>
@@ -531,9 +551,11 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  <button className="w-full mt-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold py-2.5 px-4 rounded-xl border border-amber-200 transition-colors shadow-sm text-sm">
-                    {t.sendNudge}
-                  </button>
+                  {canManageUsers && (
+                    <button className="w-full mt-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold py-2.5 px-4 rounded-xl border border-amber-200 transition-colors shadow-sm text-sm">
+                      {t.sendNudge}
+                    </button>
+                  )}
                </div>
             </div>
           </div>

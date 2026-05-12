@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Permission } from '@/lib/permissions';
 
 interface AuthState {
   user: {
@@ -11,13 +12,19 @@ interface AuthState {
     photoURL: string | null;
     phoneNumber: string | null;
   } | null;
-  role: 'student' | 'admin' | null;
+  role: 'student' | 'admin' | 'staff' | null;
+  staffRoleId?: string | null;
+  staffRoleName?: string | null;
+  permissions: Permission[];
   loading: boolean;
   error: string | null;
   isNewUser: boolean;
   originalAdmin?: {
     user: AuthState['user'];
     role: AuthState['role'];
+    staffRoleId: AuthState['staffRoleId'];
+    staffRoleName: AuthState['staffRoleName'];
+    permissions: AuthState['permissions'];
   } | null;
   isImpersonating?: boolean;
 }
@@ -25,6 +32,9 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   role: null,
+  staffRoleId: null,
+  staffRoleName: null,
+  permissions: [],
   loading: true,
   error: null,
   isNewUser: false,
@@ -40,7 +50,7 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    signupRequest: (state, _action: PayloadAction<{ email: string; pass: string; name: string; role: 'student' | 'admin'; photoURL?: string; phoneNumber?: string }>) => {
+    signupRequest: (state, _action: PayloadAction<{ email: string; pass: string; name: string; role: 'student' | 'admin' | 'staff'; photoURL?: string; phoneNumber?: string }>) => {
       state.loading = true;
       state.error = null;
     },
@@ -73,9 +83,12 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    authSuccess: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | null; isNewUser?: boolean }>) => {
+    authSuccess: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | 'staff' | null; isNewUser?: boolean; staffRoleId?: string | null; staffRoleName?: string | null; permissions?: Permission[] }>) => {
       state.user = action.payload.user;
       state.role = action.payload.role ?? null;
+      state.staffRoleId = action.payload.staffRoleId ?? null;
+      state.staffRoleName = action.payload.staffRoleName ?? null;
+      state.permissions = action.payload.permissions ?? [];
       state.isNewUser = action.payload.isNewUser ?? false;
       state.loading = false;
       state.error = null;
@@ -90,6 +103,9 @@ const authSlice = createSlice({
     logoutSuccess: (state) => {
       state.user = null;
       state.role = null;
+      state.staffRoleId = null;
+      state.staffRoleName = null;
+      state.permissions = [];
       state.isNewUser = false;
       state.loading = false;
     },
@@ -122,13 +138,28 @@ const authSlice = createSlice({
         }
       }
     },
-    updateUserData: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | null }>) => {
+    updateUserData: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | 'staff' | null; staffRoleId?: string | null; staffRoleName?: string | null; permissions?: Permission[] }>) => {
       // Merges incoming Firestore data into the existing auth state ONLY if UIDs match
       if (!state.user || state.user.uid !== action.payload.user?.uid) return;
 
       state.user = { ...state.user, ...action.payload.user };
-      if (action.payload.role !== undefined) {
-        state.role = action.payload.role;
+      
+      // Only update role and permissions if we are NOT impersonating.
+      // This prevents the real-time sync of a student's document from wiping out
+      // the original admin's session state.
+      if (!state.isImpersonating) {
+        if (action.payload.role !== undefined) {
+          state.role = action.payload.role;
+        }
+        if (action.payload.staffRoleId !== undefined) {
+          state.staffRoleId = action.payload.staffRoleId;
+        }
+        if (action.payload.staffRoleName !== undefined) {
+          state.staffRoleName = action.payload.staffRoleName;
+        }
+        if (action.payload.permissions !== undefined) {
+          state.permissions = action.payload.permissions;
+        }
       }
     },
     impersonateUserRequest: (state, _action: PayloadAction<string>) => {
@@ -139,12 +170,18 @@ const authSlice = createSlice({
       if (!state.isImpersonating) {
         state.originalAdmin = {
           user: state.user,
-          role: state.role
+          role: state.role,
+          staffRoleId: state.staffRoleId,
+          staffRoleName: state.staffRoleName,
+          permissions: state.permissions,
         };
       }
       // 2. Set the current user/role to the target user
       state.user = action.payload.user;
       state.role = action.payload.role;
+      state.permissions = []; // Students have no permissions
+      state.staffRoleId = null;
+      state.staffRoleName = null;
       state.isImpersonating = true;
       state.loading = false;
     },
@@ -155,10 +192,32 @@ const authSlice = createSlice({
       if (state.originalAdmin) {
         state.user = state.originalAdmin.user;
         state.role = state.originalAdmin.role;
+        state.staffRoleId = state.originalAdmin.staffRoleId;
+        state.staffRoleName = state.originalAdmin.staffRoleName;
+        state.permissions = state.originalAdmin.permissions;
       }
       state.originalAdmin = null;
       state.isImpersonating = false;
       state.loading = false;
+    },
+    assignTrainingPlanToUser: (state, action: PayloadAction<{ userId: string; trainingPlanIds: string[] }>) => {
+      if (state.user && state.user.uid === action.payload.userId) {
+        if (!state.user.assignedTrainingPlans) state.user.assignedTrainingPlans = [];
+        action.payload.trainingPlanIds.forEach(id => {
+          if (!state.user!.assignedTrainingPlans!.includes(id)) {
+            state.user!.assignedTrainingPlans!.push(id);
+          }
+        });
+      }
+    },
+    unassignTrainingPlanFromUser: (state, action: PayloadAction<{ userId: string; trainingPlanIds: string[] }>) => {
+      if (state.user && state.user.uid === action.payload.userId) {
+        if (state.user.assignedTrainingPlans) {
+          state.user.assignedTrainingPlans = state.user.assignedTrainingPlans.filter(
+            id => !action.payload.trainingPlanIds.includes(id)
+          );
+        }
+      }
     },
   },
 });
@@ -186,6 +245,8 @@ export const {
   impersonateUserSuccess,
   stopImpersonationRequest,
   stopImpersonationSuccess,
+  assignTrainingPlanToUser,
+  unassignTrainingPlanFromUser,
 } = authSlice.actions;
 
 export default authSlice.reducer;

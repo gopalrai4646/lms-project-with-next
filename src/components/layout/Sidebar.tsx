@@ -16,16 +16,18 @@ import {
   PieChart,
   Award,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck
 } from 'lucide-react';
 
 import { useTranslation } from 'react-i18next';
 import { setMobileMenuOpen, setSidebarCollapsed } from '@/store/slices/settingsSlice';
+import { hasModuleAccess, ModuleGroup } from '@/lib/permissions';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { user, role, isImpersonating } = useAppSelector((state) => state.auth);
+  const { user, role, isImpersonating, permissions } = useAppSelector((state) => state.auth);
   const { isMobileMenuOpen, isSidebarCollapsed } = useAppSelector((state) => state.settings);
   const { t: i18nT } = useTranslation();
 
@@ -60,17 +62,34 @@ export default function Sidebar() {
     { name: t.accountSettings, href: '/settings', icon: <Settings size={22} /> },
   ];
 
-  const adminMenuItems = [
-    { name: t.adminDashboard, href: '/admin', icon: <LayoutDashboard size={22} /> },
-    { name: t.topCourses, href: '/admin/top-courses', icon: <BarChart3 size={22} /> },
-    { name: t.topTrainingPlans, href: '/admin/top-training-plans', icon: <Award size={22} /> },
-    { name: t.manageCourses, href: '/admin/courses', icon: <Wrench size={22} /> },
-    { name: t.trainingPlans, href: '/admin/training-plans', icon: <ClipboardList size={22} /> },
-    { name: t.users, href: '/admin/users', icon: <Users size={22} /> },
-    { name: t.settings, href: '/settings', icon: <Settings size={22} /> },
+  // Full admin menu items (all modules)
+  const allAdminMenuItems = [
+    { name: t.adminDashboard, href: '/admin', icon: <LayoutDashboard size={22} />, module: 'dashboard' as ModuleGroup },
+    { name: t.topCourses, href: '/admin/top-courses', icon: <BarChart3 size={22} />, module: 'top_courses' as ModuleGroup },
+    { name: t.topTrainingPlans, href: '/admin/top-training-plans', icon: <Award size={22} />, module: 'top_training_plans' as ModuleGroup },
+    { name: t.manageCourses, href: '/admin/courses', icon: <Wrench size={22} />, module: 'courses' as ModuleGroup },
+    { name: t.trainingPlans, href: '/admin/training-plans', icon: <ClipboardList size={22} />, module: 'training_plans' as ModuleGroup },
+    { name: t.users, href: '/admin/users', icon: <Users size={22} />, module: 'users' as ModuleGroup },
   ];
 
-  const menuItems = role === 'admin' ? adminMenuItems : userMenuItems;
+  // Build the menu based on role
+  let menuItems;
+  if (role === 'admin') {
+    // Admin sees everything + Staff Management + Settings
+    menuItems = [
+      ...allAdminMenuItems,
+      { name: t.staffRoles || 'Staff & Roles', href: '/admin/staff', icon: <ShieldCheck size={22} /> },
+      { name: t.settings, href: '/settings', icon: <Settings size={22} /> },
+    ];
+  } else if (role === 'staff') {
+    // Staff sees only modules they have permission for + Settings
+    menuItems = [
+      ...allAdminMenuItems.filter(item => hasModuleAccess(permissions as any, item.module)),
+      { name: t.settings, href: '/settings', icon: <Settings size={22} /> },
+    ];
+  } else {
+    menuItems = userMenuItems;
+  }
 
   return (
     <>

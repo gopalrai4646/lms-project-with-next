@@ -87,13 +87,13 @@ export default function TopCoursesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
           <div 
-            className="h-[250px] w-full transition-all duration-700 mx-auto"
+            className="h-[320px] w-full transition-all duration-700 mx-auto"
             style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                margin={{ top: 10, right: 10, left: 0, bottom: 40 }}
                 barCategoryGap={16}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -101,9 +101,11 @@ export default function TopCoursesPage() {
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
-                  dy={10}
-                  padding={{ left: 12, right: 12 }}
+                  tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
+                  interval={0}
+                  angle={-35}
+                  textAnchor="end"
+                  height={90}
                 />
                 <YAxis 
                   axisLine={false} 

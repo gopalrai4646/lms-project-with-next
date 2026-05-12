@@ -9,12 +9,13 @@ import { impersonateUserRequest } from '@/store/slices/authSlice';
 import UserDetailsModal from '@/components/admin/UserDetailsModal';
 import { useTranslation } from 'react-i18next';
 import { Search, List, LayoutGrid, Users, Trash2, ChevronLeft, ChevronRight, Eye, UserSquare2 } from 'lucide-react';
+import { hasPermission } from '@/lib/permissions';
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { users, loading, error } = useAppSelector(state => state.users);
-  const { isImpersonating } = useAppSelector(state => state.auth);
+  const { isImpersonating, role, permissions } = useAppSelector(state => state.auth);
   const { courses } = useAppSelector(state => state.courses);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
@@ -32,6 +33,10 @@ export default function AdminUsersPage() {
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+
+  const canRead = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'users_read'));
+  const canImpersonate = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'users_impersonate'));
+  const canDeleteUser = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'users_delete'));
 
   const selectedUser = useMemo(() => {
     return selectedUserId ? users.find(u => u.id === selectedUserId) || null : null;
@@ -61,8 +66,8 @@ export default function AdminUsersPage() {
   // 1. Filter users
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      // Exclude admin users from the user management list
-      if (user.role === 'admin') return false;
+      // Exclude admin and staff users from the user management list
+      if (user.role === 'admin' || user.role === 'staff') return false;
 
       const matchesSearch = 
         (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -192,7 +197,7 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.userProfile}</th>
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.role}</th>
                   <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.enrolledCourses}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
+                  {(canRead || canImpersonate || canDeleteUser) && <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -236,30 +241,36 @@ export default function AdminUsersPage() {
                         <span className="text-xs font-medium text-slate-400 italic bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">{t.noEnrollments}</span>
                       )}
                     </td>
-                    <td className="px-6 py-2 text-right">
-                      <div className="flex items-center justify-end gap-2 text-sm">
-                        <button 
-                          onClick={() => setSelectedUserId(user.id)}
-                          className="p-2.5 bg-white border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all shadow-sm flex items-center justify-center"
-                          title={t.viewDetails}
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button 
-                          onClick={() => dispatch(impersonateUserRequest(user.id))}
-                          className="px-4 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
-                        >
-                          <UserSquare2 size={14} /> {t.impersonate}
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(user.id)}
-                          className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 shadow-sm hover:shadow-rose-50"
-                          title={t.deleteUser}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
+                    {(canRead || canImpersonate || canDeleteUser) && (
+                      <td className="px-6 py-2 text-right">
+                        <div className="flex items-center justify-end gap-2 text-sm">
+                          <button 
+                            onClick={() => setSelectedUserId(user.id)}
+                            className="p-2.5 bg-white border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                            title={t.viewDetails}
+                          >
+                            <Eye size={18} />
+                          </button>
+                          {canImpersonate && (
+                            <button 
+                              onClick={() => dispatch(impersonateUserRequest(user.id))}
+                              className="px-4 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
+                            >
+                              <UserSquare2 size={14} /> {t.impersonate}
+                            </button>
+                          )}
+                          {canDeleteUser && (
+                            <button 
+                              onClick={() => handleDelete(user.id)}
+                              className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 shadow-sm hover:shadow-rose-50"
+                              title={t.deleteUser}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -319,19 +330,23 @@ export default function AdminUsersPage() {
                   >
                     <Eye size={18} />
                   </button>
-                  <button 
-                    onClick={() => dispatch(impersonateUserRequest(user.id))}
-                    className="flex-1 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5"
-                  >
-                    <UserSquare2 size={14} /> {t.impersonate}
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(user.id)}
-                    className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex-shrink-0 shadow-sm hover:shadow-rose-50"
-                    title={t.deleteUser}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {canImpersonate && (
+                    <button 
+                      onClick={() => dispatch(impersonateUserRequest(user.id))}
+                      className="flex-1 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5"
+                    >
+                      <UserSquare2 size={14} /> {t.impersonate}
+                    </button>
+                  )}
+                  {canDeleteUser && (
+                    <button 
+                      onClick={() => handleDelete(user.id)}
+                      className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex-shrink-0 shadow-sm hover:shadow-rose-50"
+                      title={t.deleteUser}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

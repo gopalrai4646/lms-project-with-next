@@ -5,10 +5,12 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
+import { fetchStaffRolesRequest } from '@/store/slices/staffRoleSlice';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { db, auth } from '@/lib/firebase/config';
 import { logoutSuccess } from '@/store/slices/authSlice';
+import { hasModuleAccess } from '@/lib/permissions';
 
 /**
  * DataSyncProvider is a non-visual component that ensures 
@@ -20,7 +22,7 @@ import { logoutSuccess } from '@/store/slices/authSlice';
  */
 export function DataSyncProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const { user, role } = useAppSelector((state) => state.auth);
+  const { user, role, permissions } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (user?.uid) {
@@ -47,14 +49,19 @@ export function DataSyncProvider({ children }: { children: React.ReactNode }) {
       // 3. Sync training plans for everyone
       dispatch(fetchTrainingPlansRequest());
 
-      // 4. Sync users ONLY if the current user is an admin
-      if (role === 'admin') {
+      // 4. Sync users if the user is an admin OR a staff member with 'users' access
+      if (role === 'admin' || (role === 'staff' && hasModuleAccess(permissions as any, 'users'))) {
         dispatch(fetchUsersRequest());
+      }
+
+      // 5. Sync staff roles for admin (needed for staff management page)
+      if (role === 'admin') {
+        dispatch(fetchStaffRolesRequest());
       }
 
       return () => unsubscribe();
     }
-  }, [dispatch, user?.uid, role]);
+  }, [dispatch, user?.uid, role, permissions.join(',')]);
 
   return <>{children}</>;
 }

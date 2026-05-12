@@ -1,4 +1,5 @@
 import { call, put, takeLatest, all, take, fork, cancel, select } from 'redux-saga/effects';
+import { ALL_PERMISSIONS, Permission } from '@/lib/permissions';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -9,7 +10,8 @@ import {
   updateProfile,
   updatePassword,
   User,
-  UserCredential
+  UserCredential,
+  getAuth
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
@@ -41,13 +43,56 @@ import { enrollUserInCourseSuccess } from '../slices/courseSlice';
 import { clearProgress } from '../slices/progressSlice';
 import { clearUsers } from '../slices/userSlice';
 
+// Helper: Resolve permissions for a user based on their role
+function* resolvePermissions(role: string, staffRoleId?: string): any {
+  if (role === 'admin') {
+    return { permissions: [...ALL_PERMISSIONS] as Permission[], staffRoleName: null };
+  }
+  if (role === 'staff' && staffRoleId) {
+    try {
+      const response = yield call(fetch, `/api/admin/roles/get?id=${staffRoleId}`);
+      const data = yield call([response, 'json']);
+      if (response.ok && data.success) {
+        return {
+          permissions: (data.role.permissions || []) as Permission[],
+          staffRoleName: data.role.name || 'Staff',
+        };
+      }
+    } catch (err) {
+      console.error('Error fetching staff role:', err);
+    }
+  }
+  return { permissions: [] as Permission[], staffRoleName: null };
+}
+
 // Helper: Create a Firestore listener channel for user data
 function createUserChannel(uid: string) {
   return eventChannel(emit => {
     const userRef = doc(db, 'users', uid);
-    return onSnapshot(userRef, (snapshot) => {
+    return onSnapshot(userRef, async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
+        const role = data.role || 'student';
+
+        // Resolve permissions for staff users
+        let permissions: string[] = [];
+        let staffRoleName: string | null = null;
+
+        if (role === 'admin') {
+          permissions = [...ALL_PERMISSIONS];
+        } else if (role === 'staff' && data.staffRoleId) {
+          try {
+            const response = await fetch(`/api/admin/roles/get?id=${data.staffRoleId}`);
+            const resData = await response.json();
+            if (response.ok && resData.success) {
+              permissions = resData.role.permissions || [];
+              staffRoleName = resData.role.name || 'Staff';
+            }
+          } catch (err) {
+            console.error('Error fetching staff role in sync:', err);
+          }
+        }
+
         emit({
           user: {
             uid: uid,
@@ -59,7 +104,10 @@ function createUserChannel(uid: string) {
             photoURL: data.photoURL || null,
             phoneNumber: data.phoneNumber || null
           },
-          role: data.role || 'student'
+          role,
+          staffRoleId: data.staffRoleId || null,
+          staffRoleName,
+          permissions,
         });
       }
     }, (error: any) => {
@@ -110,6 +158,9 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     }
 
     const userData = userDoc.data();
+    const role = userData.role || 'student';
+    const { permissions, staffRoleName }: { permissions: Permission[]; staffRoleName: string | null } = yield call(resolvePermissions, role, userData.staffRoleId);
+
     yield put(authSuccess({ 
       user: { 
         uid, 
@@ -121,7 +172,10 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
         photoURL: userData.photoURL || null,
         phoneNumber: userData.phoneNumber || null
       }, 
-      role: userData.role || 'student', 
+      role, 
+      staffRoleId: userData.staffRoleId || null,
+      staffRoleName,
+      permissions,
       isNewUser: false 
     }));
 
@@ -130,17 +184,32 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
     userSyncTask = yield fork(syncUserSession, uid);
 
   } catch (error: any) {
-    console.error('Login error details:', { code: error.code, message: error.message });
     let message = 'An unexpected error occurred. Please try again.';
-    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+    const errorCode = error?.code || error?.message || 'unknown';
+    
+    // List of "expected" errors that we don't want to clutter the console with
+    const isKnownError = [
+      'auth/user-not-found', 
+      'auth/wrong-password', 
+      'auth/invalid-credential',
+      'auth/too-many-requests',
+      'auth/user-disabled',
+      'auth/email-already-in-use'
+    ].includes(errorCode);
+
+    if (!isKnownError) {
+      console.error('Unexpected Login Error:', error);
+    }
+    
+    if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-credential') {
       message = 'Invalid email or password.';
-    } else if (error.code === 'auth/network-request-failed' || error.message?.includes('offline')) {
+    } else if (errorCode === 'auth/network-request-failed' || error?.message?.includes('offline')) {
       message = 'Please check your internet connection.';
-    } else if (error.code === 'auth/too-many-requests') {
+    } else if (errorCode === 'auth/too-many-requests') {
       message = 'Too many failed attempts. Please try again later.';
-    } else if (error.code === 'permission-denied') {
-      message = 'Database access denied. Please check your Firestore Security Rules in the Firebase Console.';
-    } else if (error.message) {
+    } else if (errorCode === 'permission-denied') {
+      message = 'Database access denied. Please check your Firestore Security Rules.';
+    } else if (error?.message) {
       message = error.message;
     }
     yield put(authFailure(message));
@@ -242,6 +311,8 @@ function* handleGoogleLogin(): any {
 
     const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
     const userData = userDoc.data();
+    const role = userData.role || 'student';
+    const { permissions, staffRoleName }: { permissions: Permission[]; staffRoleName: string | null } = yield call(resolvePermissions, role, userData.staffRoleId);
 
     yield put(authSuccess({ 
       user: { 
@@ -252,7 +323,10 @@ function* handleGoogleLogin(): any {
         photoURL: userData.photoURL || null,
         phoneNumber: userData.phoneNumber || null
       }, 
-      role: userData.role || 'student', 
+      role, 
+      staffRoleId: userData.staffRoleId || null,
+      staffRoleName,
+      permissions,
       isNewUser: isNew 
     }));
 
@@ -304,13 +378,35 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
       yield call(updateProfile, currentUser, authUpdates);
     }
     
-    // 2. Update Firestore user document (Target the user currently in state)
-    const firestoreUpdates: any = { displayName };
-    if (photoURL !== undefined) firestoreUpdates.photoURL = photoURL;
-    if (phoneNumber !== undefined) firestoreUpdates.phoneNumber = phoneNumber;
-    
-    yield call(setDoc as any, doc(db, 'users', targetUid), firestoreUpdates, { merge: true });
-    
+    // 2. Update Firestore user document
+    if (isImpersonating) {
+      // Use secure API for impersonated users (bypasses direct write restrictions)
+      const token = yield call([currentUser, currentUser.getIdToken]);
+      const response = yield call(fetch, '/api/admin/users/update-profile', {
+        method: 'POST',
+        body: JSON.stringify({ userId: targetUid, displayName, photoURL, phoneNumber }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = yield call([response, response.json]);
+        throw new Error(errorData.error || 'Failed to update user profile');
+      }
+    } else {
+      // Direct Firestore update for normal students
+      const userRef = doc(db, 'users', targetUid);
+      const firestoreUpdates: any = { 
+        displayName,
+        updatedAt: serverTimestamp() 
+      };
+      if (photoURL !== undefined) firestoreUpdates.photoURL = photoURL;
+      if (phoneNumber !== undefined) firestoreUpdates.phoneNumber = phoneNumber;
+      yield call(updateDoc, userRef, firestoreUpdates);
+    }
+
     yield put(updateProfileSuccess({ 
       displayName, 
       photoURL: photoURL !== undefined ? photoURL : state.auth.user?.photoURL, 
@@ -326,20 +422,40 @@ function* handleEnrollCourse(action: ReturnType<typeof enrollCourseRequest>): an
     const courseId = action.payload;
     const state: any = yield select();
     const targetUid = state.auth.user?.uid;
-    if (!targetUid) {
-      yield put(authFailure('User context not found.'));
-      return;
-    }
+    const isImpersonating = state.auth.isImpersonating;
 
-    const userRef = doc(db, 'users', targetUid);
-    yield call(setDoc as any, userRef, {
-      enrolledCourses: arrayUnion(courseId)
-    }, { merge: true });
-    
-    const courseRef = doc(db, 'courses', courseId);
-    yield call(setDoc as any, courseRef, {
-      enrolledUsers: arrayUnion(targetUid)
-    }, { merge: true });
+    if (!targetUid) throw new Error('User context not found.');
+
+    if (isImpersonating) {
+      // 1. Use secure server-side API if impersonating
+      const auth = getAuth();
+      const token = yield call([auth.currentUser!, auth.currentUser!.getIdToken]);
+      
+      const response = yield call(fetch, '/api/admin/users/enroll-course', {
+        method: 'POST',
+        body: JSON.stringify({ userId: targetUid, courseId, action: 'enroll' }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = yield call([response, response.json]);
+        throw new Error(errorData.error || 'Failed to enroll user');
+      }
+    } else {
+      // 2. Direct Firestore update for normal students
+      const userRef = doc(db, 'users', targetUid);
+      yield call(setDoc as any, userRef, {
+        enrolledCourses: arrayUnion(courseId)
+      }, { merge: true });
+      
+      const courseRef = doc(db, 'courses', courseId);
+      yield call(setDoc as any, courseRef, {
+        enrolledUsers: arrayUnion(targetUid)
+      }, { merge: true });
+    }
     
     yield put(enrollUserInCourseSuccess({ courseId, userId: targetUid }));
     yield put(enrollCourseSuccess(courseId));
@@ -353,20 +469,40 @@ function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
     const courseId = action.payload;
     const state: any = yield select();
     const targetUid = state.auth.user?.uid;
-    if (!targetUid) {
-      yield put(authFailure('User context not found.'));
-      return;
-    }
+    const isImpersonating = state.auth.isImpersonating;
+
+    if (!targetUid) throw new Error('User context not found.');
 
     const userRef = doc(db, 'users', targetUid);
     const userDoc: any = yield call(getDoc, userRef);
     const savedCourses = userDoc.exists() ? userDoc.data().savedCourses || [] : [];
-    
     const isSaved = savedCourses.includes(courseId);
-    
-    yield call(setDoc as any, userRef, {
-      savedCourses: isSaved ? arrayRemove(courseId) : arrayUnion(courseId)
-    }, { merge: true });
+    const apiAction = isSaved ? 'unsave' : 'save';
+
+    if (isImpersonating) {
+      // 1. Use secure server-side API if impersonating
+      const auth = getAuth();
+      const token = yield call([auth.currentUser!, auth.currentUser!.getIdToken]);
+      
+      const response = yield call(fetch, '/api/admin/users/save-course', {
+        method: 'POST',
+        body: JSON.stringify({ userId: targetUid, courseId, action: apiAction }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = yield call([response, response.json]);
+        throw new Error(errorData.error || 'Failed to update saved courses');
+      }
+    } else {
+      // 2. Direct Firestore update for normal students
+      yield call(setDoc as any, userRef, {
+        savedCourses: isSaved ? arrayRemove(courseId) : arrayUnion(courseId)
+      }, { merge: true });
+    }
     
     yield put(saveCourseSuccess(courseId));
   } catch (error: any) {
@@ -377,31 +513,29 @@ function* handleSaveCourse(action: ReturnType<typeof saveCourseRequest>): any {
 function* handleImpersonateUser(action: ReturnType<typeof impersonateUserRequest>): any {
   try {
     const targetUid = action.payload;
-    const userDoc: any = yield call(getDoc, doc(db, 'users', targetUid));
-    
-    if (!userDoc.exists()) {
-      throw new Error('User not found in Firestore.');
+    const auth = getAuth();
+    const token = yield call([auth.currentUser!, auth.currentUser!.getIdToken]);
+
+    if (!token) throw new Error('Not authenticated');
+
+    const response = yield call(fetch, `/api/admin/users/impersonate?uid=${targetUid}`, {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = yield call([response, response.json]);
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to impersonate user');
     }
- 
-    const userData = userDoc.data();
-    const user = {
-      uid: targetUid,
-      email: userData.email || null,
-      displayName: userData.displayName || null,
-      enrolledCourses: userData.enrolledCourses || [],
-      savedCourses: userData.savedCourses || [],
-      assignedTrainingPlans: userData.assignedTrainingPlans || [],
-      photoURL: userData.photoURL || null,
-      phoneNumber: userData.phoneNumber || null,
-    };
- 
-    yield put(impersonateUserSuccess({ user, role: userData.role || 'student' }));
+
+    yield put(impersonateUserSuccess({ user: data.user, role: data.role }));
     
     // Stop the original user's sync and start sync for the impersonated user
-    // (This ensures UI updates if someone else modifies the impersonated user's data)
     if (userSyncTask) yield cancel(userSyncTask);
     userSyncTask = yield fork(syncUserSession, targetUid);
- 
+
   } catch (error: any) {
     yield put(authFailure(error.message));
   }

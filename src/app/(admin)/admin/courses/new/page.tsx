@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createCourseRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video } from 'lucide-react';
+import { hasPermission } from '@/lib/permissions';
 
 interface VideoEntry {
   title: string;
@@ -21,8 +22,17 @@ export default function NewCoursePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { createLoading, error } = useAppSelector((state) => state.courses);
+  const { role, permissions } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
+
+  const canCreate = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'courses_create'));
+
+  useEffect(() => {
+    if (role && !canCreate) {
+      router.push('/admin');
+    }
+  }, [role, canCreate, router]);
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
@@ -160,6 +170,8 @@ export default function NewCoursePage() {
       setSubmitting(false);
     }
   };
+
+  if (role && !canCreate) return null;
 
   return (
     <div className="max-w-3xl mx-auto py-8">

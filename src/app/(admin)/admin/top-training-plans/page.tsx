@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
+import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -20,40 +21,48 @@ import { Award, TrendingUp, Users } from 'lucide-react';
 export default function TopTrainingPlansPage() {
   const dispatch = useAppDispatch();
   const { trainingPlans, loading: plansLoading } = useAppSelector(state => state.trainingPlans);
+  const { courses, loading: coursesLoading } = useAppSelector(state => state.courses);
   const { users, loading: usersLoading } = useAppSelector(state => state.users);
   const { t } = useTranslation();
   const adminT = t('admin', { returnObjects: true }) as any;
 
   useEffect(() => {
     if (trainingPlans.length === 0) dispatch(fetchTrainingPlansRequest());
+    if (courses.length === 0) dispatch(fetchCoursesRequest());
     if (users.length === 0) dispatch(fetchUsersRequest());
-  }, [dispatch, trainingPlans.length, users.length]);
+  }, [dispatch, trainingPlans.length, courses.length, users.length]);
 
   const chartData = useMemo(() => {
+    const planRevenue: Record<string, number> = {};
     const planCounts: Record<string, number> = {};
-    trainingPlans.forEach(tp => { planCounts[tp.id] = 0; });
     
     // Only count assignments for students, not admins
-    const learnerUsers = users.filter(u => u.role !== 'admin');
+    const learnerUsers = users.filter(u => u.role !== 'admin' && u.role !== 'staff');
     
-    learnerUsers.forEach(u => {
-      u.assignedTrainingPlans?.forEach(tpId => {
-        if (planCounts[tpId] !== undefined) planCounts[tpId]++;
-      });
+    trainingPlans.forEach(tp => {
+      const planValue = (tp.courseIds || []).reduce((sum, cId) => {
+        const course = courses.find(c => c.id === cId);
+        return sum + (course?.price || 0);
+      }, 0);
+      
+      const count = learnerUsers.filter(u => u.assignedTrainingPlans?.includes(tp.id)).length;
+      planRevenue[tp.id] = planValue * count;
+      planCounts[tp.id] = count;
     });
 
     return [...trainingPlans]
-      .sort((a, b) => (planCounts[b.id] || 0) - (planCounts[a.id] || 0))
+      .sort((a, b) => (planRevenue[b.id] || 0) - (planRevenue[a.id] || 0))
       .slice(0, 5)
       .map(tp => ({
-        name: tp.name.length > 20 ? tp.name.substring(0, 17) + '...' : tp.name,
+        name: tp.name.length > 15 ? tp.name.substring(0, 12) + '...' : tp.name,
         fullTitle: tp.name,
+        revenue: planRevenue[tp.id] || 0,
         assignments: planCounts[tp.id] || 0,
         courses: tp.courseIds?.length || 0
       }));
-  }, [trainingPlans, users]);
+  }, [trainingPlans, users, courses]);
 
-  const isInitialLoading = (plansLoading || usersLoading) && (trainingPlans.length === 0 || users.length === 0);
+  const isInitialLoading = (plansLoading || usersLoading || coursesLoading) && (trainingPlans.length === 0 || users.length === 0 || courses.length === 0);
 
   if (isInitialLoading) {
     return (
@@ -93,13 +102,13 @@ export default function TopTrainingPlansPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
           <div 
-            className="h-[250px] w-full transition-all duration-700 mx-auto"
+            className="h-[320px] w-full transition-all duration-700 mx-auto"
             style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+                margin={{ top: 5, right: 5, left: -20, bottom: 40 }}
                 barCategoryGap={10}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -107,15 +116,17 @@ export default function TopTrainingPlansPage() {
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
-                  dy={10}
-                  padding={{ left: 12, right: 12 }}
+                  tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
+                  interval={0}
+                  angle={-35}
+                  textAnchor="end"
+                  height={90}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
                   tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
-                  allowDecimals={false}
+                  tickFormatter={(value) => `$${value}`}
                 />
                 <Tooltip 
                   cursor={{ fill: '#f8fafc' }}
@@ -127,10 +138,10 @@ export default function TopTrainingPlansPage() {
                   }}
                   labelStyle={{ color: '#0f172a', fontWeight: '800', marginBottom: '4px', fontSize: '14px' }}
                   itemStyle={{ color: '#8b5cf6', fontWeight: '600', fontSize: '12px' }}
-                  formatter={(value: any) => [`${value} ${adminT.assignmentsCount}`, adminT.engagement]}
+                  formatter={(value: any) => [`$${value.toLocaleString()}`, adminT.totalRevenue || 'Revenue']}
                 />
                 <Bar 
-                  dataKey="assignments" 
+                  dataKey="revenue" 
                   radius={[5, 5, 0, 0]} 
                   barSize={24}
                 >
@@ -158,7 +169,7 @@ export default function TopTrainingPlansPage() {
                                     <p className="text-[10px] text-slate-400 font-bold">{tp.courses} {adminT.tpCoursesCount}</p>
                                 </div>
                             </div>
-                            <span className="text-sm font-black text-slate-900">{tp.assignments}</span>
+                            <span className="text-sm font-black text-slate-900">${tp.revenue.toLocaleString()}</span>
                         </div>
                     ))}
                 </div>

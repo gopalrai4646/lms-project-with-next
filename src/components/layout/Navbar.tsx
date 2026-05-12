@@ -20,7 +20,7 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 
 export default function Navbar() {
   const dispatch = useAppDispatch();
-  const { user, role, isImpersonating } = useAppSelector((state) => state.auth);
+  const { user, role, isImpersonating, staffRoleName } = useAppSelector((state) => state.auth);
   const { t, i18n } = useTranslation();
   
   const navT = t('nav', { returnObjects: true }) as any;
@@ -196,7 +196,7 @@ export default function Navbar() {
                     </div>
                     <div>
                       <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Current Role</p>
-                      <p className="text-xs font-bold text-slate-700 capitalize">{role}</p>
+                      <p className="text-xs font-bold text-slate-700 capitalize">{role === 'staff' && staffRoleName ? staffRoleName : role}</p>
                     </div>
                   </div>
 

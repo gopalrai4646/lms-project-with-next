@@ -152,7 +152,7 @@ export default function AdminReport() {
       })
       .filter(c => c.avg > 0 && c.avg < 3.5)
       .sort((a, b) => a.avg - b.avg)
-      .slice(0, 3);
+      .slice(0, 10);
 
     const now = new Date().getTime();
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -387,7 +387,16 @@ export default function AdminReport() {
              </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[230px] overflow-y-auto pr-1 no-scrollbar">
+            <style jsx>{`
+              .no-scrollbar::-webkit-scrollbar {
+                display: none;
+              }
+              .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
             {attentionNeeded.length === 0 ? (
                <div className="p-8 text-center text-slate-400 italic">All courses are performing well!</div>
             ) : (
@@ -431,7 +440,6 @@ export default function AdminReport() {
                  size={160} 
                  strokeWidth={14} 
                  color="#A16207"
-                 label={`${stalledStats.percent}%`}
                  sublabel="COHORT AVERAGE"
                />
              </div>

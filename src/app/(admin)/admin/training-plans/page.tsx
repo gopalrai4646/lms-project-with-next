@@ -8,11 +8,13 @@ import { fetchTrainingPlansRequest, deleteTrainingPlanRequest } from '@/store/sl
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Plus, Search, List, LayoutGrid, Users, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { hasPermission } from '@/lib/permissions';
 
 export default function AdminTrainingPlansPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { trainingPlans, loading, error } = useAppSelector((state) => state.trainingPlans);
+  const { user, role, permissions } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
 
@@ -22,6 +24,10 @@ export default function AdminTrainingPlansPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [isMounted, setIsMounted] = useState(false);
+
+  const canCreate = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_create'));
+  const canEdit = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_edit'));
+  const canDelete = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_delete'));
 
   useEffect(() => {
     setIsMounted(true);
@@ -80,12 +86,14 @@ export default function AdminTrainingPlansPage() {
           <h1 className="text-3xl font-extrabold text-slate-900">{t.manageTrainingPlans}</h1>
           <p className="text-slate-500 mt-1">{t.manageTrainingPlansSubtitle}</p>
         </div>
-        <Link 
-          href="/admin/training-plans/new" 
-          className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-2"
-        >
-          <Plus size={20} /> {t.newTrainingPlan}
-        </Link>
+        {canCreate && (
+          <Link 
+            href="/admin/training-plans/new" 
+            className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-2"
+          >
+            <Plus size={20} /> {t.newTrainingPlan}
+          </Link>
+        )}
       </header>
 
       {error && (
@@ -160,15 +168,15 @@ export default function AdminTrainingPlansPage() {
                 <tr>
                   <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo}</th>
                   <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses}</th>
-                  <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
+                  {(canEdit || canDelete) && <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedPlans.map((plan) => (
                   <tr 
                     key={plan.id} 
-                    className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                    onClick={() => router.push(`/admin/training-plans/edit/${plan.id}`)}
+                    className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${!canEdit ? 'cursor-default' : ''}`}
+                    onClick={() => canEdit && router.push(`/admin/training-plans/edit/${plan.id}`)}
                   >
                     <td className="px-6 py-2">
                       <div className="flex items-center gap-4">
@@ -190,24 +198,30 @@ export default function AdminTrainingPlansPage() {
                          <BookOpen size={14} className="opacity-60" /> {plan.courseIds?.length || 0}
                       </span>
                     </td>
-                    <td className="px-6 py-2 text-right">
-                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        <Link 
-                          href={`/admin/training-plans/edit/${plan.id}`}
-                          className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all border border-transparent hover:border-amber-100 flex items-center gap-1"
-                          title={t.editTrainingPlan}
-                        >
-                          <Pencil size={18} />
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(plan.id)}
-                          className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1"
-                          title={t.deleteTrainingPlan}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
+                    {(canEdit || canDelete) && (
+                      <td className="px-6 py-2 text-right">
+                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          {canEdit && (
+                            <Link 
+                              href={`/admin/training-plans/edit/${plan.id}`}
+                              className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all border border-transparent hover:border-amber-100 flex items-center gap-1"
+                              title={t.editTrainingPlan}
+                            >
+                              <Pencil size={18} />
+                            </Link>
+                          )}
+                          {canDelete && (
+                            <button 
+                              onClick={() => handleDelete(plan.id)}
+                              className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1"
+                              title={t.deleteTrainingPlan}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -220,8 +234,8 @@ export default function AdminTrainingPlansPage() {
           {paginatedPlans.map((plan) => (
             <div 
               key={plan.id} 
-              className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 cursor-pointer"
-              onClick={() => router.push(`/admin/training-plans/edit/${plan.id}`)}
+              className={`bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ${canEdit ? 'cursor-pointer' : 'cursor-default'}`}
+              onClick={() => canEdit && router.push(`/admin/training-plans/edit/${plan.id}`)}
             >
               <div className="aspect-video bg-slate-50 relative overflow-hidden flex items-center justify-center text-5xl">
                 {plan.image ? (
@@ -241,19 +255,23 @@ export default function AdminTrainingPlansPage() {
                 <p className="text-sm text-slate-500 line-clamp-2 mb-6 flex-grow">{plan.description}</p>
                 
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
-                    <Link 
-                      href={`/admin/training-plans/edit/${plan.id}`}
-                      className="text-sm font-bold text-slate-600 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 px-4 py-2 rounded-xl transition-all border border-slate-200 hover:border-amber-100 flex items-center gap-2"
-                    >
-                      <Pencil size={16} /> {t.editTrainingPlan}
-                    </Link>
-                    <button 
-                      onClick={() => handleDelete(plan.id)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center"
-                      title={t.deleteTrainingPlan}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {canEdit && (
+                      <Link 
+                        href={`/admin/training-plans/edit/${plan.id}`}
+                        className="text-sm font-bold text-slate-600 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 px-4 py-2 rounded-xl transition-all border border-slate-200 hover:border-amber-100 flex items-center gap-2"
+                      >
+                        <Pencil size={16} /> {t.editTrainingPlan}
+                      </Link>
+                    )}
+                    {canDelete && (
+                      <button 
+                        onClick={() => handleDelete(plan.id)}
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center"
+                        title={t.deleteTrainingPlan}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                 </div>
               </div>
             </div>

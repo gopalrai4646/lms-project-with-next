@@ -3,14 +3,15 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
+import { getPermissionForRoute, getFirstAllowedRoute, hasModuleAccess } from '@/lib/permissions';
 
 interface RouteGuardProps {
   children: React.ReactNode;
-  allowedRole?: 'admin' | 'student' | 'any';
+  allowedRole?: 'admin' | 'student' | 'staff' | 'admin_or_staff' | 'any';
 }
 
 export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuardProps) {
-  const { user, role, isImpersonating, loading } = useAppSelector((state) => state.auth);
+  const { user, role, isImpersonating, loading, permissions } = useAppSelector((state) => state.auth);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -25,27 +26,53 @@ export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuard
 
     // 2. Logic for Admin Routes (/admin/**)
     if (pathname.startsWith('/admin')) {
-      // Students cannot access admin routes
-      if (role !== 'admin') {
+      // Only admin and staff can access admin routes
+      if (role !== 'admin' && role !== 'staff') {
         router.push('/dashboard');
         return;
       }
+
       // Admins who are impersonating should stay in the dashboard
       if (isImpersonating) {
         router.push('/dashboard');
         return;
       }
+
+      // Staff-specific permission checks
+      if (role === 'staff') {
+        // Staff cannot access /admin/staff (staff management is admin-only)
+        if (pathname === '/admin/staff' || pathname.startsWith('/admin/staff/')) {
+          const firstAllowed = getFirstAllowedRoute(permissions);
+          router.push(firstAllowed);
+          return;
+        }
+
+        // Check if staff has permission for this specific route
+        const requiredModule = getPermissionForRoute(pathname);
+        if (requiredModule && !hasModuleAccess(permissions, requiredModule)) {
+          // Redirect to first allowed route
+          const firstAllowed = getFirstAllowedRoute(permissions);
+          router.push(firstAllowed);
+          return;
+        }
+      }
     }
 
     // 3. Logic for Dashboard Routes (/dashboard/**)
     if (pathname.startsWith('/dashboard')) {
-      // If an Admin is NOT impersonating, they should be in /admin (per "vice-versa" requirement)
+      // If an Admin is NOT impersonating, they should be in /admin
       if (role === 'admin' && !isImpersonating) {
         router.push('/admin');
         return;
       }
+      // Staff (not impersonating) should be in /admin
+      if (role === 'staff' && !isImpersonating) {
+        const firstAllowed = getFirstAllowedRoute(permissions);
+        router.push(firstAllowed);
+        return;
+      }
     }
-  }, [user, role, isImpersonating, loading, router, pathname]);
+  }, [user, role, isImpersonating, loading, router, pathname, permissions]);
 
   // Show a loading state while checking auth
   if (loading || !user) {
@@ -59,9 +86,18 @@ export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuard
     );
   }
 
-  // Prevent flash of content if user is logged in but role is wrong (useEffect will handle redirect)
-  if (pathname.startsWith('/admin') && (role !== 'admin' || isImpersonating)) return null;
-  if (pathname.startsWith('/dashboard') && role === 'admin' && !isImpersonating) return null;
+  // Prevent flash of content if user is logged in but role is wrong
+  if (pathname.startsWith('/admin')) {
+    if (role !== 'admin' && role !== 'staff') return null;
+    if (isImpersonating) return null;
+    // Staff trying to access admin-only pages
+    if (role === 'staff') {
+      if (pathname === '/admin/staff' || pathname.startsWith('/admin/staff/')) return null;
+      const requiredModule = getPermissionForRoute(pathname);
+      if (requiredModule && !hasModuleAccess(permissions, requiredModule)) return null;
+    }
+  }
+  if (pathname.startsWith('/dashboard') && (role === 'admin' || role === 'staff') && !isImpersonating) return null;
 
   return <>{children}</>;
 }

@@ -4,7 +4,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'admin';
+  role: 'student' | 'admin' | 'staff';
+  staffRoleId?: string;
   enrolledCourses?: string[];
   savedCourses?: string[];
   assignedTrainingPlans?: string[];
@@ -47,9 +48,31 @@ const userSlice = createSlice({
       state.error = null;
     },
     deleteUserSuccess: (state, action: PayloadAction<string>) => {
-      state.loading = false;
       state.users = state.users.filter(u => u.id !== action.payload);
       state.error = null;
+    },
+    enrollUserRequest: (state, _action: PayloadAction<{ userId: string; courseId: string }>) => {
+      state.loading = true;
+    },
+    enrollUserSuccess: (state, action: PayloadAction<{ userId: string; courseId: string }>) => {
+      const user = state.users.find(u => u.id === action.payload.userId);
+      if (user) {
+        if (!user.enrolledCourses) user.enrolledCourses = [];
+        if (!user.enrolledCourses.includes(action.payload.courseId)) {
+          user.enrolledCourses.push(action.payload.courseId);
+        }
+      }
+      state.loading = false;
+    },
+    unenrollUserRequest: (state, _action: PayloadAction<{ userId: string; courseId: string }>) => {
+      state.loading = true;
+    },
+    unenrollUserSuccess: (state, action: PayloadAction<{ userId: string; courseId: string }>) => {
+      const user = state.users.find(u => u.id === action.payload.userId);
+      if (user) {
+        user.enrolledCourses = (user.enrolledCourses || []).filter(id => id !== action.payload.courseId);
+      }
+      state.loading = false;
     },
     assignTrainingPlanRequest: (state, _action: PayloadAction<{ userId: string; trainingPlanIds: string[] }>) => {
       state.loading = true;
@@ -89,6 +112,10 @@ export const {
   fetchUsersFailure,
   deleteUserRequest,
   deleteUserSuccess,
+  enrollUserRequest,
+  enrollUserSuccess,
+  unenrollUserRequest,
+  unenrollUserSuccess,
   assignTrainingPlanRequest,
   assignTrainingPlanSuccess,
   unassignTrainingPlanRequest,

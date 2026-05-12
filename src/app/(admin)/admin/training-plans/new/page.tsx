@@ -8,14 +8,24 @@ import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, BookOpen, ChevronUp, ChevronDown, Trash2, Search, X } from 'lucide-react';
+import { hasPermission } from '@/lib/permissions';
 
 export default function NewTrainingPlanPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { createLoading, error } = useAppSelector((state) => state.trainingPlans);
   const { courses } = useAppSelector((state) => state.courses);
+  const { role, permissions } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
+
+  const canCreate = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_create'));
+
+  useEffect(() => {
+    if (role && !canCreate) {
+      router.push('/admin');
+    }
+  }, [role, canCreate, router]);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -108,6 +118,8 @@ export default function NewTrainingPlanPage() {
   );
 
   const curriculumCourses = selectedCourseIds.map(id => courses.find(c => c.id === id)).filter(Boolean);
+
+  if (role && !canCreate) return null;
 
   return (
     <div className="max-w-4xl mx-auto py-8">

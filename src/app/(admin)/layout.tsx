@@ -10,7 +10,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <RouteGuard allowedRole="admin">
+    <RouteGuard allowedRole="admin_or_staff">
       <div className="min-h-screen bg-slate-50 relative overflow-x-hidden">
         <Navbar />
         <Sidebar />

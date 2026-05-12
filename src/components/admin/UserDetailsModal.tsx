@@ -4,11 +4,12 @@ import { User } from '@/store/slices/userSlice';
 import { Course } from '@/store/slices/courseSlice';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
-import { assignTrainingPlanRequest, unassignTrainingPlanRequest } from '@/store/slices/userSlice';
+import { assignTrainingPlanRequest, unassignTrainingPlanRequest, enrollUserRequest, unenrollUserRequest } from '@/store/slices/userSlice';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ClipboardList, BookOpen, Heart, Plus, Phone, Calendar, Trash2 } from 'lucide-react';
 import { formatDate } from '@/utils/dateUtils';
+import { hasPermission } from '@/lib/permissions';
 
 interface Props {
   user: User;
@@ -22,9 +23,15 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
   const { t: i18nT, i18n } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
   const language = i18n.language;
+  const { role, permissions } = useAppSelector(state => state.auth);
+
+  const canAssignPlans = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_assign'));
+  const canEnrollCourses = role === 'admin';
 
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('');
 
   useEffect(() => {
     if (trainingPlans.length === 0) {
@@ -37,6 +44,12 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
 
   const handleAssignPlan = () => {
     if (!selectedPlanId) return;
+    
+    if (!canAssignPlans) {
+      alert(t.staff.noPermissionToAssign || "You don't have permission to assign the training plan");
+      return;
+    }
+
     dispatch(assignTrainingPlanRequest({
       userId: user.id,
       trainingPlanIds: [selectedPlanId]
@@ -50,6 +63,32 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
       userId: user.id,
       trainingPlanId: planId
     }));
+  };
+
+  const handleEnrollCourse = () => {
+    if (!selectedCourseId) return;
+    
+    if (!canEnrollCourses) {
+      alert(t.staff.noPermissionToEnroll || "You don't have permission to enroll the user in courses");
+      return;
+    }
+
+    dispatch(enrollUserRequest({
+      userId: user.id,
+      courseId: selectedCourseId
+    }));
+    setIsEnrolling(false);
+    setSelectedCourseId('');
+  };
+
+  const handleUnenrollCourse = (courseId: string) => {
+    if (!canEnrollCourses) return;
+    if (window.confirm(t.unenrollConfirm || "Are you sure you want to unenroll this user?")) {
+      dispatch(unenrollUserRequest({
+        userId: user.id,
+        courseId
+      }));
+    }
   };
 
   return (
@@ -109,7 +148,13 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
               </h4>
               <button 
                 onClick={() => setIsAssigning(!isAssigning)}
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg transition-colors flex items-center gap-1"
+                className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors flex items-center gap-1 ${
+                  !canAssignPlans 
+                    ? 'text-slate-400 bg-slate-100 cursor-not-allowed opacity-60' 
+                    : 'text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                }`}
+                disabled={!canAssignPlans && !isAssigning} // Allow closing if already open
+                title={!canAssignPlans ? (t.staff.noPermissionToAssign || "No permission to assign") : ""}
               >
                 {isAssigning ? t.cancel : <><Plus size={12} /> {t.assignTrainingPlan}</>}
               </button>
@@ -145,13 +190,15 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                       <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span> 
                       <span className="truncate">{getPlanName(id)}</span>
                     </div>
-                    <button
-                      onClick={() => handleUnassignPlan(id)}
-                      className="text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-md hover:bg-rose-50"
-                      title={t.remove || "Remove"}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {canAssignPlans && (
+                      <button
+                        onClick={() => handleUnassignPlan(id)}
+                        className="text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-md hover:bg-rose-50"
+                        title={t.remove || "Remove"}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -161,15 +208,63 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
           </div>
           
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-            <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <BookOpen size={16} className="text-slate-400" /> {t.enrolledCourses} ({user.enrolledCourses?.length || 0})
-            </h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen size={16} className="text-slate-400" /> {t.enrolledCourses} ({user.enrolledCourses?.length || 0})
+              </h4>
+              <button 
+                onClick={() => setIsEnrolling(!isEnrolling)}
+                className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors flex items-center gap-1 ${
+                  !canEnrollCourses 
+                    ? 'text-slate-400 bg-slate-100 cursor-not-allowed opacity-60' 
+                    : 'text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                }`}
+                disabled={!canEnrollCourses && !isEnrolling}
+                title={!canEnrollCourses ? (t.staff.noPermissionToEnroll || "No permission to enroll") : ""}
+              >
+                {isEnrolling ? t.cancel : <><Plus size={12} /> {t.enrollInCourse || "Enroll in Course"}</>}
+              </button>
+            </div>
+
+            {isEnrolling && (
+              <div className="mb-3 p-3 bg-white rounded-xl border border-indigo-100 shadow-sm flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                <select 
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 bg-white text-slate-900"
+                >
+                  <option value="">{t.selectCourse || "Select Course"}</option>
+                  {courses.filter(c => !user.enrolledCourses?.includes(c.id)).map(course => (
+                    <option key={course.id} value={course.id}>{course.title}</option>
+                  ))}
+                </select>
+                <button 
+                  onClick={handleEnrollCourse}
+                  disabled={!selectedCourseId}
+                  className="w-full py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {t.enrollBtn || "Enroll"}
+                </button>
+              </div>
+            )}
+
             {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                 {user.enrolledCourses.map(id => (
-                  <li key={id} className="flex items-center gap-2 p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-indigo-700 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span> 
-                    {getCourseTitle(id)}
+                  <li key={id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-indigo-700 shadow-sm group">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span> 
+                      <span className="truncate">{getCourseTitle(id)}</span>
+                    </div>
+                    {canEnrollCourses && (
+                      <button
+                        onClick={() => handleUnenrollCourse(id)}
+                        className="text-slate-300 hover:text-rose-500 transition-colors p-1 rounded-md hover:bg-rose-50"
+                        title={t.unenroll || "Unenroll"}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

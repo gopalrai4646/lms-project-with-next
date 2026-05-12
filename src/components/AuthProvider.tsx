@@ -5,6 +5,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase/config';
 import { useAppDispatch } from '@/store/hooks';
 import { authSuccess, logoutSuccess } from '@/store/slices/authSlice';
+import { doc, getDoc } from 'firebase/firestore';
+import { ALL_PERMISSIONS } from '@/lib/permissions';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -14,10 +16,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         try {
           // Fetch role from Firestore
-          const { doc, getDoc } = await import('firebase/firestore');
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           const userData = userDoc.exists() ? userDoc.data() : {};
-          const role = userData.role as 'student' | 'admin' || null;
+          const role = userData.role as 'student' | 'admin' | 'staff' || null;
+
+          // If staff, resolve permissions from the staffRoles collection
+          let permissions: string[] = [];
+          let staffRoleId: string | null = null;
+          let staffRoleName: string | null = null;
+
+          if (role === 'admin') {
+            // Admin has all permissions
+            permissions = [...ALL_PERMISSIONS];
+          } else if (role === 'staff' && userData.staffRoleId) {
+            staffRoleId = userData.staffRoleId;
+            try {
+              const response = await fetch(`/api/admin/roles/get?id=${userData.staffRoleId}`);
+              const resData = await response.json();
+              if (response.ok && resData.success) {
+                permissions = resData.role.permissions || [];
+                staffRoleName = resData.role.name || 'Staff';
+              }
+            } catch (err) {
+              console.error("Error fetching staff role:", err);
+            }
+          }
 
           dispatch(authSuccess({
             user: {
@@ -31,6 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               assignedTrainingPlans: userData.assignedTrainingPlans || [],
             },
             role,
+            staffRoleId,
+            staffRoleName,
+            permissions: permissions as any,
             isNewUser: false,
           }));
         } catch (error) {

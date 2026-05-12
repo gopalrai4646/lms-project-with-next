@@ -8,6 +8,7 @@ import { VideoItem } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video } from 'lucide-react';
+import { hasPermission } from '@/lib/permissions';
 
 interface VideoEntry {
   title: string;
@@ -25,8 +26,11 @@ export default function EditCoursePage() {
   const courseId = params.id as string;
   const dispatch = useAppDispatch();
   const { courses, updateLoading, error } = useAppSelector((state) => state.courses);
+  const { role, permissions } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
+  
+  const canEdit = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'courses_edit'));
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0, visibility: 'public' as 'public' | 'private' });
@@ -49,8 +53,12 @@ export default function EditCoursePage() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    if (role && !canEdit) {
+      router.push('/admin');
+      return;
+    }
     if (courses.length === 0) dispatch(fetchCoursesRequest());
-  }, [dispatch, courses.length]);
+  }, [dispatch, courses.length, role, canEdit, router]);
 
   useEffect(() => {
     if (!initialized && courses.length > 0) {
@@ -181,6 +189,8 @@ export default function EditCoursePage() {
       </div>
     );
   }
+
+  if (role && !canEdit) return null;
 
   return (
     <div className="max-w-3xl mx-auto py-8">
