@@ -404,7 +404,7 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
       };
       if (photoURL !== undefined) firestoreUpdates.photoURL = photoURL;
       if (phoneNumber !== undefined) firestoreUpdates.phoneNumber = phoneNumber;
-      yield call(updateDoc, userRef, firestoreUpdates);
+      yield call(() => updateDoc(userRef, firestoreUpdates));
     }
 
     yield put(updateProfileSuccess({ 

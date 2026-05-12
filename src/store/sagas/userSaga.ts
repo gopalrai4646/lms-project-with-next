@@ -175,11 +175,7 @@ function* handleAssignTrainingPlan(action: ReturnType<typeof assignTrainingPlanR
     yield put(assignTrainingPlanSuccess({ userId, trainingPlanIds }));
     
     // Also update the auth state if we are currently impersonating this user
-    if (action === 'assign') {
-      yield put(assignTrainingPlanToUser({ userId, trainingPlanIds }));
-    } else {
-      yield put(unassignTrainingPlanFromUser({ userId, trainingPlanIds }));
-    }
+    yield put(assignTrainingPlanToUser({ userId, trainingPlanIds }));
   } catch (error: any) {
     console.error('Saga: Error assigning training plan', error.message);
     yield put(fetchUsersFailure(error.message));
@@ -209,6 +205,9 @@ function* handleUnassignTrainingPlan(action: ReturnType<typeof unassignTrainingP
     }
 
     yield put(unassignTrainingPlanSuccess({ userId, trainingPlanId }));
+    
+    // Also update the auth state if we are currently impersonating this user
+    yield put(unassignTrainingPlanFromUser({ userId, trainingPlanIds: [trainingPlanId] }));
   } catch (error: any) {
     console.error('Saga: Error unassigning training plan', error.message);
     yield put(fetchUsersFailure(error.message));
