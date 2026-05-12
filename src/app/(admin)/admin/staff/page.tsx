@@ -255,17 +255,17 @@ export default function StaffManagementPage() {
 
       {/* ─── Section A: Role Definitions ─── */}
       <section>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <KeyRound size={24} className="text-violet-600" />
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <KeyRound size={22} className="text-violet-600 md:w-6 md:h-6" />
               {t.staff.roleDefinitions}
             </h2>
-            <p className="text-slate-500 mt-1">{t.staff.roleDefinitionsSubtitle}</p>
+            <p className="text-sm md:text-base text-slate-500 mt-1">{t.staff.roleDefinitionsSubtitle}</p>
           </div>
           <button
             onClick={openCreateRole}
-            className="px-5 py-3 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 flex items-center gap-2 active:scale-95"
+            className="w-full sm:w-auto px-5 py-3 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 flex items-center justify-center gap-2 active:scale-95"
           >
             <Plus size={18} />
             {t.staff.createRoleBtn}
@@ -345,13 +345,13 @@ export default function StaffManagementPage() {
 
       {/* ─── Section B: Staff Members ─── */}
       <section>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <Users size={24} className="text-violet-600" />
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <Users size={22} className="text-violet-600 md:w-6 md:h-6" />
               {t.staff.activeStaff}
             </h2>
-            <p className="text-slate-500 mt-1">{t.staff.activeStaffSubtitle}</p>
+            <p className="text-sm md:text-base text-slate-500 mt-1">{t.staff.activeStaffSubtitle}</p>
           </div>
           <button
             onClick={() => {
@@ -363,7 +363,7 @@ export default function StaffManagementPage() {
               setShowPassword(false);
             }}
             disabled={roles.length === 0}
-            className="px-5 py-3 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-5 py-3 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <UserPlus size={18} />
             {t.staff.createStaff}
@@ -383,82 +383,134 @@ export default function StaffManagementPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left min-w-[700px]">
-                <thead className="bg-slate-50/50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.staffName}</th>
-                    <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.staffRole}</th>
-                    <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.permissions}</th>
-                    <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {staffUsers.map(user => {
-                    const userRole = roles.find(r => r.id === user.staffRoleId);
-                    return (
-                      <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 rounded-2xl bg-violet-50 text-violet-600 font-bold text-lg flex items-center justify-center shrink-0 border border-violet-100/50 shadow-sm overflow-hidden">
-                              {user.photoURL ? (
-                                <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
-                              ) : (
-                                user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+          <div className="space-y-4 lg:space-y-0">
+            {/* Mobile/Tablet Card View */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+              {staffUsers.map(user => {
+                const userRole = roles.find(r => r.id === user.staffRoleId);
+                return (
+                  <div key={user.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col gap-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 font-bold flex items-center justify-center shrink-0 border border-violet-100/50 shadow-sm overflow-hidden">
+                          {user.photoURL ? (
+                            <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 text-sm">{user.name || t.noName}</p>
+                          <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">{user.email}</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-50">
+                      <span className="px-2 py-1 bg-violet-50 text-violet-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-violet-100">
+                        {getRoleName(user.staffRoleId)}
+                      </span>
+                      <div className="flex -space-x-1">
+                        {userRole?.permissions.slice(0, 3).map(perm => (
+                          <div key={perm} className="w-6 h-6 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-[8px] font-bold text-slate-500" title={i18nT(PERMISSION_MODULES[perm]?.label) || perm}>
+                            {i18nT(PERMISSION_MODULES[perm]?.label)?.[0] || perm[0].toUpperCase()}
+                          </div>
+                        ))}
+                        {(userRole?.permissions.length || 0) > 3 && (
+                          <div className="w-6 h-6 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-[8px] font-bold text-slate-400">
+                            +{(userRole?.permissions.length || 0) - 3}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50/50 border-b border-slate-100">
+                    <tr>
+                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.staffName}</th>
+                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.staffRole}</th>
+                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.permissions}</th>
+                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {staffUsers.map(user => {
+                      const userRole = roles.find(r => r.id === user.staffRoleId);
+                      return (
+                        <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-2xl bg-violet-50 text-violet-600 font-bold text-lg flex items-center justify-center shrink-0 border border-violet-100/50 shadow-sm overflow-hidden">
+                                {user.photoURL ? (
+                                  <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900">{user.name || t.noName}</p>
+                                <p className="text-sm text-slate-500 font-medium">{user.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1.5 bg-violet-50 text-violet-600 rounded-lg text-xs font-black uppercase tracking-widest border border-violet-100">
+                              {getRoleName(user.staffRoleId)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {userRole?.permissions.slice(0, 3).map(perm => {
+                                const group = Object.values(PERMISSION_GROUPS).find(g => 
+                                  Object.keys(g.subPermissions).includes(perm)
+                                );
+                                const groupLabel = group ? i18nT(group.label) : '';
+                                const label = i18nT(PERMISSION_MODULES[perm]?.label) || perm;
+                                
+                                const isGeneric = ['View', 'Create', 'Edit', 'Delete', 'Enroll', 'Unenroll', 'Voir', 'Créer', 'Modifier', 'Supprimer', 'Inscrire', 'Désinscrire', 'Anzeigen', 'Erstellen', 'Bearbeiten', 'Löschen', 'Einschreiben', 'Abmelden'].includes(label);
+                                const displayLabel = isGeneric ? `${groupLabel}: ${label}` : label;
+                                
+                                return (
+                                  <span key={perm} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap">
+                                    {displayLabel}
+                                  </span>
+                                );
+                              })}
+                              {(userRole?.permissions.length || 0) > 3 && (
+                                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md">
+                                  +{(userRole?.permissions.length || 0) - 3} {t.more}
+                                </span>
                               )}
                             </div>
-                            <div>
-                              <p className="font-bold text-slate-900">{user.name || t.noName}</p>
-                              <p className="text-sm text-slate-500 font-medium">{user.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1.5 bg-violet-50 text-violet-600 rounded-lg text-xs font-black uppercase tracking-widest border border-violet-100">
-                            {getRoleName(user.staffRoleId)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {userRole?.permissions.slice(0, 3).map(perm => {
-                              const group = Object.values(PERMISSION_GROUPS).find(g => 
-                                Object.keys(g.subPermissions).includes(perm)
-                              );
-                              const groupLabel = group ? i18nT(group.label) : '';
-                              const label = i18nT(PERMISSION_MODULES[perm]?.label) || perm;
-                              
-                              // Add module context if the label is a generic action
-                              const isGeneric = ['View', 'Create', 'Edit', 'Delete', 'Enroll', 'Unenroll', 'Voir', 'Créer', 'Modifier', 'Supprimer', 'Inscrire', 'Désinscrire', 'Anzeigen', 'Erstellen', 'Bearbeiten', 'Löschen', 'Einschreiben', 'Abmelden'].includes(label);
-                              const displayLabel = isGeneric ? `${groupLabel}: ${label}` : label;
-                              
-                              return (
-                                <span key={perm} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap">
-                                  {displayLabel}
-                                </span>
-                              );
-                            })}
-                            {(userRole?.permissions.length || 0) > 3 && (
-                              <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md">
-                                +{(userRole?.permissions.length || 0) - 3} {t.more}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button 
-                            onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
-                            className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100"
-                            title="Remove staff member"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button 
+                              onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
+                              className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100"
+                              title="Remove staff member"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -466,8 +518,8 @@ export default function StaffManagementPage() {
 
       {/* ─── Role Modal ─── */}
       {showRoleModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] shadow-2xl max-w-lg w-full p-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-900">
                 {editingRole ? i18nT('admin.staff.editRole', { name: editingRole.name }) : t.staff.createRole}
@@ -576,8 +628,8 @@ export default function StaffManagementPage() {
 
       {/* ─── Add Staff Modal ─── */}
       {showUserModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] shadow-2xl max-w-lg w-full p-8 animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-900">{t.staff.createStaff}</h2>
               <button onClick={() => setShowUserModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
