@@ -61,7 +61,7 @@ export default function AdminCoursesPage() {
 
     if (debouncedSearchQuery) {
       const lowerQuery = debouncedSearchQuery.toLowerCase();
-      result = result.filter((course) => 
+      result = result.filter((course) =>
         course.title.toLowerCase().includes(lowerQuery) ||
         course.instructor.toLowerCase().includes(lowerQuery)
       );
@@ -79,7 +79,7 @@ export default function AdminCoursesPage() {
   const totalItems = filteredCourses.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  
+
   const startIndex = (safeCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
@@ -94,8 +94,8 @@ export default function AdminCoursesPage() {
           <p className="text-slate-500 mt-1">{t.manageCoursesSubtitle}</p>
         </div>
         {canCreate && (
-          <Link 
-            href="/admin/courses/new" 
+          <Link
+            href="/admin/courses/new"
             className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] flex items-center gap-2 shrink-0 group"
           >
             <Plus className="group-hover:rotate-90 transition-transform duration-300" size={20} /> {t.newCourse}
@@ -110,65 +110,98 @@ export default function AdminCoursesPage() {
       )}
 
       {/* Toolbar: Search, Filters, and Items Per Page */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
-        <div className="flex flex-col lg:flex-row gap-4 w-full xl:flex-1">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text"
-              placeholder={t.searchCourses}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 placeholder:text-slate-400"
-            />
-          </div>
-          
-          <div className="w-full lg:w-64 relative">
-            <select 
-              value={visibilityFilter}
-              onChange={(e) => setVisibilityFilter(e.target.value as any)}
-              className="w-full px-4 py-3 pl-10 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 bg-white cursor-pointer appearance-none shadow-sm transition-all"
-            >
-              <option value="all">{t.allCourses}</option>
-              <option value="public">{t.public?.split(' ')[0] || 'Public'}</option>
-              <option value="private">{t.private?.split(' ')[0] || 'Private'}</option>
-            </select>
-            <Eye className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={18} />
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={14} />
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full xl:w-auto">
-          <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0 shadow-sm">
-            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage}:</span>
-            <select 
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
-            >
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-              <option value={24}>24</option>
-              <option value={48}>48</option>
-            </select>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 bg-white py-3 px-4 rounded-3xl shadow-sm border border-slate-100">
 
-          <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0 shadow-inner">
-            <button
-              onClick={() => handleViewToggle('list')}
-              className={`p-2 rounded-lg flex items-center gap-2 transition-all duration-300 ${viewMode === 'list' ? 'bg-white shadow-md text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-              title={t.listView}
-            >
-              <List size={20} /> <span className="hidden lg:inline text-sm">{t.listView}</span>
-            </button>
-            <button
-              onClick={() => handleViewToggle('grid')}
-              className={`p-2 rounded-lg flex items-center gap-2 transition-all duration-300 ${viewMode === 'grid' ? 'bg-white shadow-md text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-              title={t.gridView}
-            >
-              <LayoutGrid size={20} /> <span className="hidden lg:inline text-sm">{t.gridView}</span>
-            </button>
-          </div>
+        {/* Search */}
+        <div className="relative w-full">
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            size={18}
+          />
+
+          <input
+            type="text"
+            placeholder={t.searchCourses}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 text-sm"
+          />
+        </div>
+
+        {/* Visibility Filter */}
+        <div className="relative w-full">
+          <Eye
+            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
+            size={18}
+          />
+
+          <select
+            value={visibilityFilter}
+            onChange={(e) => setVisibilityFilter(e.target.value as any)}
+            className="w-full px-4 py-2.5 pl-11 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 bg-white cursor-pointer appearance-none shadow-sm transition-all"
+          >
+            <option value="all">{t.allCourses}</option>
+            <option value="public">
+              {t.public?.split(' ')[0] || 'Public'}
+            </option>
+            <option value="private">
+              {t.private?.split(' ')[0] || 'Private'}
+            </option>
+          </select>
+
+          <ChevronDown
+            className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
+            size={14}
+          />
+        </div>
+
+        {/* Items Per Page */}
+        <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 w-full">
+          <span className="text-sm font-semibold text-slate-500 whitespace-nowrap pl-1">
+            {t.itemsPerPage}:
+          </span>
+
+          <select
+            value={itemsPerPage}
+            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
+          >
+            <option value={8}>8</option>
+            <option value={12}>12</option>
+            <option value={24}>24</option>
+            <option value={48}>48</option>
+          </select>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner w-full">
+          <button
+            onClick={() => handleViewToggle('list')}
+            className={`flex-1 p-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'list'
+              ? 'bg-white shadow-md text-indigo-600 font-bold'
+              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            title={t.listView}
+          >
+            <List size={20} />
+            <span className="hidden sm:inline text-sm">
+              {t.listView}
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleViewToggle('grid')}
+            className={`flex-1 p-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'grid'
+              ? 'bg-white shadow-md text-indigo-600 font-bold'
+              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+              }`}
+            title={t.gridView}
+          >
+            <LayoutGrid size={20} />
+            <span className="hidden sm:inline text-sm">
+              {t.gridView}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -213,10 +246,10 @@ export default function AdminCoursesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <div className="flex items-center gap-2.5">
-                         <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs shrink-0 shadow-sm text-indigo-600">
-                           <GraduationCap size={16} />
-                         </div>
-                         <span className="text-sm font-bold text-slate-700">{course.instructor}</span>
+                        <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs shrink-0 shadow-sm text-indigo-600">
+                          <GraduationCap size={16} />
+                        </div>
+                        <span className="text-sm font-bold text-slate-700">{course.instructor}</span>
                       </div>
                     </td>
                     <td className="px-6 py-2 text-center">
@@ -238,7 +271,7 @@ export default function AdminCoursesPage() {
                       <td className="px-6 py-2 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {canEdit && (
-                            <Link 
+                            <Link
                               href={`/admin/courses/edit/${course.id}`}
                               className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center gap-1 shrink-0 shadow-sm hover:shadow-indigo-50"
                               title={t.editCourse}
@@ -247,7 +280,7 @@ export default function AdminCoursesPage() {
                             </Link>
                           )}
                           {canDeleteCourse && (
-                            <button 
+                            <button
                               onClick={() => handleDelete(course.id)}
                               className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1 shrink-0 shadow-sm hover:shadow-rose-50"
                               title={t.deleteCourse}
@@ -266,10 +299,10 @@ export default function AdminCoursesPage() {
         </div>
       ) : (
         /* Grid View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in zoom-in-95 duration-500">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-in fade-in zoom-in-95 duration-500">
           {paginatedCourses.map((course) => (
-            <div 
-              key={course.id} 
+            <div
+              key={course.id}
               className={`bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ${canEdit ? 'cursor-pointer' : 'cursor-default'}`}
               onClick={() => canEdit && router.push(`/admin/courses/edit/${course.id}`)}
             >
@@ -285,16 +318,16 @@ export default function AdminCoursesPage() {
                   </span>
                 </div>
                 <div className="absolute bottom-4 left-4">
-                   <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white text-[10px] font-black flex items-center gap-1.5 shadow-lg">
-                      <Users size={12} className="opacity-80" /> {course.enrolledUsers?.length || 0} {t.learners}
-                   </div>
+                  <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white text-[10px] font-black flex items-center gap-1.5 shadow-lg">
+                    <Users size={12} className="opacity-80" /> {course.enrolledUsers?.length || 0} {t.learners}
+                  </div>
                 </div>
               </div>
-              
+
               <div className="p-8 flex flex-col flex-grow">
                 <h3 className="font-bold text-2xl text-slate-900 line-clamp-2 leading-tight mb-3 group-hover:text-indigo-600 transition-colors">{course.title}</h3>
                 <p className="text-sm text-slate-500 line-clamp-2 mb-8 flex-grow font-medium leading-relaxed">{course.description}</p>
-                
+
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100/80">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors duration-300">
@@ -305,27 +338,27 @@ export default function AdminCoursesPage() {
                       <p className="text-sm font-bold text-slate-700 truncate max-w-[120px]">{course.instructor}</p>
                     </div>
                   </div>
-                  
+
                   {(canEdit || canDeleteCourse) && (
                     <div className="flex items-center justify-end gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        {canEdit && (
-                          <Link 
-                            href={`/admin/courses/edit/${course.id}`}
-                            className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center justify-center shadow-sm"
-                            title={t.editCourse}
-                          >
-                            <Pencil size={18} />
-                          </Link>
-                        )}
-                        {canDeleteCourse && (
-                          <button 
-                            onClick={() => handleDelete(course.id)}
-                            className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center shadow-sm"
-                            title={t.deleteCourse}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
+                      {canEdit && (
+                        <Link
+                          href={`/admin/courses/edit/${course.id}`}
+                          className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center justify-center shadow-sm"
+                          title={t.editCourse}
+                        >
+                          <Pencil size={18} />
+                        </Link>
+                      )}
+                      {canDeleteCourse && (
+                        <button
+                          onClick={() => handleDelete(course.id)}
+                          className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center shadow-sm"
+                          title={t.deleteCourse}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -349,7 +382,7 @@ export default function AdminCoursesPage() {
             >
               <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
-            
+
             <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
@@ -360,32 +393,30 @@ export default function AdminCoursesPage() {
                         <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
-                            safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white border border-indigo-700' 
-                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
+                            ? 'bg-indigo-600 text-white border border-indigo-700'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
                         >
                           {page}
                         </button>
                       </div>
                     );
                   }
-                  
+
                   return (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
-                        safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white border border-indigo-700' 
-                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
+                        ? 'bg-indigo-600 text-white border border-indigo-700'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
                       {page}
                     </button>
                   );
-              })}
+                })}
             </div>
 
             <button
@@ -393,7 +424,7 @@ export default function AdminCoursesPage() {
               disabled={safeCurrentPage === totalPages || totalPages === 0}
               className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
             >
-               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
+              <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
             </button>
           </div>
         </div>

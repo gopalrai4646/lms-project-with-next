@@ -8,14 +8,14 @@ import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import CourseCard from '@/components/common/CourseCard';
 import ProgressRing from '@/components/charts/ProgressRing';
-import { 
-  Search, 
-  LayoutGrid, 
-  List, 
-  BookOpen, 
-  CheckCircle2, 
-  RotateCw, 
-  PauseCircle, 
+import {
+  Search,
+  LayoutGrid,
+  List,
+  BookOpen,
+  CheckCircle2,
+  RotateCw,
+  PauseCircle,
   GraduationCap,
   ArrowRight,
   ChevronLeft,
@@ -63,7 +63,7 @@ export default function MyCoursesPage() {
   const assignedPlans = trainingPlans.filter(tp => assignedPlanIds.includes(tp.id));
   const planCourseIds = new Set(assignedPlans.flatMap(tp => tp.courseIds || []));
 
-  const availableCourses = courses.filter(c => 
+  const availableCourses = courses.filter(c =>
     c.visibility !== 'private' || planCourseIds.has(c.id) || user?.enrolledCourses?.includes(c.id)
   );
 
@@ -73,7 +73,7 @@ export default function MyCoursesPage() {
     const courseProgress = progress[course.id];
     const videoCount = course.videos?.length || 0;
     if (!courseProgress || videoCount === 0) return 0;
-    
+
     const videoList = course.videos || [];
     let totalDuration = 0;
     let totalWatched = 0;
@@ -99,7 +99,7 @@ export default function MyCoursesPage() {
 
   const filteredCourses = useMemo(() => {
     let filtered = enrolledCourses;
-    
+
     // Tab filter
     if (activeTab === 'in-progress') {
       filtered = filtered.filter(c => {
@@ -113,25 +113,25 @@ export default function MyCoursesPage() {
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(c => 
-        c.title.toLowerCase().includes(query) || 
+      filtered = filtered.filter(c =>
+        c.title.toLowerCase().includes(query) ||
         c.instructor.toLowerCase().includes(query)
       );
     }
 
     return filtered;
   }, [enrolledCourses, activeTab, searchQuery, progress]);
-  
+
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab, searchQuery, itemsPerPage]);
-  
+
   // Pagination logic
   const totalItems = filteredCourses.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  
+
   const startIndex = (safeCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
@@ -157,24 +157,28 @@ export default function MyCoursesPage() {
 
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 py-2.5 px-4 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
-        {/* Tabs - Scrollable on mobile */}
-        <div className="overflow-x-auto no-scrollbar -mx-1 px-1 shrink-0 lg:w-auto">
-          <div className="flex justify-between gap-1 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
-            {tabs.map(tab => (
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-4 grid grid-cols-1 xl:grid-cols-4 gap-4">
+
+        {/* Tabs */}
+        <div className="overflow-x-auto no-scrollbar xl:col-span-2">
+          <div className="flex gap-2 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
+            {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === tab.key
-                    ? 'bg-white text-indigo-600 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+                  }`}
               >
                 {tab.label}
-                <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
-                  activeTab === tab.key ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-500'
-                }`}>
+
+                <span
+                  className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key
+                    ? 'bg-indigo-100 text-indigo-600'
+                    : 'bg-slate-200 text-slate-500'
+                    }`}
+                >
                   {tab.count}
                 </span>
               </button>
@@ -182,51 +186,66 @@ export default function MyCoursesPage() {
           </div>
         </div>
 
-        {/* Global Controls Wrapper - Search and View Toggle share a row on tablet */}
-        <div className="flex flex-col sm:flex-row gap-4 flex-1 items-stretch sm:items-center">
-          {/* Search */}
-          <div className="relative flex-1">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-              <Search size={18} />
+        {/* Search */}
+        <div className="relative w-full">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <Search size={18} />
+          </span>
+
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t.searchCourses || 'Search your courses...'}
+            className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all bg-slate-50"
+          />
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+
+          {/* Items Per Page */}
+          <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 flex-1">
+            <span className="text-sm font-semibold text-slate-500 whitespace-nowrap">
+              {t.itemsPerPage || 'Items'}:
             </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.searchCourses || 'Search your courses...'}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all bg-slate-50/30"
-            />
+
+            <select
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
+            >
+              {[8, 12, 16, 20].map((val) => (
+                <option key={val} value={val}>
+                  {val}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* View Toggle - Professional Layout */}
-          <div className="flex bg-slate-100 p-1.5 rounded-xl gap-2 items-center sm:shrink-0">
-            <div className="flex items-center grow sm:grow-0 gap-2 whitespace-nowrap bg-white/50 px-2 h-10 rounded-lg border border-slate-200/50 shadow-sm">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.itemsPerPage || 'Items'}:</span>
-              <select 
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="bg-transparent border-none focus:ring-0 text-xs font-bold text-indigo-600 cursor-pointer outline-none grow"
-              >
-                {[8, 12, 16, 20].map(val => <option key={val} value={val}>{val}</option>)}
-              </select>
-            </div>
+          {/* View Toggle */}
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner flex-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`flex-1 p-2.5 rounded-xl flex items-center justify-center transition-all duration-300 ${viewMode === 'grid'
+                ? 'bg-white shadow-md text-indigo-600'
+                : 'text-slate-500 hover:bg-slate-200/50'
+                }`}
+              title={adminT?.gridView || 'Grid View'}
+            >
+              <LayoutGrid size={18} />
+            </button>
 
-            <div className="flex bg-slate-200/50 p-1 rounded-lg shrink-0">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-                title={adminT?.gridView || 'Grid View'}
-              >
-                <LayoutGrid size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-                title={adminT?.listView || 'List View'}
-              >
-                <List size={18} />
-              </button>
-            </div>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex-1 p-2.5 rounded-xl flex items-center justify-center transition-all duration-300 ${viewMode === 'list'
+                ? 'bg-white shadow-md text-indigo-600'
+                : 'text-slate-500 hover:bg-slate-200/50'
+                }`}
+              title={adminT?.listView || 'List View'}
+            >
+              <List size={18} />
+            </button>
           </div>
         </div>
       </div>
@@ -293,11 +312,10 @@ export default function MyCoursesPage() {
                           </div>
                         </td>
                         <td className="px-6 py-2 text-center">
-                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${
-                            status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
                             status === 'in-progress' ? 'bg-amber-100 text-amber-600' :
-                            'bg-slate-100 text-slate-500'
-                          }`}>
+                              'bg-slate-100 text-slate-500'
+                            }`}>
                             {status === 'completed' ? (
                               <span className="flex items-center gap-1.5"><CheckCircle2 size={14} /> {t.completedLabel || 'Completed'}</span>
                             ) : status === 'in-progress' ? (
@@ -326,17 +344,17 @@ export default function MyCoursesPage() {
       ) : (
         <div className="text-center py-16 bg-white rounded-[28px] border border-dashed border-slate-200 shadow-sm">
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-             {activeTab === 'completed' ? <GraduationCap size={48} /> : <BookOpen size={48} />}
+            {activeTab === 'completed' ? <GraduationCap size={48} /> : <BookOpen size={48} />}
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">
             {activeTab === 'all' ? (t.noEnrolledCourses || 'No courses enrolled yet') :
-             activeTab === 'in-progress' ? (t.noInProgress || 'No courses in progress') :
-             (t.noCompleted || 'No completed courses yet')}
+              activeTab === 'in-progress' ? (t.noInProgress || 'No courses in progress') :
+                (t.noCompleted || 'No completed courses yet')}
           </h3>
           <p className="text-slate-500 mb-6 max-w-md mx-auto">
             {activeTab === 'all' ? (t.enrollToStart || 'Explore available courses from your dashboard and start learning today!') :
-             activeTab === 'in-progress' ? (t.startACourse || 'Start any enrolled course to see your progress here.') :
-             (t.finishACourse || 'Complete all videos in a course to mark it as done.')}
+              activeTab === 'in-progress' ? (t.startACourse || 'Start any enrolled course to see your progress here.') :
+                (t.finishACourse || 'Complete all videos in a course to mark it as done.')}
           </p>
           {activeTab === 'all' && (
             <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center gap-2">
@@ -360,7 +378,7 @@ export default function MyCoursesPage() {
             >
               <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev || 'Prev'}</span>
             </button>
-            
+
             <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
@@ -371,32 +389,30 @@ export default function MyCoursesPage() {
                         <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
-                            safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white border border-indigo-700' 
-                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
+                            ? 'bg-indigo-600 text-white border border-indigo-700'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
                         >
                           {page}
                         </button>
                       </div>
                     );
                   }
-                  
+
                   return (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
-                        safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white border border-indigo-700' 
-                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
+                        ? 'bg-indigo-600 text-white border border-indigo-700'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
                       {page}
                     </button>
                   );
-              })}
+                })}
             </div>
 
             <button

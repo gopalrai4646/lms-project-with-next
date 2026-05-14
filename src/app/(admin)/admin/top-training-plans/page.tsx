@@ -99,8 +99,8 @@ export default function TopTrainingPlansPage() {
         <p className="text-slate-500 mt-1 max-w-2xl">{adminT.topTrainingPlansSubtitle}</p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-1/2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
           <div 
             className="h-[320px] w-full transition-all duration-700 mx-auto"
             style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
@@ -153,23 +153,33 @@ export default function TopTrainingPlansPage() {
             </ResponsiveContainer>
           </div>
         </div>
-
-        <div className="space-y-6">
+        
+        <div className="w-full lg:w-1/2 self-start">
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{adminT.leaderboard}</h4>
-                <div className="space-y-4">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <TrendingUp size={14} className="text-violet-500" />
+                    {adminT.leaderboard}
+                </h4>
+                <div className="space-y-5">
                     {chartData.map((tp, i) => (
-                        <div key={i} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-sm" style={{ backgroundColor: colors[i % colors.length] }}>
+                        <div key={i} className="flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shadow-md transition-transform group-hover:scale-110" style={{ backgroundColor: colors[i % colors.length] }}>
                                     {i + 1}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-sm font-bold text-slate-700 truncate max-w-[100px]">{tp.name}</p>
-                                    <p className="text-[10px] text-slate-400 font-bold">{tp.courses} {adminT.tpCoursesCount}</p>
+                                    <p className="text-sm font-bold text-slate-700 truncate max-w-[150px] group-hover:text-violet-600 transition-colors">{tp.name}</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{tp.courses} {adminT.tpCoursesCount}</p>
+                                        <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                                        <p className="text-[10px] text-slate-500 font-bold">{tp.assignments} {adminT.enrolledLabel || 'Enrolled'}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <span className="text-sm font-black text-slate-900">${tp.revenue.toLocaleString()}</span>
+                            <div className="text-right">
+                                <span className="text-sm font-black text-slate-900 block">${tp.revenue.toLocaleString()}</span>
+                                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{adminT.revenueLabel || 'Revenue'}</span>
+                            </div>
                         </div>
                     ))}
                 </div>

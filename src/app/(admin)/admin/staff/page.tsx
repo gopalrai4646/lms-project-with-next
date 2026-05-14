@@ -286,7 +286,7 @@ export default function StaffManagementPage() {
               <div key={role.id} className="bg-white rounded-[28px] border border-slate-100 shadow-sm p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-violet-600 transition-colors">{role.name}</h3>
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-violet-600 transition-colors truncate max-w-[180px]">{role.name}</h3>
                     <p className="text-sm text-slate-500 mt-1 line-clamp-2">{role.description || 'No description'}</p>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -383,135 +383,72 @@ export default function StaffManagementPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4 lg:space-y-0">
-            {/* Mobile/Tablet Card View */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
-              {staffUsers.map(user => {
-                const userRole = roles.find(r => r.id === user.staffRoleId);
-                return (
-                  <div key={user.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col gap-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 font-bold flex items-center justify-center shrink-0 border border-violet-100/50 shadow-sm overflow-hidden">
-                          {user.photoURL ? (
-                            <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
-                          ) : (
-                            user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm">{user.name || t.noName}</p>
-                          <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">{user.email}</p>
-                        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {staffUsers.map(user => {
+              const userRole = roles.find(r => r.id === user.staffRoleId);
+              return (
+                <div key={user.id} className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-6 flex flex-col hover:shadow-xl hover:shadow-violet-500/5 transition-all duration-500 group relative overflow-hidden">
+                  {/* Background Decoration */}
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-violet-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"></div>
+                  
+                  <div className="flex justify-between items-start mb-6 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-violet-50 text-violet-600 font-bold text-xl flex items-center justify-center shrink-0 border border-violet-100 shadow-sm group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                        {user.photoURL ? (
+                          <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                          user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+                        )}
                       </div>
-                      <button 
-                        onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
-                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="min-w-0">
+                        <p className="font-black text-slate-900 group-hover:text-violet-600 transition-colors truncate max-w-[150px]">{user.name || t.noName}</p>
+                        <p className="text-xs text-slate-400 font-bold truncate max-w-[150px] uppercase tracking-tight">{user.email}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
+                      className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100"
+                      title={t.staff.deleteStaffConfirm}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-5 mt-auto relative z-10">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.staff.staffRole}</span>
+                        <span className="px-2.5 py-1 bg-violet-50 text-violet-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-violet-100 shadow-sm">
+                          {getRoleName(user.staffRoleId)}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-50">
-                      <span className="px-2 py-1 bg-violet-50 text-violet-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-violet-100">
-                        {getRoleName(user.staffRoleId)}
-                      </span>
-                      <div className="flex -space-x-1">
-                        {userRole?.permissions.slice(0, 3).map(perm => (
-                          <div key={perm} className="w-6 h-6 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-[8px] font-bold text-slate-500" title={i18nT(PERMISSION_MODULES[perm]?.label) || perm}>
-                            {i18nT(PERMISSION_MODULES[perm]?.label)?.[0] || perm[0].toUpperCase()}
-                          </div>
-                        ))}
-                        {(userRole?.permissions.length || 0) > 3 && (
-                          <div className="w-6 h-6 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-[8px] font-bold text-slate-400">
-                            +{(userRole?.permissions.length || 0) - 3}
-                          </div>
+                    <div className="pt-4 border-t border-slate-50">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">{t.staff.permissions}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {userRole?.permissions.slice(0, 4).map(perm => {
+                          const label = i18nT(PERMISSION_MODULES[perm]?.label) || perm;
+                          return (
+                            <span key={perm} className="px-2 py-1 bg-slate-50 text-slate-500 text-[9px] font-bold uppercase tracking-wider rounded-md border border-slate-100 group-hover:bg-violet-50/50 group-hover:text-violet-600 group-hover:border-violet-100 transition-colors">
+                              {label}
+                            </span>
+                          );
+                        })}
+                        {(userRole?.permissions.length || 0) > 4 && (
+                          <span className="px-2 py-1 bg-slate-50 text-slate-400 text-[9px] font-bold rounded-md border border-slate-100">
+                            +{(userRole?.permissions.length || 0) - 4}
+                          </span>
+                        )}
+                        {(userRole?.permissions.length || 0) === 0 && (
+                          <span className="text-[10px] font-bold text-slate-400 italic">{t.staff.unassigned}</span>
                         )}
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Desktop Table View */}
-            <div className="hidden lg:block bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50/50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.staffName}</th>
-                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.staffRole}</th>
-                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.staff.permissions}</th>
-                      <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {staffUsers.map(user => {
-                      const userRole = roles.find(r => r.id === user.staffRoleId);
-                      return (
-                        <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-4">
-                              <div className="w-11 h-11 rounded-2xl bg-violet-50 text-violet-600 font-bold text-lg flex items-center justify-center shrink-0 border border-violet-100/50 shadow-sm overflow-hidden">
-                                {user.photoURL ? (
-                                  <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-                                )}
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-900">{user.name || t.noName}</p>
-                                <p className="text-sm text-slate-500 font-medium">{user.email}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1.5 bg-violet-50 text-violet-600 rounded-lg text-xs font-black uppercase tracking-widest border border-violet-100">
-                              {getRoleName(user.staffRoleId)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {userRole?.permissions.slice(0, 3).map(perm => {
-                                const group = Object.values(PERMISSION_GROUPS).find(g => 
-                                  Object.keys(g.subPermissions).includes(perm)
-                                );
-                                const groupLabel = group ? i18nT(group.label) : '';
-                                const label = i18nT(PERMISSION_MODULES[perm]?.label) || perm;
-                                
-                                const isGeneric = ['View', 'Create', 'Edit', 'Delete', 'Enroll', 'Unenroll', 'Voir', 'Créer', 'Modifier', 'Supprimer', 'Inscrire', 'Désinscrire', 'Anzeigen', 'Erstellen', 'Bearbeiten', 'Löschen', 'Einschreiben', 'Abmelden'].includes(label);
-                                const displayLabel = isGeneric ? `${groupLabel}: ${label}` : label;
-                                
-                                return (
-                                  <span key={perm} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap">
-                                    {displayLabel}
-                                  </span>
-                                );
-                              })}
-                              {(userRole?.permissions.length || 0) > 3 && (
-                                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md">
-                                  +{(userRole?.permissions.length || 0) - 3} {t.more}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <button 
-                              onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
-                              className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100"
-                              title="Remove staff member"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </section>

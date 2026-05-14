@@ -103,20 +103,20 @@ export default function AdminTrainingPlansPage() {
       )}
 
       {/* Toolbar: Search, Items Per Page, and View toggle */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
-        <div className="relative w-full lg:flex-1">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
+        <div className="relative w-full lg:flex-1 lg:max-w-2xl">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text"
             placeholder={t.searchTrainingPlans}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700"
+            className="w-full pl-11 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 text-sm"
           />
         </div>
         
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full lg:w-auto">
-          <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0">
+        <div className="flex flex-row items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
+          <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0 shadow-sm justify-center flex-1 sm:flex-none">
             <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage}:</span>
             <select 
               value={itemsPerPage}
@@ -130,7 +130,7 @@ export default function AdminTrainingPlansPage() {
             </select>
           </div>
 
-          <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0">
+          <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0 shadow-inner justify-center flex-1 sm:flex-none">
             <button
               onClick={() => handleViewToggle('list')}
               className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}

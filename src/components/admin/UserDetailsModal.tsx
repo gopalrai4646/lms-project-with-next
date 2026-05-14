@@ -39,6 +39,10 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
     }
   }, [dispatch, trainingPlans.length]);
 
+  const validAssignedPlans = user.assignedTrainingPlans?.filter(id => trainingPlans.some(tp => tp.id === id)) || [];
+  const validEnrolledCourses = user.enrolledCourses?.filter(id => courses.some(c => c.id === id)) || [];
+  const validSavedCourses = user.savedCourses?.filter(id => courses.some(c => c.id === id)) || [];
+
   const getCourseTitle = (id: string) => courses.find(c => c.id === id)?.title || t.unknownCourse;
   const getPlanName = (id: string) => trainingPlans.find(tp => tp.id === id)?.name || t.unknownPlan;
 
@@ -144,7 +148,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ClipboardList size={16} className="text-slate-400" /> {t.assignedTrainingPlans} ({user.assignedTrainingPlans?.length || 0})
+                <ClipboardList size={16} className="text-slate-400" /> {t.assignedTrainingPlans} ({validAssignedPlans.length})
               </h4>
               <button 
                 onClick={() => setIsAssigning(!isAssigning)}
@@ -168,7 +172,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                   className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 bg-white text-slate-900"
                 >
                   <option value="">{t.selectTrainingPlan}</option>
-                  {trainingPlans.filter(tp => !user.assignedTrainingPlans?.includes(tp.id)).map(plan => (
+                  {trainingPlans.filter(tp => !validAssignedPlans.includes(tp.id)).map(plan => (
                     <option key={plan.id} value={plan.id}>{plan.name}</option>
                   ))}
                 </select>
@@ -182,9 +186,9 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
               </div>
             )}
 
-            {user.assignedTrainingPlans && user.assignedTrainingPlans.length > 0 ? (
+            {validAssignedPlans.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                {user.assignedTrainingPlans.map(id => (
+                {validAssignedPlans.map(id => (
                   <li key={id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-slate-700 shadow-sm group">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span> 
@@ -210,7 +214,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen size={16} className="text-slate-400" /> {t.enrolledCourses} ({user.enrolledCourses?.length || 0})
+                <BookOpen size={16} className="text-slate-400" /> {t.enrolledCourses} ({validEnrolledCourses.length})
               </h4>
               <button 
                 onClick={() => setIsEnrolling(!isEnrolling)}
@@ -234,7 +238,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                   className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 bg-white text-slate-900"
                 >
                   <option value="">{t.selectCourse || "Select Course"}</option>
-                  {courses.filter(c => !user.enrolledCourses?.includes(c.id)).map(course => (
+                  {courses.filter(c => !validEnrolledCourses.includes(c.id)).map(course => (
                     <option key={course.id} value={course.id}>{course.title}</option>
                   ))}
                 </select>
@@ -248,9 +252,9 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
               </div>
             )}
 
-            {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
+            {validEnrolledCourses.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                {user.enrolledCourses.map(id => (
+                {validEnrolledCourses.map(id => (
                   <li key={id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-indigo-700 shadow-sm group">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span> 
@@ -275,11 +279,11 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
 
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
             <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Heart size={16} className="text-rose-400 fill-rose-400" /> {t.savedCourses} ({user.savedCourses?.length || 0})
+              <Heart size={16} className="text-rose-400 fill-rose-400" /> {t.savedCourses} ({validSavedCourses.length})
             </h4>
-            {user.savedCourses && user.savedCourses.length > 0 ? (
+            {validSavedCourses.length > 0 ? (
               <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                {user.savedCourses.map(id => (
+                {validSavedCourses.map(id => (
                   <li key={id} className="flex items-center gap-2 p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-rose-600 shadow-sm">
                     <span className="w-2 h-2 rounded-full bg-rose-400"></span> 
                     {getCourseTitle(id)}

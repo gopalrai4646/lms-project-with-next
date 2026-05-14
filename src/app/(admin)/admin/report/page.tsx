@@ -457,10 +457,7 @@ export default function AdminReport() {
                     </div>
                   </div>
                 </div>
-                <button className="w-full mt-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold py-2.5 px-4 rounded-xl border border-amber-200 transition-colors shadow-sm text-sm">
-                  Send Nudge
-                </button>
-             </div>
+              </div>
           </div>
         </div>
       </div>

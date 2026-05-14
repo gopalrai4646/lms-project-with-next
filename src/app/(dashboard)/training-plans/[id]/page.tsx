@@ -131,28 +131,29 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
               const isEnrolled = user?.enrolledCourses?.includes(course.id);
               
               return (
-                <div key={course.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 bg-white border border-slate-100 rounded-[28px] hover:border-indigo-200 hover:shadow-md transition-all group">
-                  <div className="flex items-center gap-4 flex-grow min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-500 shrink-0 border border-slate-200/50">
+                <div key={course.id} className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 p-5 bg-white border border-slate-100 rounded-[28px] hover:border-indigo-200 hover:shadow-md transition-all group">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="hidden sm:flex w-10 h-10 rounded-xl bg-slate-50 items-center justify-center text-xs font-black text-slate-400 shrink-0 border border-slate-100">
                       {index + 1}
                     </div>
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-slate-200/50">
+                    <div className="w-16 h-16 bg-slate-50 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform duration-500">
                       {course.thumbnail ? <img src={course.thumbnail} className="w-full h-full object-cover" /> : <BookOpen size={24} className="text-slate-300" />}
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
                         <p className="font-bold text-slate-900 text-lg truncate group-hover:text-indigo-600 transition-colors">{course.title}</p>
-                        {course.visibility === 'private' && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-600 uppercase tracking-wide shrink-0">Private</span>
-                        )}
-                        {course.visibility !== 'private' && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-600 uppercase tracking-wide shrink-0">Public</span>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          {course.visibility === 'private' ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-50 text-amber-600 border border-amber-100 uppercase tracking-widest shrink-0">Private</span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-widest shrink-0">Public</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-slate-500">
-                        <span className="font-medium flex items-center gap-1.5"><GraduationCap size={16} /> {course.instructor}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1.5"><Video size={16} /> {course.videos?.length || 0} Lessons</span>
+                      <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-500 font-medium">
+                        <span className="flex items-center gap-1.5 shrink-0"><GraduationCap size={14} className="text-indigo-400" /> {course.instructor}</span>
+                        <span className="hidden xs:block text-slate-300">•</span>
+                        <span className="flex items-center gap-1.5 shrink-0"><Video size={14} className="text-indigo-400" /> {course.videos?.length || 0} Lessons</span>
                       </div>
                     </div>
                   </div>
