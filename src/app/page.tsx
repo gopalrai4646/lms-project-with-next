@@ -2,14 +2,14 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  ArrowRight, 
-  BarChart3, 
-  Play, 
-  FileText, 
-  ShieldCheck, 
-  Globe, 
-  RefreshCcw, 
+import {
+  ArrowRight,
+  BarChart3,
+  Play,
+  FileText,
+  ShieldCheck,
+  Globe,
+  RefreshCcw,
   Lock,
   ChevronDown
 } from 'lucide-react';
@@ -27,7 +27,6 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
-  const landingT = t('landing', { returnObjects: true }) as any;
 
   const [mounted, setMounted] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -37,7 +36,13 @@ export default function LandingPage() {
     setMounted(true);
   }, []);
 
-  // Use fallback during SSR to prevent hydration mismatch, then switch to real language on client
+  // Use fallback 'en' during SSR and first client render to prevent text hydration mismatch
+  const landingT = t('landing', { 
+    returnObjects: true, 
+    lng: mounted ? i18n.language : 'en' 
+  }) as any;
+
+  // Same for the language switcher display
   const currentLang = mounted
     ? LANGUAGE_OPTIONS.find((l) => l.code === i18n.language) || LANGUAGE_OPTIONS[0]
     : LANGUAGE_OPTIONS[0];
@@ -59,20 +64,25 @@ export default function LandingPage() {
 
   return (
 
-    <div className="min-h-screen bg-[#fafbff] font-manrope">
+    <div className="min-h-screen bg-[#fafbff] font-manrope overflow-x-hidden">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-1.5 xxs:px-4 sm:px-6 h-16 sm:h-20 flex justify-between items-center gap-2">
-          <div className="flex items-center gap-2 sm:gap-6">
-            <Link href="/" className="text-[13px] xxs:text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform whitespace-nowrap">
+      <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-20 flex justify-between items-center">
+
+          {/* Left: Logo + Language */}
+          <div className="flex items-center gap-1.5 sm:gap-6 shrink-0">
+            <Link
+              href="/"
+              className="text-sm xxs:text-base xs:text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent whitespace-nowrap"
+            >
               {landingT.nav.mentora}
             </Link>
 
-            {/* Custom Language Switcher */}
+            {/* Language Switcher — UNCHANGED LOGIC */}
             <div className="relative" ref={langRef}>
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 bg-white/80 border border-slate-200 rounded-full px-2 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer focus:outline-none"
+                className="flex items-center gap-1 bg-white/80 border border-slate-200 rounded-full px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer focus:outline-none"
               >
                 <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-sm border border-slate-100">
                   <img
@@ -81,16 +91,15 @@ export default function LandingPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="hidden xxs:inline uppercase tracking-widest">{currentLang.short}</span>
+                <span className="uppercase tracking-widest">{currentLang.short}</span>
                 <ChevronDown
-                  size={12}
+                  size={10}
                   className={`text-slate-400 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
-              {/* Dropdown */}
               {langOpen && (
-                <div className="absolute left-0 mt-2 w-28 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-[60] py-1 animate-in fade-in zoom-in duration-200">
+                <div className="absolute left-0 mt-2 w-28 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-[60] py-1">
                   {LANGUAGE_OPTIONS.map((opt) => (
                     <button
                       key={opt.code}
@@ -115,28 +124,36 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/login" className="text-[10px] xxs:text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors">
+          {/* Right: Login + Get Started */}
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
+            <Link
+              href="/login"
+              className="text-[10px] xxs:text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors whitespace-nowrap"
+            >
               {landingT.nav.login}
             </Link>
-            <Link href="/signup" className="bg-blue-700 text-white px-3 xxs:px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[8px] xxs:text-[10px] xs:text-xs sm:text-base font-bold hover:bg-blue-800 transition-all shadow-md shadow-blue-200 shrink-0 whitespace-nowrap">
+            <Link
+              href="/signup"
+              className="bg-blue-700 text-white px-2.5 xxs:px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[9px] xxs:text-[10px] sm:text-base font-bold hover:bg-blue-800 transition-all shadow-md shadow-blue-200 whitespace-nowrap shrink-0"
+            >
               {landingT.nav.getStarted}
             </Link>
           </div>
+
         </div>
       </nav>
 
       {/* Hero Section */}
       <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-8 overflow-x-hidden">
         <div className="flex-1 text-center lg:text-left">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="inline-block px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs sm:text-sm font-bold tracking-wide mb-6 shadow-sm border border-purple-100"
           >
             {landingT.hero.badge}
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -144,7 +161,7 @@ export default function LandingPage() {
           >
             {landingT.hero.title_1} <span className="text-blue-700 italic border-b-[4px] sm:border-b-[6px] border-blue-200/50 pb-1 inline-block">{landingT.hero.title_with}</span> <span className="text-purple-600">{landingT.hero.title_2}</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -156,7 +173,7 @@ export default function LandingPage() {
 
         {/* Dashboard Preview */}
         <div className="flex-1 w-full relative group mt-8 lg:mt-0 px-2 sm:px-0">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, type: 'spring' }}
@@ -170,8 +187,8 @@ export default function LandingPage() {
               <div className="text-sm sm:text-lg font-black text-slate-900 drop-shadow-sm">{landingT.hero.accuracy}</div>
             </div>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -179,8 +196,8 @@ export default function LandingPage() {
           >
             {/* Using Unsplash mockup image as replacement for local asset */}
             <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-4 border-slate-800 shadow-2xl bg-black">
-               <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay z-10 pointer-events-none" />
-               <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop" alt="Mentora Dashboard" className="object-cover w-full h-full opacity-90 transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay z-10 pointer-events-none" />
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop" alt="Mentora Dashboard" className="object-cover w-full h-full opacity-90 transition-transform duration-700 group-hover:scale-105" />
             </div>
           </motion.div>
         </div>
@@ -190,7 +207,7 @@ export default function LandingPage() {
       <section className="py-20 sm:py-24 bg-white px-4 sm:px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 px-2">
-            <h2 
+            <h2
               className="font-black text-slate-900 mb-4 tracking-tight leading-tight sm:text-3xl lg:text-4xl"
               style={{ fontSize: 'clamp(1.25rem, 6vw, 2.25rem)' }}
             >
@@ -198,7 +215,7 @@ export default function LandingPage() {
             </h2>
             <p className="text-slate-500 font-medium text-[11px] xxs:text-xs sm:text-base max-w-2xl mx-auto leading-relaxed">{landingT.features.subtitle}</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { icon: BarChart3, title: landingT.features.feature_1.title, desc: landingT.features.feature_1.desc },
@@ -265,7 +282,7 @@ export default function LandingPage() {
               ))}
             </ul>
           </div>
-          
+
           <div className="bg-slate-800/50 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] border border-slate-700 shadow-2xl relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-[2.5rem] sm:rounded-[3rem] pointer-events-none" />
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-700 relative z-10">
@@ -303,7 +320,7 @@ export default function LandingPage() {
           </div>
           <div className="text-sm text-slate-500 font-medium">{landingT.footer.copyright}</div>
         </div>
-        <div className="flex justify-center gap-8 text-sm font-bold text-slate-400">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-bold text-slate-400">
           <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.terms}</a>
           <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.privacy}</a>
           <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.twitter}</a>
