@@ -28,10 +28,19 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
   const landingT = t('landing', { returnObjects: true }) as any;
-  const currentLang = LANGUAGE_OPTIONS.find((l) => l.code === i18n.language) || LANGUAGE_OPTIONS[0];
 
+  const [mounted, setMounted] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use fallback during SSR to prevent hydration mismatch, then switch to real language on client
+  const currentLang = mounted
+    ? LANGUAGE_OPTIONS.find((l) => l.code === i18n.language) || LANGUAGE_OPTIONS[0]
+    : LANGUAGE_OPTIONS[0];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

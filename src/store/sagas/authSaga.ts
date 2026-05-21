@@ -11,7 +11,8 @@ import {
   updatePassword,
   User,
   UserCredential,
-  getAuth
+  getAuth,
+  getAdditionalUserInfo
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
@@ -42,6 +43,7 @@ import {
 import { enrollUserInCourseSuccess } from '../slices/courseSlice';
 import { clearProgress } from '../slices/progressSlice';
 import { clearUsers } from '../slices/userSlice';
+import i18n from '@/i18n';
 
 // Helper: Resolve permissions for a user based on their role
 function* resolvePermissions(role: string, staffRoleId?: string): any {
@@ -227,6 +229,15 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
       throw new Error('This email is banned and cannot be used to create an account.');
     }
 
+    // Security check: Block forced admin signups if one already exists
+    if (role === 'admin') {
+      const res = yield call(fetch, '/api/auth/check-admin');
+      const data = yield call([res, res.json]);
+      if (data.adminExists) {
+        throw new Error('An admin account already exists. You can only sign up as a student.');
+      }
+    }
+
     const userCredential: UserCredential = yield call(createUserWithEmailAndPassword, auth, normalizedEmail, pass);
     yield call(updateProfile, userCredential.user, { displayName: name, photoURL });
     const { uid, email: userEmail } = userCredential.user;
@@ -290,7 +301,11 @@ function* handleGoogleLogin(): any {
   try {
     const provider = new GoogleAuthProvider();
     const userCredential: UserCredential = yield call(signInWithPopup, auth, provider);
-    const { uid, email, displayName, metadata } = userCredential.user;
+    const { uid, email, displayName, photoURL, phoneNumber } = userCredential.user;
+    
+    // 1. Reliable new user detection
+    const additionalInfo = getAdditionalUserInfo(userCredential);
+    const isNew = additionalInfo?.isNewUser ?? false;
 
     // Check if email is banned
     if (email) {
@@ -301,15 +316,28 @@ function* handleGoogleLogin(): any {
         throw new Error('This Google account has been permanently disabled on this platform.');
       }
     }
-    const isNew = metadata.creationTime === metadata.lastSignInTime;
     
+    // 2. Add full profile data on creation
     if (isNew) {
       yield call(setDoc as any, doc(db, 'users', uid), {
         uid, email, displayName, role: 'student', createdAt: serverTimestamp(),
+        photoURL: photoURL || null,
+        phoneNumber: phoneNumber || null
       });
     }
 
-    const userDoc: any = yield call(getDoc, doc(db, 'users', uid));
+    let userDoc: any = yield call(getDoc, doc(db, 'users', uid));
+    
+    // 3. Fallback if document still doesn't exist
+    if (!userDoc.exists()) {
+      yield call(setDoc as any, doc(db, 'users', uid), {
+        uid, email, displayName, role: 'student', createdAt: serverTimestamp(),
+        photoURL: photoURL || null,
+        phoneNumber: phoneNumber || null
+      });
+      userDoc = yield call(getDoc, doc(db, 'users', uid));
+    }
+
     const userData = userDoc.data();
     const role = userData.role || 'student';
     const { permissions, staffRoleName }: { permissions: Permission[]; staffRoleName: string | null } = yield call(resolvePermissions, role, userData.staffRoleId);
@@ -335,7 +363,22 @@ function* handleGoogleLogin(): any {
     userSyncTask = yield fork(syncUserSession, uid);
 
   } catch (error: any) {
-    yield put(authFailure(error.message));
+    let message = error.message;
+    
+    // 4. User friendly messages for blocked/closed popups
+    if (error.code === 'auth/popup-closed-by-user') {
+      message = 'Google Login was cancelled. Please try again.';
+    } else if (error.code === 'auth/popup-blocked') {
+      message = 'Popup was blocked by your browser. Please allow popups for this site and try again.';
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      message = 'Only one login popup is allowed at a time.';
+    } else if (error.code === 'auth/unauthorized-domain') {
+      message = 'This domain is not authorized for Google Login. Please add it to your Firebase Console settings.';
+    } else if (error.code === 'auth/network-request-failed' || error?.message?.includes('offline')) {
+      message = 'Please check your internet connection.';
+    }
+
+    yield put(authFailure(message));
   }
 }
 
@@ -562,6 +605,7 @@ function* handleStopImpersonation(): any {
 function* handleForgotPassword(action: ReturnType<typeof forgotPasswordRequest>): any {
   try {
     const { email } = action.payload;
+    auth.languageCode = i18n.language;
     yield call(sendPasswordResetEmail, auth, email);
     yield put(authSuccess({ user: null })); // Clear loading
   } catch (error: any) {
