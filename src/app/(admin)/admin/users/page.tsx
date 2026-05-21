@@ -101,95 +101,89 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageUsers}</h1>
-          <p className="text-slate-500 mt-1">{t.manageUsersSubtitle}</p>
-        </div>
-      </header>
-
-      {error && (
-        <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl">
-          {error}
-        </div>
-      )}
-
-      {/* Toolbar: Search, Course Filter, and Items Per Page */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 bg-white py-3 px-4 rounded-3xl shadow-sm border border-slate-100">
-        {/* Search */}
-        <div className="relative w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder={t.searchPlaceholder}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 text-sm"
-          />
+      {/* Header + Toolbar Combined */}
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 xl:p-5 flex flex-col xl:flex-row gap-4 xl:items-center">
+        {/* Title */}
+        <div className="shrink-0">
+          <h1 className="text-2xl xl:text-3xl font-extrabold text-slate-900">{t.manageUsers}</h1>
+          <p className="text-slate-500 text-sm mt-0.5">{t.manageUsersSubtitle}</p>
         </div>
 
-        {/* Course Filter */}
-        <div className="relative w-full">
-          <select
-            value={courseFilter}
-            onChange={(e) => setCourseFilter(e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 bg-white cursor-pointer appearance-none"
-          >
-            <option value="">{t.allCourses}</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-          <ChevronRight
-            className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 rotate-90"
-            size={16}
-          />
-        </div>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row flex-wrap xl:flex-nowrap gap-3 xl:ml-auto xl:items-center w-full xl:w-auto">
+          {/* Search */}
+          <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder={t.searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 text-sm placeholder:text-slate-400"
+            />
+          </div>
 
-        {/* Items Per Page */}
-        <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 w-full">
-          <span className="text-sm font-semibold text-slate-500 whitespace-nowrap pl-1">
-            {t.itemsPerPage}:
-          </span>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
-          >
-            <option value={8}>8</option>
-            <option value={12}>12</option>
-            <option value={24}>24</option>
-            <option value={48}>48</option>
-          </select>
-        </div>
+          {/* Course Filter */}
+          <div className="relative flex-1 min-w-0 sm:min-w-[160px]">
+            <select
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer appearance-none"
+            >
+              <option value="">{t.allCourses}</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+            <ChevronRight
+              className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 rotate-90"
+              size={16}
+            />
+          </div>
 
-        {/* View Toggle */}
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner w-full">
-          <button
-            onClick={() => handleViewToggle('list')}
-            className={`flex-1 p-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'list'
-              ? 'bg-white shadow-md text-indigo-600 font-bold'
-              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            title={t.listView}
-          >
-            <List size={20} />
-            <span className="hidden sm:inline text-sm">{t.listView}</span>
-          </button>
+          {/* Items Per Page */}
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-2xl border border-slate-100 shrink-0">
+            <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+              {t.itemsPerPage}:
+            </span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className="px-2 py-1 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
+            >
+              <option value={8}>8</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+              <option value={48}>48</option>
+            </select>
+          </div>
 
-          <button
-            onClick={() => handleViewToggle('grid')}
-            className={`flex-1 p-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'grid'
-              ? 'bg-white shadow-md text-indigo-600 font-bold'
-              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            title={t.gridView}
-          >
-            <LayoutGrid size={20} />
-            <span className="hidden sm:inline text-sm">{t.gridView}</span>
-          </button>
+          {/* View Toggle */}
+          <div className="flex bg-slate-100 p-1 rounded-xl shadow-inner shrink-0">
+            <button
+              onClick={() => handleViewToggle('list')}
+              className={`p-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 ${viewMode === 'list'
+                ? 'bg-white shadow-md text-indigo-600 font-bold'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              title={t.listView}
+            >
+              <List size={18} />
+            </button>
+
+            <button
+              onClick={() => handleViewToggle('grid')}
+              className={`p-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 ${viewMode === 'grid'
+                ? 'bg-white shadow-md text-indigo-600 font-bold'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                }`}
+              title={t.gridView}
+            >
+              <LayoutGrid size={18} />
+            </button>
+          </div>
         </div>
       </div>
 

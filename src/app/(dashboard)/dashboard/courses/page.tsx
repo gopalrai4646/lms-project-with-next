@@ -157,10 +157,10 @@ export default function MyCoursesPage() {
 
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-4 grid grid-cols-1 xl:grid-cols-4 gap-4">
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-4 flex flex-col xl:flex-row gap-4 xl:items-center">
 
         {/* Tabs */}
-        <div className="overflow-x-auto no-scrollbar xl:col-span-2">
+        <div className="overflow-x-auto no-scrollbar w-full xl:flex-1">
           <div className="flex gap-2 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
             {tabs.map((tab) => (
               <button
@@ -187,7 +187,7 @@ export default function MyCoursesPage() {
         </div>
 
         {/* Search */}
-        <div className="relative w-full">
+        <div className="relative w-full xl:w-72 shrink-0">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
             <Search size={18} />
           </span>
@@ -197,15 +197,15 @@ export default function MyCoursesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.searchCourses || 'Search your courses...'}
-            className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all bg-slate-50"
+            className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all bg-slate-50 text-slate-900 placeholder:text-slate-400"
           />
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
+        <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto shrink-0">
 
           {/* Items Per Page */}
-          <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 flex-1">
+          <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 flex-1 sm:flex-none">
             <span className="text-sm font-semibold text-slate-500 whitespace-nowrap">
               {t.itemsPerPage || 'Items'}:
             </span>

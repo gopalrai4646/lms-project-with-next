@@ -18,11 +18,30 @@ export default function SignupPage() {
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [adminExists, setAdminExists] = useState<boolean | null>(null);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, role: authRole, loading, error } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('auth', { returnObjects: true }) as any;
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const res = await fetch('/api/auth/check-admin');
+        const data = await res.json();
+        if (data.success) {
+          setAdminExists(data.adminExists);
+        } else {
+          setAdminExists(true); // default to restricting on error
+        }
+      } catch (err) {
+        console.error('Failed to check admin status:', err);
+        setAdminExists(true);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -100,33 +119,35 @@ export default function SignupPage() {
         )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">{t.role}</label>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setRole('student')}
-                className={`py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
-                  role === 'student' 
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' 
-                    : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
-                }`}
-              >
-                👤 {t.user}
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('admin')}
-                className={`py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
-                  role === 'admin' 
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' 
-                    : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
-                }`}
-              >
-                🛠️ {t.admin}
-              </button>
+          {adminExists === false && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.role}</label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setRole('student')}
+                  className={`py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
+                    role === 'student' 
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' 
+                      : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
+                  }`}
+                >
+                  {t.user}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('admin')}
+                  className={`py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
+                    role === 'admin' 
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' 
+                      : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
+                  }`}
+                >
+                  {t.admin}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex flex-col items-center mb-6">
             <div className="relative group cursor-pointer" onClick={() => document.getElementById('photo-upload')?.click()}>
