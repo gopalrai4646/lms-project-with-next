@@ -27,7 +27,6 @@ const LANGUAGE_OPTIONS: { code: Language; flag: string; label: string; short: st
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
-  const landingT = t('landing', { returnObjects: true }) as any;
 
   const [mounted, setMounted] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -37,7 +36,13 @@ export default function LandingPage() {
     setMounted(true);
   }, []);
 
-  // Use fallback during SSR to prevent hydration mismatch, then switch to real language on client
+  // Use fallback 'en' during SSR and first client render to prevent text hydration mismatch
+  const landingT = t('landing', { 
+    returnObjects: true, 
+    lng: mounted ? i18n.language : 'en' 
+  }) as any;
+
+  // Same for the language switcher display
   const currentLang = mounted
     ? LANGUAGE_OPTIONS.find((l) => l.code === i18n.language) || LANGUAGE_OPTIONS[0]
     : LANGUAGE_OPTIONS[0];
@@ -59,44 +64,49 @@ export default function LandingPage() {
 
   return (
 
-    <div className="min-h-screen bg-[#fafbff] font-manrope">
+    <div className="min-h-screen bg-[#fafbff] font-manrope overflow-x-hidden">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-1.5 xxs:px-4 sm:px-6 h-16 sm:h-20 flex justify-between items-center gap-2">
-          <div className="flex items-center gap-2 sm:gap-6">
-            <Link href="/" className="text-xl sm:text-2xl font-black text-purple-500 hover:scale-105 transition-transform whitespace-nowrap">
+      <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-20 flex justify-between items-center">
+
+          {/* Left: Logo + Language */}
+          <div className="flex items-center gap-1.5 sm:gap-6 shrink-0">
+            <Link
+              href="/"
+              className="text-sm xxs:text-base xs:text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent whitespace-nowrap"
+            >
               {landingT.nav.mentora}
             </Link>
 
-            {/* Custom Language Switcher */}
+            {/* Language Switcher — UNCHANGED LOGIC */}
             <div className="relative" ref={langRef}>
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-2 bg-white/80 border border-slate-200 rounded-full px-3 py-1.5 hover:bg-slate-50 transition-all cursor-pointer focus:outline-none"
+                className="flex items-center gap-1 bg-white/80 border border-slate-200 rounded-full px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer focus:outline-none"
               >
-                <div className="w-5 h-5 relative flex-shrink-0 overflow-hidden rounded-full border border-slate-100">
+                <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-sm border border-slate-100">
                   <img
                     src={currentLang.flag}
                     alt={currentLang.label}
                     className="w-full h-full object-cover"
                   />
                 </div>
+                <span className="uppercase tracking-widest">{currentLang.short}</span>
                 <ChevronDown
-                  size={14}
+                  size={10}
                   className={`text-slate-400 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
-              {/* Dropdown */}
               {langOpen && (
-                <div className="absolute left-0 mt-2 w-28 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-[60] py-1 animate-in fade-in zoom-in duration-200">
+                <div className="absolute left-0 mt-2 w-28 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-[60] py-1">
                   {LANGUAGE_OPTIONS.map((opt) => (
                     <button
                       key={opt.code}
                       onClick={() => handleLanguageChange(opt.code)}
                       className={`w-full flex items-center justify-between px-3 py-2 text-[10px] tracking-widest uppercase transition-all ${i18n.language === opt.code
-                        ? 'bg-blue-50 text-blue-700 font-extrabold'
-                        : 'text-slate-500 hover:bg-slate-50 font-bold'
+                          ? 'bg-blue-50 text-blue-700 font-extrabold'
+                          : 'text-slate-500 hover:bg-slate-50 font-bold'
                         }`}
                     >
                       <span>{opt.short}</span>
@@ -114,14 +124,22 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/login" className="text-[10px] xxs:text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors">
+          {/* Right: Login + Get Started */}
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
+            <Link
+              href="/login"
+              className="text-[10px] xxs:text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors whitespace-nowrap"
+            >
               {landingT.nav.login}
             </Link>
-            <Link href="/signup" className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold hover:bg-blue-700 transition-all shrink-0 whitespace-nowrap">
+            <Link
+              href="/signup"
+              className="bg-blue-700 text-white px-2.5 xxs:px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[9px] xxs:text-[10px] sm:text-base font-bold hover:bg-blue-800 transition-all shadow-md shadow-blue-200 whitespace-nowrap shrink-0"
+            >
               {landingT.nav.getStarted}
             </Link>
           </div>
+
         </div>
       </nav>
 
@@ -131,7 +149,7 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-block px-5 py-2 rounded-full bg-purple-50 text-purple-600 text-[10px] sm:text-xs font-black tracking-widest uppercase mb-8 border border-purple-100"
+            className="inline-block px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs sm:text-sm font-bold tracking-wide mb-6 shadow-sm border border-purple-100"
           >
             {landingT.hero.badge}
           </motion.div>
@@ -139,9 +157,9 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-[2.5rem] sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1] sm:leading-[1.1] lg:leading-[1.1] mb-6 tracking-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.2] lg:leading-[1.15] mb-6"
           >
-            {landingT.hero.title_1} <span className="text-blue-600 italic border-b-[4px] sm:border-b-[6px] border-blue-100 pb-1 inline-block pr-1">{landingT.hero.title_with}</span> <span className="text-purple-500 block sm:inline mt-2 sm:mt-0">{landingT.hero.title_2}</span>
+            {landingT.hero.title_1} <span className="text-blue-700 italic border-b-[4px] sm:border-b-[6px] border-blue-200/50 pb-1 inline-block">{landingT.hero.title_with}</span> <span className="text-purple-600">{landingT.hero.title_2}</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -188,29 +206,29 @@ export default function LandingPage() {
       {/* Features Grid */}
       <section className="py-20 sm:py-24 bg-white px-4 sm:px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 sm:mb-20 px-2">
+          <div className="text-center mb-12 sm:mb-16 px-2">
             <h2
-              className="font-black text-slate-900 mb-6 tracking-tight leading-[1.15]"
-              style={{ fontSize: 'clamp(2rem, 6vw, 3rem)' }}
+              className="font-black text-slate-900 mb-4 tracking-tight leading-tight sm:text-3xl lg:text-4xl"
+              style={{ fontSize: 'clamp(1.25rem, 6vw, 2.25rem)' }}
             >
               {landingT.features.title}
             </h2>
-            <p className="text-slate-500 font-medium text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">{landingT.features.subtitle}</p>
+            <p className="text-slate-500 font-medium text-[11px] xxs:text-xs sm:text-base max-w-2xl mx-auto leading-relaxed">{landingT.features.subtitle}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { icon: BarChart3, title: landingT.features.feature_1.title, desc: landingT.features.feature_1.desc },
               { icon: Play, title: landingT.features.feature_2.title, desc: landingT.features.feature_2.desc },
               { icon: FileText, title: landingT.features.feature_3.title, desc: landingT.features.feature_3.desc },
               { icon: ShieldCheck, title: landingT.features.feature_4.title, desc: landingT.features.feature_4.desc }
             ].map((feature, i) => (
-              <div key={i} className="p-8 sm:p-10 rounded-[2.5rem] bg-[#f8fafc] hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-slate-100 group">
-                <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-sm border border-slate-100 mb-8 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                  <feature.icon className="w-7 h-7 text-slate-700 group-hover:text-blue-600 transition-colors" strokeWidth={1.5} />
+              <div key={i} className="p-8 rounded-[2rem] bg-slate-50 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-slate-100 group">
+                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md shadow-slate-200/50 mb-6 group-hover:scale-110 group-hover:text-blue-600 transition-transform">
+                  <feature.icon className="w-6 h-6 text-slate-600 group-hover:text-blue-600 transition-colors" />
                 </div>
-                <h3 className="text-[1.35rem] font-bold text-slate-900 mb-4 leading-tight">{feature.title}</h3>
-                <p className="text-slate-500 leading-relaxed text-[15px] font-medium">{feature.desc}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
+                <p className="text-slate-500 leading-relaxed text-sm font-medium">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -302,7 +320,7 @@ export default function LandingPage() {
           </div>
           <div className="text-sm text-slate-500 font-medium">{landingT.footer.copyright}</div>
         </div>
-        <div className="flex justify-center gap-8 text-sm font-bold text-slate-400">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-bold text-slate-400">
           <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.terms}</a>
           <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.privacy}</a>
           <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.twitter}</a>

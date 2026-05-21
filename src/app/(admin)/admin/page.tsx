@@ -551,11 +551,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  {canManageUsers && (
-                    <button className="w-full mt-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold py-2.5 px-4 rounded-xl border border-amber-200 transition-colors shadow-sm text-sm">
-                      {t.sendNudge}
-                    </button>
-                  )}
+
                </div>
             </div>
           </div>
