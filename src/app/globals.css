@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F8FAFD;
-  --foreground: #171717;
+  --background: #F8F9FF; /* Soft neutral background */
+  --foreground: #0F172A; /* Slate-900 */
 }
 
 @theme inline {
@@ -13,72 +13,31 @@
   --breakpoint-xxs: 360px;
   --breakpoint-xs: 420px;
 
-  /* ── Primary (#4A55E2) ── */
-  --color-indigo-50: #ECEDFB;
-  --color-indigo-100: #D5D8F7;
-  --color-indigo-200: #ABB1EF;
-  --color-indigo-300: #818AE7;
-  --color-indigo-400: #6770E5;
-  --color-indigo-500: #4A55E2;
-  --color-indigo-600: #4A55E2;
-  --color-indigo-700: #3A44CB;
-  --color-indigo-800: #2D35A0;
-  --color-indigo-900: #161B4F;
-  --color-indigo-950: #0D1030;
+  /* ── Primary Theme (Deep Indigo) ── */
+  --color-primary-50: #EEF2FF;
+  --color-primary-100: #E0E7FF;
+  --color-primary-200: #C7D2FE;
+  --color-primary-300: #A5B4FC;
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #4F46E5;
+  --color-primary-700: #4338CA;
+  --color-primary-800: #3730A3;
+  --color-primary-900: #312E81;
+  --color-primary-950: #1E1B4B;
 
-  /* ── Secondary (#A85EE6) ── */
-  --color-purple-50: #F5EDFD;
-  --color-purple-100: #EBDBFB;
-  --color-purple-200: #D6B7F7;
-  --color-purple-300: #C193F3;
-  --color-purple-400: #B479EC;
-  --color-purple-500: #A85EE6;
-  --color-purple-600: #A85EE6;
-  --color-purple-700: #6E2FA3;
-  --color-purple-800: #502276;
-  --color-purple-900: #35174F;
-  --color-purple-950: #1F0D2E;
-
-  --color-violet-50: #F5EDFD;
-  --color-violet-100: #EBDBFB;
-  --color-violet-200: #D6B7F7;
-  --color-violet-300: #C193F3;
-  --color-violet-400: #B479EC;
-  --color-violet-500: #A85EE6;
-  --color-violet-600: #A85EE6;
-  --color-violet-700: #6E2FA3;
-  --color-violet-800: #502276;
-  --color-violet-900: #35174F;
-  --color-violet-950: #1F0D2E;
-
-  /* ── Success (#459D68) ── */
-  --color-emerald-50: #ECFAF1;
-  --color-emerald-100: #D1F4DE;
-  --color-emerald-200: #A3E9BD;
-  --color-emerald-300: #75DE9C;
-  --color-emerald-400: #56C47F;
-  --color-emerald-500: #459D68;
-  --color-emerald-600: #459D68;
-  --color-emerald-700: #2A6341;
-  --color-emerald-800: #1E472E;
-  --color-emerald-900: #132E1E;
-  --color-emerald-950: #0A1A11;
-
-  /* ── Danger (#E95B67) ── */
-  --color-red-50: #FEF0F1;
-  --color-red-100: #FDD8DB;
-  --color-red-200: #FBB1B7;
-  --color-red-300: #F38A93;
-  --color-red-400: #EE707B;
-  --color-red-500: #E95B67;
-  --color-red-600: #E95B67;
-  --color-red-700: #A52D38;
-  --color-red-800: #7A2129;
-  --color-red-900: #51161B;
-  --color-red-950: #2E0D10;
-
-  /* ── Background override ── */
-  --color-slate-50: #F8FAFD;
+  /* ── Legacy Mappings (To avoid breaking existing ui temporarily) ── */
+  --color-indigo-50: var(--color-primary-50);
+  --color-indigo-100: var(--color-primary-100);
+  --color-indigo-200: var(--color-primary-200);
+  --color-indigo-300: var(--color-primary-300);
+  --color-indigo-400: var(--color-primary-400);
+  --color-indigo-500: var(--color-primary-500);
+  --color-indigo-600: var(--color-primary-600);
+  --color-indigo-700: var(--color-primary-700);
+  --color-indigo-800: var(--color-primary-800);
+  --color-indigo-900: var(--color-primary-900);
+  --color-indigo-950: var(--color-primary-950);
 }
 
 @utility no-scrollbar {
@@ -89,12 +48,6 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 html, body {
   overflow-x: hidden;
@@ -105,4 +58,110 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ────────────────────────────────────────────────────────────
+   GLOBAL DESIGN SYSTEM COMPONENTS (Industry-Ready UI)
+   ──────────────────────────────────────────────────────────── */
+
+@layer components {
+
+  /* ── Typography ── */
+  .text-display {
+    @apply text-3xl md:text-4xl font-semibold tracking-tight text-slate-900;
+  }
+  .text-h1 {
+    @apply text-2xl font-semibold text-slate-900 tracking-tight;
+  }
+  .text-h2 {
+    @apply text-lg md:text-xl font-semibold text-slate-900;
+  }
+  .text-h3 {
+    @apply text-base font-semibold text-slate-900;
+  }
+  .text-body {
+    @apply text-sm text-slate-600 leading-relaxed;
+  }
+  .text-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+  .text-metric {
+    @apply text-2xl md:text-3xl font-semibold text-slate-900;
+  }
+
+  /* ── Structural Components ── */
+  
+  /* The main page container layout */
+  .page-container {
+    @apply space-y-6 pb-8 bg-background min-h-screen p-4 md:p-8;
+  }
+
+  /* Standard Card: precise 1px borders, white background */
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col;
+  }
+
+  /* Interactive Card: gentle hover lift */
+  .card-interactive {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col hover:shadow-md hover:border-slate-300 transition-all cursor-pointer;
+  }
+
+  /* Standard sections within cards */
+  .card-header {
+    @apply flex justify-between items-center mb-6 border-b border-slate-100 pb-4;
+  }
+
+  /* ── Interaction Components ── */
+
+  /* Buttons */
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply flex items-center justify-center gap-2 px-3 py-1.5 bg-transparent text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-100 transition-colors;
+  }
+
+  .btn-danger {
+    @apply flex items-center justify-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all;
+  }
+
+  /* Segmented Control (Toggle) */
+  .segmented-control {
+    @apply flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50;
+  }
+  .segmented-item {
+    @apply px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 hover:text-slate-700;
+  }
+  .segmented-item-active {
+    @apply px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white text-slate-900 shadow-sm;
+  }
+
+  /* ── Badges / Micro Components ── */
+  
+  .badge {
+    @apply flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded-md text-slate-600 text-xs font-medium shadow-sm;
+  }
+
+  /* Progress bars */
+  .progress-track {
+    @apply w-full h-1.5 bg-slate-100 rounded-full overflow-hidden;
+  }
+  .progress-fill {
+    @apply h-full bg-primary-600 rounded-full transition-all duration-500 ease-out;
+  }
+
+  /* Data Table / List Rows */
+  .list-row {
+    @apply flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors;
+  }
 }
