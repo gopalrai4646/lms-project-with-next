@@ -88,7 +88,7 @@ export default function AdminCoursesPage() {
   if (!isMounted) return null; // Avoid hydration mismatch for localStorage view
 
   return (
-    <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
+    <div className="space-y-6 bg-background min-h-screen p-0 animate-in fade-in duration-700">
       {/* ─── Page Header ─── */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -109,112 +109,96 @@ export default function AdminCoursesPage() {
         </div>
       )}
 
-      {/* ─── Toolbar ─── */}
-      <div
-  className={`${UI_COMPONENTS.card} flex flex-col lg:flex-row gap-4 lg:items-center`}
->
-  {/* Left Controls */}
-  <div className="flex flex-col sm:flex-row gap-3 flex-1">
-    
-    {/* Search */}
-    <div className="relative flex-1 min-w-0">
-      <Search
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-        size={16}
-      />
+      {/* ─── Toolbar: 3 rows (mobile) → 2 rows (md) → 1 row (lg) ─── */}
+      <div className={`${UI_COMPONENTS.card} !p-4 w-full min-w-0`}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full">
+          {/* Row 1–2: Search + visibility */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center w-full min-w-0 lg:flex-1 lg:min-w-0">
+            <div className="relative w-full min-w-0 md:flex-1">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                size={16}
+                aria-hidden
+              />
+              <input
+                type="search"
+                placeholder={t.searchCourses}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`${UI_COMPONENTS.input} pl-10 w-full`}
+                aria-label={t.searchCourses}
+              />
+            </div>
+            <CustomSelect
+              value={visibilityFilter}
+              onChange={(val) => setVisibilityFilter(val as any)}
+              icon={<Eye size={16} />}
+              className="w-full md:w-[11.5rem] md:shrink-0"
+              options={[
+                { value: 'all', label: t.allCourses || 'All Courses' },
+                { value: 'public', label: t.public?.split(' ')[0] || 'Public' },
+                { value: 'private', label: t.private?.split(' ')[0] || 'Private' },
+              ]}
+            />
+          </div>
 
-      <input
-        type="text"
-        placeholder={t.searchCourses}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className={`${UI_COMPONENTS.input} pl-10 w-full`}
-      />
-    </div>
-
-    {/* Visibility Filter */}
-    <CustomSelect
-      value={visibilityFilter}
-      onChange={(val) => setVisibilityFilter(val as any)}
-      icon={<Eye size={16} />}
-      className="w-full sm:w-[180px]"
-      options={[
-        {
-          value: "all",
-          label: t.allCourses || "All Courses",
-        },
-        {
-          value: "public",
-          label: t.public?.split(" ")[0] || "Public",
-        },
-        {
-          value: "private",
-          label: t.private?.split(" ")[0] || "Private",
-        },
-      ]}
-    />
-  </div>
-
-  {/* Right Controls */}
-  <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
-
-    {/* Items per page */}
-    <div className="flex items-center gap-2 shrink-0">
-      <span
-        className={`${TYPOGRAPHY.label} text-xs whitespace-nowrap`}
-      >
-        {t.itemsPerPage}
-      </span>
-
-      <CustomSelect
-        value={itemsPerPage}
-        onChange={(val) => setItemsPerPage(Number(val))}
-        icon={<Hash size={14} />}
-        size="sm"
-        className="w-[90px]"
-        options={[
-          { value: 8, label: "8" },
-          { value: 12, label: "12" },
-          { value: 24, label: "24" },
-          { value: 48, label: "48" },
-        ]}
-      />
-    </div>
-
-    {/* View Toggle */}
-    <div
-      className={`${UI_COMPONENTS.segmentedControl} shrink-0`}
-    >
-      <button
-        onClick={() => handleViewToggle("list")}
-        className={`flex items-center gap-2 ${
-          viewMode === "list"
-            ? UI_COMPONENTS.segmentedItemActive
-            : UI_COMPONENTS.segmentedItem
-        }`}
-      >
-        <List size={16} />
-        <span className="hidden md:inline">
-          {t.listView}
-        </span>
-      </button>
-
-      <button
-        onClick={() => handleViewToggle("grid")}
-        className={`flex items-center gap-2 ${
-          viewMode === "grid"
-            ? UI_COMPONENTS.segmentedItemActive
-            : UI_COMPONENTS.segmentedItem
-        }`}
-      >
-        <LayoutGrid size={16} />
-        <span className="hidden md:inline">
-          {t.gridView}
-        </span>
-      </button>
-    </div>
-  </div>
-</div>
+          {/* Row 3: Items per page + view (2 equal columns, full-width row) */}
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
+            <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
+              <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
+                {t.itemsPerPage}
+              </span>
+              <CustomSelect
+                value={itemsPerPage}
+                onChange={(val) => setItemsPerPage(Number(val))}
+                icon={<Hash size={14} />}
+                size="sm"
+                className="w-full lg:w-[5.5rem] lg:shrink-0"
+                options={[
+                  { value: 8, label: '8' },
+                  { value: 12, label: '12' },
+                  { value: 24, label: '24' },
+                  { value: 48, label: '48' },
+                ]}
+              />
+            </div>
+            <div
+              className={`${UI_COMPONENTS.segmentedControl} w-full min-w-0 p-1 lg:p-0.5`}
+              role="group"
+              aria-label={`${t.listView} / ${t.gridView}`}
+            >
+              <button
+                type="button"
+                onClick={() => handleViewToggle('list')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title={t.listView}
+                aria-pressed={viewMode === 'list'}
+              >
+                <List className="w-5 h-5 lg:w-4 lg:h-4" aria-hidden />
+                <span className="hidden lg:inline">{t.listView}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewToggle('grid')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title={t.gridView}
+                aria-pressed={viewMode === 'grid'}
+              >
+                <LayoutGrid className="w-5 h-5 lg:w-4 lg:h-4" aria-hidden />
+                <span className="hidden lg:inline">{t.gridView}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ─── Content Area ─── */}
       {loading && courses.length === 0 ? (

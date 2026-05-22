@@ -7,8 +7,10 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest, deleteTrainingPlanRequest } from '@/store/slices/trainingPlanSlice';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Plus, Search, List, LayoutGrid, Users, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, List, LayoutGrid, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight, Hash, ClipboardList } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import CustomSelect from '@/components/common/CustomSelect';
 
 export default function AdminTrainingPlansPage() {
   const router = useRouter();
@@ -54,7 +56,7 @@ export default function AdminTrainingPlansPage() {
 
     if (debouncedSearchQuery) {
       const lowerQuery = debouncedSearchQuery.toLowerCase();
-      result = result.filter((plan) => 
+      result = result.filter((plan) =>
         plan.name.toLowerCase().includes(lowerQuery) ||
         (plan.description && plan.description.toLowerCase().includes(lowerQuery))
       );
@@ -72,7 +74,7 @@ export default function AdminTrainingPlansPage() {
   const totalItems = filteredPlans.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  
+
   const startIndex = (safeCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedPlans = filteredPlans.slice(startIndex, endIndex);
@@ -80,143 +82,193 @@ export default function AdminTrainingPlansPage() {
   if (!isMounted) return null; // Avoid hydration mismatch for localStorage view
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background min-h-screen p-0 animate-in fade-in duration-700">
+      {/* ─── Page Header ─── */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageTrainingPlans}</h1>
-          <p className="text-slate-500 mt-1">{t.manageTrainingPlansSubtitle}</p>
+          <h1 className={TYPOGRAPHY.h1}>{t.manageTrainingPlans}</h1>
+          <p className={`${TYPOGRAPHY.body} mt-1`}>{t.manageTrainingPlansSubtitle}</p>
         </div>
         {canCreate && (
-          <Link 
-            href="/admin/training-plans/new" 
-            className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-2"
-          >
-            <Plus size={20} /> {t.newTrainingPlan}
+          <Link href="/admin/training-plans/new" className={BUTTONS.primary}>
+            <Plus size={16} /> {t.newTrainingPlan}
           </Link>
         )}
       </header>
 
+      {/* ─── Error Banner ─── */}
       {error && (
-        <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl">
+        <div
+          className="p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-left duration-300"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
-      {/* Toolbar: Search, Items Per Page, and View toggle */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white py-2.5 px-4 rounded-3xl shadow-sm border border-slate-100">
-        <div className="relative w-full lg:flex-1 lg:max-w-2xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text"
-            placeholder={t.searchTrainingPlans}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 text-sm"
-          />
-        </div>
-        
-        <div className="flex flex-row items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
-          <div className="flex items-center gap-2 whitespace-nowrap bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0 shadow-sm justify-center flex-1 sm:flex-none">
-            <span className="text-sm font-semibold text-slate-500 pl-2">{t.itemsPerPage}:</span>
-            <select 
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer"
-            >
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-              <option value={24}>24</option>
-              <option value={48}>48</option>
-            </select>
+      {/* ─── Toolbar: 2 rows (mobile) → 1 row (lg) ─── */}
+      <div className={`${UI_COMPONENTS.card} !p-4 w-full min-w-0`}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full">
+          <div className="relative w-full min-w-0 lg:flex-1">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              size={16}
+              aria-hidden
+            />
+            <input
+              type="search"
+              placeholder={t.searchTrainingPlans}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`${UI_COMPONENTS.input} pl-10 w-full`}
+              aria-label={t.searchTrainingPlans}
+            />
           </div>
 
-          <div className="flex bg-slate-100 p-1.5 rounded-xl shrink-0 shadow-inner justify-center flex-1 sm:flex-none">
-            <button
-              onClick={() => handleViewToggle('list')}
-              className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-              title={t.listView}
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
+            <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
+              <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
+                {t.itemsPerPage}
+              </span>
+              <CustomSelect
+                value={itemsPerPage}
+                onChange={(val) => setItemsPerPage(Number(val))}
+                icon={<Hash size={14} />}
+                size="sm"
+                className="w-full lg:w-[5.5rem] lg:shrink-0"
+                options={[
+                  { value: 8, label: '8' },
+                  { value: 12, label: '12' },
+                  { value: 24, label: '24' },
+                  { value: 48, label: '48' },
+                ]}
+              />
+            </div>
+            <div
+              className={`${UI_COMPONENTS.segmentedControl} w-full min-w-0 p-1 lg:p-0.5`}
+              role="group"
+              aria-label={`${t.listView} / ${t.gridView}`}
             >
-              <List size={20} /> <span className="hidden sm:inline text-sm">{t.listView}</span>
-            </button>
-            <button
-              onClick={() => handleViewToggle('grid')}
-              className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-              title={t.gridView}
-            >
-              <LayoutGrid size={20} /> <span className="hidden sm:inline text-sm">{t.gridView}</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleViewToggle('list')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title={t.listView}
+                aria-pressed={viewMode === 'list'}
+              >
+                <List className="w-5 h-5 lg:w-4 lg:h-4" aria-hidden />
+                <span className="hidden lg:inline">{t.listView}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewToggle('grid')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title={t.gridView}
+                aria-pressed={viewMode === 'grid'}
+              >
+                <LayoutGrid className="w-5 h-5 lg:w-4 lg:h-4" aria-hidden />
+                <span className="hidden lg:inline">{t.gridView}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* ─── Content Area ─── */}
       {loading && trainingPlans.length === 0 ? (
-        <div className="py-12 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3">
-          <div className="w-8 h-8 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-          {t.loadingTrainingPlans}
+        <div className={`${UI_COMPONENTS.card} items-center justify-center py-12`}>
+          <div
+            className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"
+            role="status"
+            aria-label={t.loadingTrainingPlans}
+          />
+          <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingTrainingPlans}</p>
         </div>
       ) : paginatedPlans.length === 0 ? (
-        <div className="py-16 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
-          <Search className="opacity-50 grayscale" size={48} />
-          <p className="text-lg text-slate-500 font-semibold">{t.noTrainingPlansFound}</p>
+        <div className={`${UI_COMPONENTS.card} items-center justify-center py-16`}>
+          <Search className="text-slate-300" size={48} aria-hidden />
+          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noTrainingPlansFound}</p>
         </div>
       ) : viewMode === 'list' ? (
-        /* List View */
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden text-wrap">
+        /* ─── List View ─── */
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left min-w-[800px]">
-              <thead className="bg-slate-50 border-b border-slate-100">
+            <table className="w-full text-left min-w-[640px]">
+              <thead className="bg-slate-50/80 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest">{t.trainingPlanInfo}</th>
-                  <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.courses}</th>
-                  {(canEdit || canDelete) && <th className="px-6 py-2 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>}
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.trainingPlanInfo}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>{t.courses}</th>
+                  {(canEdit || canDelete) && (
+                    <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-right`}>{t.actions}</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedPlans.map((plan) => (
-                  <tr 
-                    key={plan.id} 
-                    className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${!canEdit ? 'cursor-default' : ''}`}
+                  <tr
+                    key={plan.id}
+                    className={`hover:bg-slate-50/50 transition-colors group ${
+                      canEdit ? 'cursor-pointer' : 'cursor-default'
+                    }`}
                     onClick={() => canEdit && router.push(`/admin/training-plans/edit/${plan.id}`)}
                   >
-                    <td className="px-6 py-2">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200/50 flex items-center justify-center">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border border-slate-200/50 group-hover:scale-105 transition-transform duration-300">
                           {plan.image ? (
                             <img src={plan.image} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <List size={24} className="text-slate-400" />
+                            <ClipboardList size={22} className="text-slate-300" aria-hidden />
                           )}
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">{plan.name}</p>
-                          <p className="text-xs text-slate-400 mt-1 max-w-md truncate">{plan.description}</p>
+                        <div className="min-w-0">
+                          <p
+                            className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1`}
+                          >
+                            {plan.name}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body} text-xs mt-0.5 line-clamp-1 max-w-md`}>
+                            {plan.description}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-2 text-center">
-                      <span className="text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/50 shadow-sm inline-flex items-center gap-1.5">
-                         <BookOpen size={14} className="opacity-60" /> {plan.courseIds?.length || 0}
+                    <td className="px-5 py-3 text-center">
+                      <span className={`${UI_COMPONENTS.badge} inline-flex`}>
+                        <BookOpen size={12} className="opacity-60" aria-hidden />
+                        {plan.courseIds?.length || 0}
                       </span>
                     </td>
                     {(canEdit || canDelete) && (
-                      <td className="px-6 py-2 text-right">
-                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                           {canEdit && (
-                            <Link 
+                            <Link
                               href={`/admin/training-plans/edit/${plan.id}`}
-                              className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all border border-transparent hover:border-amber-100 flex items-center gap-1"
+                              className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-primary-600`}
                               title={t.editTrainingPlan}
+                              aria-label={t.editTrainingPlan}
                             >
-                              <Pencil size={18} />
+                              <Pencil size={16} aria-hidden />
                             </Link>
                           )}
                           {canDelete && (
-                            <button 
+                            <button
+                              type="button"
                               onClick={() => handleDelete(plan.id)}
-                              className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1"
+                              className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
                               title={t.deleteTrainingPlan}
+                              aria-label={t.deleteTrainingPlan}
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} aria-hidden />
                             </button>
                           )}
                         </div>
@@ -229,117 +281,160 @@ export default function AdminTrainingPlansPage() {
           </div>
         </div>
       ) : (
-        /* Grid View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        /* ─── Grid View ─── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-in fade-in duration-500">
           {paginatedPlans.map((plan) => (
-            <div 
-              key={plan.id} 
-              className={`bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ${canEdit ? 'cursor-pointer' : 'cursor-default'}`}
+            <div
+              key={plan.id}
+              className={`${UI_COMPONENTS.cardInteractive} !p-0 overflow-hidden group ${
+                !canEdit ? '!cursor-default' : ''
+              }`}
               onClick={() => canEdit && router.push(`/admin/training-plans/edit/${plan.id}`)}
             >
-              <div className="aspect-video bg-slate-50 relative overflow-hidden flex items-center justify-center text-5xl">
+              <div className="aspect-video bg-slate-100 relative overflow-hidden flex items-center justify-center">
                 {plan.image ? (
-                  <img src={plan.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img
+                    src={plan.image}
+                    alt=""
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 ) : (
-                  <List size={48} className="text-slate-300 transform group-hover:scale-110 transition-transform duration-500" />
+                  <ClipboardList
+                    size={48}
+                    className="text-slate-300 group-hover:scale-110 transition-transform duration-500"
+                    aria-hidden
+                  />
                 )}
-                <div className="absolute top-3 right-3 shadow-sm">
-                  <span className="text-xs font-bold px-3 py-1 bg-white/90 backdrop-blur-md text-indigo-700 rounded-full border border-indigo-100/50 flex items-center gap-1.5">
-                    <BookOpen size={14} /> {plan.courseIds?.length || 0}
+                <div className="absolute top-3 right-3">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase border backdrop-blur-sm bg-white/90 text-primary-700 border-primary-200/50">
+                    <BookOpen size={11} aria-hidden />
+                    {plan.courseIds?.length || 0} {t.courses}
                   </span>
                 </div>
               </div>
-              
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="font-bold text-xl text-slate-900 line-clamp-1 leading-tight mb-2 group-hover:text-indigo-600 transition-colors">{plan.name}</h3>
-                <p className="text-sm text-slate-500 line-clamp-2 mb-6 flex-grow">{plan.description}</p>
-                
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+
+              <div className="p-4 flex flex-col flex-grow">
+                <h3
+                  className={`${TYPOGRAPHY.h3} line-clamp-2 leading-snug mb-2 group-hover:text-primary-600 transition-colors`}
+                >
+                  {plan.name}
+                </h3>
+                <p className={`${TYPOGRAPHY.body} text-xs line-clamp-2 mb-4 flex-grow`}>{plan.description}</p>
+
+                {(canEdit || canDelete) && (
+                  <div
+                    className="mt-auto flex items-center justify-end gap-0.5 pt-3 border-t border-slate-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {canEdit && (
-                      <Link 
+                      <Link
                         href={`/admin/training-plans/edit/${plan.id}`}
-                        className="text-sm font-bold text-slate-600 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 px-4 py-2 rounded-xl transition-all border border-slate-200 hover:border-amber-100 flex items-center gap-2"
+                        className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-primary-600`}
+                        title={t.editTrainingPlan}
+                        aria-label={t.editTrainingPlan}
                       >
-                        <Pencil size={16} /> {t.editTrainingPlan}
+                        <Pencil size={14} aria-hidden />
                       </Link>
                     )}
                     {canDelete && (
-                      <button 
+                      <button
+                        type="button"
                         onClick={() => handleDelete(plan.id)}
-                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center"
+                        className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
                         title={t.deleteTrainingPlan}
+                        aria-label={t.deleteTrainingPlan}
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} aria-hidden />
                       </button>
                     )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* ─── Pagination ─── */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
-          <p className="text-xs text-slate-500 font-medium">
-            {t.showing} <span className="font-bold text-slate-700">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-700">{endIndex}</span> {t.of} <span className="font-bold text-slate-700">{totalItems}</span>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200 mt-2">
+          <p className={TYPOGRAPHY.body}>
+            {t.showing}{' '}
+            <span className="font-semibold text-slate-900">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to}{' '}
+            <span className="font-semibold text-slate-900">{endIndex}</span> {t.of}{' '}
+            <span className="font-semibold text-slate-900">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-1 overflow-x-auto">
+          <nav className="flex items-center gap-1" aria-label="Pagination">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={safeCurrentPage === 1 || totalPages === 0}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+              className={`${BUTTONS.ghost} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
-              <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
+              <ChevronLeft size={14} aria-hidden />
+              <span className="hidden sm:inline">{t.prev}</span>
             </button>
-            
+
             <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
+                .filter(
+                  (page) =>
+                    totalPages <= 5 ||
+                    page === 1 ||
+                    page === totalPages ||
+                    Math.abs(page - safeCurrentPage) <= 1
+                )
                 .map((page, index, array) => {
                   if (index > 0 && page - array[index - 1] > 1) {
                     return (
                       <div key={`ellipsis-${page}`} className="flex items-center gap-1">
-                        <span className="w-4 text-center text-slate-400 text-xs">…</span>
+                        <span className="w-4 text-center text-slate-400 text-xs" aria-hidden>
+                          …
+                        </span>
                         <button
+                          type="button"
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
-                            safeCurrentPage === page 
-                              ? 'bg-indigo-600 text-white border border-indigo-700' 
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${
+                            safeCurrentPage === page
+                              ? 'bg-primary-600 text-white shadow-sm'
                               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                           }`}
+                          aria-current={safeCurrentPage === page ? 'page' : undefined}
                         >
                           {page}
                         </button>
                       </div>
                     );
                   }
-                  
+
                   return (
                     <button
                       key={page}
+                      type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${
-                        safeCurrentPage === page 
-                          ? 'bg-indigo-600 text-white border border-indigo-700' 
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${
+                        safeCurrentPage === page
+                          ? 'bg-primary-600 text-white shadow-sm'
                           : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
+                      aria-current={safeCurrentPage === page ? 'page' : undefined}
                     >
                       {page}
                     </button>
                   );
-              })}
+                })}
             </div>
 
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={safeCurrentPage === totalPages || totalPages === 0}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+              className={`${BUTTONS.ghost} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
-               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
+              <span className="hidden sm:inline">{t.next}</span>
+              <ChevronRight size={14} aria-hidden />
             </button>
-          </div>
+          </nav>
         </div>
       )}
     </div>
