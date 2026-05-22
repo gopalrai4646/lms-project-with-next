@@ -27,6 +27,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import Link from 'next/link';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 
 export default function AdminDashboard() {
   const dispatch = useAppDispatch();
@@ -239,10 +240,10 @@ export default function AdminDashboard() {
 
   if (isInitialLoading) {
     return (
-      <div className="page-container flex items-center justify-center">
+      <div className={`${UI_COMPONENTS.pageContainer} flex items-center justify-center`}>
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
-          <p className="text-body animate-pulse">{t.loadingAnalytics || 'Loading analytics...'}</p>
+          <p className={`${TYPOGRAPHY.body} animate-pulse`}>{t.loadingAnalytics || 'Loading analytics...'}</p>
         </div>
       </div>
     );
@@ -250,25 +251,25 @@ export default function AdminDashboard() {
 
   if (isPlatformEmpty) {
     return (
-      <div className="page-container flex flex-col items-center justify-center">
-        <div className="card max-w-md w-full text-center space-y-6">
+      <div className={`${UI_COMPONENTS.pageContainer} flex flex-col items-center justify-center`}>
+        <div className={`${UI_COMPONENTS.card} max-w-md w-full text-center space-y-6`}>
           <div className="w-12 h-12 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-center mx-auto text-primary-600">
             <Zap size={24} />
           </div>
           <div>
-            <h1 className="text-h1 mb-2">
+            <h1 className={`${TYPOGRAPHY.h1} mb-2`}>
               {t.welcomeEmpire || 'Welcome to your Workspace'}
             </h1>
-            <p className="text-body">
+            <p className={`${TYPOGRAPHY.body}`}>
               {t.welcomeEmpireSub || 'Your platform is currently empty. Start by creating your first course or setting up a training plan to begin tracking engagement.'}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-slate-100">
-            <Link href="/admin/courses" className="btn-primary w-full sm:w-auto">
+            <Link href="/admin/courses" className={`${BUTTONS.primary} w-full sm:w-auto`}>
               <BookOpen size={16} />
               {t.createFirstCourse || 'Create Course'}
             </Link>
-            <Link href="/admin/training-plans" className="btn-secondary w-full sm:w-auto">
+            <Link href="/admin/training-plans" className={`${BUTTONS.secondary} w-full sm:w-auto`}>
               <Award size={16} />
               {t.setupTrainingPlan || 'Setup Training Plan'}
             </Link>
@@ -279,20 +280,20 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="page-container">
+    <div className={`${UI_COMPONENTS.pageContainer}`}>
       {role === 'admin' && (
         <>
           <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
             <div>
-              <h1 className="text-h1 mb-1">
+              <h1 className={`${TYPOGRAPHY.h1} mb-1`}>
                 {t.performanceOverview || 'Performance Overview'}
               </h1>
-              <p className="text-body">
+              <p className={`${TYPOGRAPHY.body}`}>
                 {i18nT('admin.welcomeAdmin', { name: user?.displayName || 'Admin' }) || `Welcome back, ${user?.displayName || 'Admin'}`}
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="badge">
+              <span className={`${UI_COMPONENTS.badge}`}>
                 <TrendingUp size={14} className="text-emerald-500" />
                 System Healthy
               </span>
@@ -351,13 +352,13 @@ export default function AdminDashboard() {
       {/* ─── Integrated Report Sections ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* DAU Chart */}
-        <div className="card lg:col-span-2">
-          <div className="card-header">
+        <div className={`${UI_COMPONENTS.card} lg:col-span-2`}>
+          <div className={`${UI_COMPONENTS.cardHeader}`}>
             <div>
-              <h2 className="text-h3">{t.dauTitle || 'Daily Active Users'}</h2>
-              <p className="text-body text-xs mt-1">{t.dauSub || 'Engagement over time'}</p>
+              <h2 className={`${TYPOGRAPHY.h3}`}>{t.dauTitle || 'Daily Active Users'}</h2>
+              <p className={`${TYPOGRAPHY.body} text-xs mt-1`}>{t.dauSub || 'Engagement over time'}</p>
             </div>
-            <div className="segmented-control">
+            <div className={`${UI_COMPONENTS.segmentedControl}`}>
               <button 
                 onClick={() => setDauTimeframe('week')}
                 className={dauTimeframe === 'week' ? 'segmented-item-active' : 'segmented-item'}
@@ -378,8 +379,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Popularity Heatmap */}
-        <div className="card">
-          <h2 className="card-header !mb-6 text-h3">{t.popularityHeatmap || 'Course Popularity'}</h2>
+        <div className={`${UI_COMPONENTS.card}`}>
+          <h2 className={`${UI_COMPONENTS.cardHeader} !mb-6 ${TYPOGRAPHY.h3}`}>{t.popularityHeatmap || 'Course Popularity'}</h2>
           <div className="space-y-5 flex-1">
             {reportStats.popularity.map((course) => (
               <div key={course.id}>
@@ -387,8 +388,8 @@ export default function AdminDashboard() {
                   <span className="text-sm font-medium text-slate-700 truncate max-w-[70%]">{course.title}</span>
                   <span className="text-xs font-semibold text-slate-900">{course.percent}% <span className="text-slate-400 font-normal">assigned</span></span>
                 </div>
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${course.percent}%` }}></div>
+                <div className={`${UI_COMPONENTS.progressTrack}`}>
+                  <div className={`${UI_COMPONENTS.progressFill}`} style={{ width: `${course.percent}%` }}></div>
                 </div>
               </div>
             ))}
@@ -398,25 +399,25 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Attention Needed */}
-        <div className="card">
-          <div className="card-header !mb-4">
+        <div className={`${UI_COMPONENTS.card}`}>
+          <div className={`${UI_COMPONENTS.cardHeader} !mb-4`}>
              <div className="flex items-center gap-3">
                <div className="w-8 h-8 rounded-md bg-rose-50 flex items-center justify-center text-rose-500 border border-rose-100">
                   <AlertTriangle size={16} />
                </div>
                <div>
-                 <h2 className="text-h3">{t.attentionNeeded || 'Attention Needed'}</h2>
-                 <p className="text-body text-xs mt-0.5">{t.attentionNeededSub || 'Courses with low satisfaction'}</p>
+                 <h2 className={`${TYPOGRAPHY.h3}`}>{t.attentionNeeded || 'Attention Needed'}</h2>
+                 <p className={`${TYPOGRAPHY.body} text-xs mt-0.5`}>{t.attentionNeededSub || 'Courses with low satisfaction'}</p>
                </div>
              </div>
           </div>
 
           <div className="space-y-2 max-h-[280px] overflow-y-auto pr-2 no-scrollbar">
             {reportStats.attentionNeeded.length === 0 ? (
-               <div className="py-8 text-center text-body">{t.allCoursesWell || 'All courses performing well.'}</div>
+               <div className={`py-8 text-center ${TYPOGRAPHY.body}`}>{t.allCoursesWell || 'All courses performing well.'}</div>
             ) : (
                 reportStats.attentionNeeded.map((course) => (
-                  <div key={course.id} className="list-row group">
+                  <div key={course.id} className={`${UI_COMPONENTS.listRow} group`}>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 text-xs font-bold uppercase shrink-0 border border-slate-200">
                          {course.title.substring(0, 2)}
@@ -428,7 +429,7 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                     </div>
-                    <Link href={`/admin/courses`} className="btn-ghost !border !border-slate-200 hover:!border-primary-200 hover:!bg-primary-50 bg-white">
+                    <Link href={`/admin/courses`} className={`${BUTTONS.ghost} !border !border-slate-200 hover:!border-primary-200 hover:!bg-primary-50 bg-white`}>
                       {t.revise || 'Revise'}
                     </Link>
                   </div>
@@ -438,15 +439,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stalled Learners */}
-        <div className="card">
-          <div className="card-header !mb-4">
+        <div className={`${UI_COMPONENTS.card}`}>
+          <div className={`${UI_COMPONENTS.cardHeader} !mb-4`}>
              <div className="flex items-center gap-3">
                <div className="w-8 h-8 rounded-md bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
                   <Hourglass size={16} />
                </div>
                <div>
-                 <h2 className="text-h3">{t.stalledLearners || 'Stalled Learners'}</h2>
-                 <p className="text-body text-xs mt-0.5">{t.stalledLearnersSub || 'No activity in 7 days'}</p>
+                 <h2 className={`${TYPOGRAPHY.h3}`}>{t.stalledLearners || 'Stalled Learners'}</h2>
+                 <p className={`${TYPOGRAPHY.body} text-xs mt-0.5`}>{t.stalledLearnersSub || 'No activity in 7 days'}</p>
                </div>
              </div>
           </div>
@@ -469,14 +470,14 @@ export default function AdminDashboard() {
                        <span className="w-2.5 h-2.5 rounded-sm bg-primary-600"></span>
                        <span className="text-slate-600">{t.stalledLabel || 'Stalled'}</span>
                      </div>
-                     <span className="text-metric !text-lg">{reportStats.stalledStats.stalled.toLocaleString()}</span>
+                     <span className={`${TYPOGRAPHY.metric} !text-lg`}>{reportStats.stalledStats.stalled.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between gap-6">
                      <div className="flex items-center gap-2">
                        <span className="w-2.5 h-2.5 rounded-sm bg-slate-200"></span>
                        <span className="text-slate-600">{t.activeLabel || 'Active'}</span>
                      </div>
-                     <span className="text-metric !text-lg">{reportStats.stalledStats.active.toLocaleString()}</span>
+                     <span className={`${TYPOGRAPHY.metric} !text-lg`}>{reportStats.stalledStats.active.toLocaleString()}</span>
                   </div>
                 </div>
              </div>
@@ -500,14 +501,14 @@ function AnalyticsCard({ href, title, value, subtext, icon, chartData }: Analyti
   const CardContent = (
     <>
       <div className="flex justify-between items-start mb-3">
-        <h3 className="text-label">{title}</h3>
+        <h3 className={`${TYPOGRAPHY.label}`}>{title}</h3>
         <div className="text-slate-400">
           {icon}
         </div>
       </div>
       
       <div>
-        <div className="text-metric truncate" title={String(value)}>
+        <div className={`${TYPOGRAPHY.metric} truncate`} title={String(value)}>
           {value}
         </div>
         
@@ -517,7 +518,7 @@ function AnalyticsCard({ href, title, value, subtext, icon, chartData }: Analyti
           </div>
         )}
         
-        <p className={`text-body !text-xs flex items-center gap-1 ${chartData ? 'mt-3' : 'mt-2'}`}>
+        <p className={`${TYPOGRAPHY.body} !text-xs flex items-center gap-1 ${chartData ? 'mt-3' : 'mt-2'}`}>
           {subtext}
         </p>
       </div>
@@ -526,14 +527,14 @@ function AnalyticsCard({ href, title, value, subtext, icon, chartData }: Analyti
 
   if (!href) {
     return (
-      <div className="card">
+      <div className={`${UI_COMPONENTS.card}`}>
         {CardContent}
       </div>
     );
   }
 
   return (
-    <Link href={href} className="card-interactive">
+    <Link href={href} className={`${UI_COMPONENTS.cardInteractive}`}>
       {CardContent}
     </Link>
   );

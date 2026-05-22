@@ -6,11 +6,12 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest, deleteCourseRequest } from '@/store/slices/courseSlice';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Plus, Search, Eye, ChevronDown, List, LayoutGrid, BookOpen, GraduationCap, Users, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-
+import { Plus, Search, Eye, List, LayoutGrid, BookOpen, GraduationCap, Users, Pencil, Trash2, ChevronLeft, ChevronRight, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/utils/dateUtils';
 import { hasPermission } from '@/lib/permissions';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import CustomSelect from '@/components/common/CustomSelect';
 
 export default function AdminCoursesPage() {
   const router = useRouter();
@@ -87,205 +88,220 @@ export default function AdminCoursesPage() {
   if (!isMounted) return null; // Avoid hydration mismatch for localStorage view
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
+      {/* ─── Page Header ─── */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">{t.manageCoursesTitle}</h1>
-          <p className="text-slate-500 mt-1">{t.manageCoursesSubtitle}</p>
+          <h1 className={TYPOGRAPHY.h1}>{t.manageCoursesTitle}</h1>
+          <p className={`${TYPOGRAPHY.body} mt-1`}>{t.manageCoursesSubtitle}</p>
         </div>
         {canCreate && (
-          <Link
-            href="/admin/courses/new"
-            className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] flex items-center gap-2 shrink-0 group"
-          >
-            <Plus className="group-hover:rotate-90 transition-transform duration-300" size={20} /> {t.newCourse}
+          <Link href="/admin/courses/new" className={BUTTONS.primary}>
+            <Plus size={16} /> {t.newCourse}
           </Link>
         )}
       </header>
 
+      {/* ─── Error Banner ─── */}
       {error && (
-        <div className="p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 rounded-r-xl font-medium animate-in slide-in-from-left duration-300">
+        <div className="p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-left duration-300">
           {error}
         </div>
       )}
 
-      {/* Toolbar: Search, Filters, and Items Per Page */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 bg-white py-3 px-4 rounded-3xl shadow-sm border border-slate-100">
+      {/* ─── Toolbar ─── */}
+      <div
+  className={`${UI_COMPONENTS.card} flex flex-col lg:flex-row gap-4 lg:items-center`}
+>
+  {/* Left Controls */}
+  <div className="flex flex-col sm:flex-row gap-3 flex-1">
+    
+    {/* Search */}
+    <div className="relative flex-1 min-w-0">
+      <Search
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+        size={16}
+      />
 
-        {/* Search */}
-        <div className="relative w-full">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            size={18}
-          />
+      <input
+        type="text"
+        placeholder={t.searchCourses}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className={`${UI_COMPONENTS.input} pl-10 w-full`}
+      />
+    </div>
 
-          <input
-            type="text"
-            placeholder={t.searchCourses}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 text-sm"
-          />
-        </div>
+    {/* Visibility Filter */}
+    <CustomSelect
+      value={visibilityFilter}
+      onChange={(val) => setVisibilityFilter(val as any)}
+      icon={<Eye size={16} />}
+      className="w-full sm:w-[180px]"
+      options={[
+        {
+          value: "all",
+          label: t.allCourses || "All Courses",
+        },
+        {
+          value: "public",
+          label: t.public?.split(" ")[0] || "Public",
+        },
+        {
+          value: "private",
+          label: t.private?.split(" ")[0] || "Private",
+        },
+      ]}
+    />
+  </div>
 
-        {/* Visibility Filter */}
-        <div className="relative w-full">
-          <Eye
-            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
-            size={18}
-          />
+  {/* Right Controls */}
+  <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
 
-          <select
-            value={visibilityFilter}
-            onChange={(e) => setVisibilityFilter(e.target.value as any)}
-            className="w-full px-4 py-2.5 pl-11 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 bg-white cursor-pointer appearance-none shadow-sm transition-all"
-          >
-            <option value="all">{t.allCourses}</option>
-            <option value="public">
-              {t.public?.split(' ')[0] || 'Public'}
-            </option>
-            <option value="private">
-              {t.private?.split(' ')[0] || 'Private'}
-            </option>
-          </select>
+    {/* Items per page */}
+    <div className="flex items-center gap-2 shrink-0">
+      <span
+        className={`${TYPOGRAPHY.label} text-xs whitespace-nowrap`}
+      >
+        {t.itemsPerPage}
+      </span>
 
-          <ChevronDown
-            className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
-            size={14}
-          />
-        </div>
+      <CustomSelect
+        value={itemsPerPage}
+        onChange={(val) => setItemsPerPage(Number(val))}
+        icon={<Hash size={14} />}
+        size="sm"
+        className="w-[90px]"
+        options={[
+          { value: 8, label: "8" },
+          { value: 12, label: "12" },
+          { value: 24, label: "24" },
+          { value: 48, label: "48" },
+        ]}
+      />
+    </div>
 
-        {/* Items Per Page */}
-        <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 w-full">
-          <span className="text-sm font-semibold text-slate-500 whitespace-nowrap pl-1">
-            {t.itemsPerPage}:
-          </span>
+    {/* View Toggle */}
+    <div
+      className={`${UI_COMPONENTS.segmentedControl} shrink-0`}
+    >
+      <button
+        onClick={() => handleViewToggle("list")}
+        className={`flex items-center gap-2 ${
+          viewMode === "list"
+            ? UI_COMPONENTS.segmentedItemActive
+            : UI_COMPONENTS.segmentedItem
+        }`}
+      >
+        <List size={16} />
+        <span className="hidden md:inline">
+          {t.listView}
+        </span>
+      </button>
 
-          <select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
-          >
-            <option value={8}>8</option>
-            <option value={12}>12</option>
-            <option value={24}>24</option>
-            <option value={48}>48</option>
-          </select>
-        </div>
+      <button
+        onClick={() => handleViewToggle("grid")}
+        className={`flex items-center gap-2 ${
+          viewMode === "grid"
+            ? UI_COMPONENTS.segmentedItemActive
+            : UI_COMPONENTS.segmentedItem
+        }`}
+      >
+        <LayoutGrid size={16} />
+        <span className="hidden md:inline">
+          {t.gridView}
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 
-        {/* View Toggle */}
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner w-full">
-          <button
-            onClick={() => handleViewToggle('list')}
-            className={`flex-1 p-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'list'
-              ? 'bg-white shadow-md text-indigo-600 font-bold'
-              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            title={t.listView}
-          >
-            <List size={20} />
-            <span className="hidden sm:inline text-sm">
-              {t.listView}
-            </span>
-          </button>
-
-          <button
-            onClick={() => handleViewToggle('grid')}
-            className={`flex-1 p-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'grid'
-              ? 'bg-white shadow-md text-indigo-600 font-bold'
-              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            title={t.gridView}
-          >
-            <LayoutGrid size={20} />
-            <span className="hidden sm:inline text-sm">
-              {t.gridView}
-            </span>
-          </button>
-        </div>
-      </div>
-
+      {/* ─── Content Area ─── */}
       {loading && courses.length === 0 ? (
-        <div className="py-12 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3">
-          <div className="w-8 h-8 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-          {t.loadingCourses}
+        <div className={`${UI_COMPONENTS.card} items-center justify-center py-12`}>
+          <div className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"></div>
+          <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingCourses}</p>
         </div>
       ) : paginatedCourses.length === 0 ? (
-        <div className="py-16 text-center text-slate-400 font-medium italic bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
-          <Search className="opacity-50 grayscale" size={48} />
-          <p className="text-lg text-slate-500 font-semibold">{t.noCoursesFound}</p>
+        <div className={`${UI_COMPONENTS.card} items-center justify-center py-16`}>
+          <Search className="text-slate-300" size={48} />
+          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noCoursesFound}</p>
         </div>
       ) : viewMode === 'list' ? (
-        /* List View */
-        <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden animate-in fade-in duration-500">
+        /* ─── List View ─── */
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left min-w-[950px]">
-              <thead className="bg-slate-50/50 border-b border-slate-100">
+            <table className="w-full text-left min-w-[900px]">
+              <thead className="bg-slate-50/80 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.courseInfo}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.instructor}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.visibility}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.created_at}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-center">{t.user}</th>
-                  {(canEdit || canDeleteCourse) && <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>}
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.courseInfo}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.instructor}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>{t.visibility}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.created_at}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>{t.user}</th>
+                  {(canEdit || canDeleteCourse) && <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-right`}>{t.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedCourses.map((course) => (
-                  <tr key={course.id} className="hover:bg-slate-50/30 transition-colors group">
-                    <td className="px-6 py-2 w-1/3">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center text-2xl relative border border-slate-200/50 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                          {course.thumbnail ? <img src={course.thumbnail} alt="" className="w-full h-full object-cover" /> : <BookOpen size={32} className="text-slate-300" />}
+                  <tr key={course.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-5 py-3 w-1/3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border border-slate-200/50 group-hover:scale-105 transition-transform duration-300">
+                          {course.thumbnail ? <img src={course.thumbnail} alt="" className="w-full h-full object-cover" /> : <BookOpen size={24} className="text-slate-300" />}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-1 text-base">{course.title}</p>
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-1 max-w-[250px] font-medium">{course.description}</p>
+                          <p className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1`}>{course.title}</p>
+                          <p className={`${TYPOGRAPHY.body} text-xs mt-0.5 line-clamp-1 max-w-[250px]`}>{course.description}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs shrink-0 shadow-sm text-indigo-600">
-                          <GraduationCap size={16} />
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0 text-primary-600">
+                          <GraduationCap size={14} />
                         </div>
-                        <span className="text-sm font-bold text-slate-700">{course.instructor}</span>
+                        <span className="text-sm font-medium text-slate-700">{course.instructor}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-2 text-center">
-                      <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap border ${course.visibility === 'private' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                    <td className="px-5 py-3 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${
+                        course.visibility === 'private'
+                          ? 'bg-amber-50 text-amber-600 border-amber-200'
+                          : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                      }`}>
                         {course.visibility === 'private' ? (t.private?.split(' ')[0] || 'Private') : (t.public?.split(' ')[0] || 'Public')}
                       </span>
                     </td>
-                    <td className="px-6 py-2">
-                      <span className="text-xs font-bold text-slate-500 font-mono bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
+                    <td className="px-5 py-3">
+                      <span className="text-xs font-medium text-slate-500 font-mono bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
                         {formatDate(course.createdAt)}
                       </span>
                     </td>
-                    <td className="px-6 py-2 text-center">
-                      <span className="text-xs font-black text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-full inline-flex items-center justify-center gap-1.5 w-fit border border-slate-200/50 shadow-sm">
-                        <Users size={14} className="opacity-60" /> {course.enrolledUsers?.length || 0}
+                    <td className="px-5 py-3 text-center">
+                      <span className={`${UI_COMPONENTS.badge} inline-flex`}>
+                        <Users size={12} className="opacity-60" /> {course.enrolledUsers?.length || 0}
                       </span>
                     </td>
                     {(canEdit || canDeleteCourse) && (
-                      <td className="px-6 py-2 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
                           {canEdit && (
                             <Link
                               href={`/admin/courses/edit/${course.id}`}
-                              className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center gap-1 shrink-0 shadow-sm hover:shadow-indigo-50"
+                              className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-primary-600`}
                               title={t.editCourse}
                             >
-                              <Pencil size={18} />
+                              <Pencil size={16} />
                             </Link>
                           )}
                           {canDeleteCourse && (
                             <button
                               onClick={() => handleDelete(course.id)}
-                              className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center gap-1 shrink-0 shadow-sm hover:shadow-rose-50"
+                              className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
                               title={t.deleteCourse}
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </button>
                           )}
                         </div>
@@ -298,65 +314,71 @@ export default function AdminCoursesPage() {
           </div>
         </div>
       ) : (
-        /* Grid View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-in fade-in zoom-in-95 duration-500">
+        /* ─── Grid View ─── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-in fade-in duration-500">
           {paginatedCourses.map((course) => (
             <div
               key={course.id}
-              className={`bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ${canEdit ? 'cursor-pointer' : 'cursor-default'}`}
+              className={`${UI_COMPONENTS.cardInteractive} !p-0 overflow-hidden group`}
               onClick={() => canEdit && router.push(`/admin/courses/edit/${course.id}`)}
             >
-              <div className="aspect-video bg-slate-50 relative overflow-hidden flex items-center justify-center text-6xl">
+              {/* Thumbnail */}
+              <div className="aspect-video bg-slate-100 relative overflow-hidden flex items-center justify-center">
                 {course.thumbnail ? (
-                  <img src={course.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src={course.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
-                  <BookOpen size={64} className="text-slate-300 drop-shadow-xl transform group-hover:scale-125 transition-transform duration-700" />
+                  <BookOpen size={48} className="text-slate-300 group-hover:scale-110 transition-transform duration-500" />
                 )}
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <span className={`text-[10px] font-black uppercase tracking-tighter px-3 py-1.5 rounded-full shadow-lg backdrop-blur-xl border ${course.visibility === 'private' ? 'bg-white/90 text-amber-700 border-amber-200/30' : 'bg-white/90 text-emerald-700 border-emerald-200/30'}`}>
+                <div className="absolute top-3 right-3">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase border backdrop-blur-sm ${
+                    course.visibility === 'private'
+                      ? 'bg-white/90 text-amber-600 border-amber-200/50'
+                      : 'bg-white/90 text-emerald-600 border-emerald-200/50'
+                  }`}>
                     {course.visibility === 'private' ? (t.private?.split(' ')[0] || 'Private') : (t.public?.split(' ')[0] || 'Public')}
                   </span>
                 </div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="bg-slate-900/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white text-[10px] font-black flex items-center gap-1.5 shadow-lg">
-                    <Users size={12} className="opacity-80" /> {course.enrolledUsers?.length || 0} {t.learners}
+                <div className="absolute bottom-3 left-3">
+                  <div className="bg-slate-900/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 text-white text-[10px] font-semibold flex items-center gap-1.5">
+                    <Users size={11} /> {course.enrolledUsers?.length || 0} {t.learners}
                   </div>
                 </div>
               </div>
 
-              <div className="p-8 flex flex-col flex-grow">
-                <h3 className="font-bold text-2xl text-slate-900 line-clamp-2 leading-tight mb-3 group-hover:text-indigo-600 transition-colors">{course.title}</h3>
-                <p className="text-sm text-slate-500 line-clamp-2 mb-8 flex-grow font-medium leading-relaxed">{course.description}</p>
+              {/* Card Body */}
+              <div className="p-4 flex flex-col flex-grow">
+                <h3 className={`${TYPOGRAPHY.h3} line-clamp-2 leading-snug mb-2 group-hover:text-primary-600 transition-colors`}>{course.title}</h3>
+                <p className={`${TYPOGRAPHY.body} text-xs line-clamp-2 mb-4 flex-grow`}>{course.description}</p>
 
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100/80">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-100 shadow-sm group-hover:bg-indigo-100 transition-colors duration-300">
-                      <GraduationCap size={20} />
+                <div className="mt-auto flex items-center justify-between pt-3 border-t border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600 shrink-0 border border-primary-100">
+                      <GraduationCap size={14} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.instructor}</p>
-                      <p className="text-sm font-bold text-slate-700 truncate max-w-[120px]">{course.instructor}</p>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{t.instructor}</p>
+                      <p className="text-xs font-medium text-slate-700 truncate max-w-[100px]">{course.instructor}</p>
                     </div>
                   </div>
 
                   {(canEdit || canDeleteCourse) && (
-                    <div className="flex items-center justify-end gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {canEdit && (
                         <Link
                           href={`/admin/courses/edit/${course.id}`}
-                          className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all border border-transparent hover:border-indigo-100 flex items-center justify-center shadow-sm"
+                          className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-primary-600`}
                           title={t.editCourse}
                         >
-                          <Pencil size={18} />
+                          <Pencil size={14} />
                         </Link>
                       )}
                       {canDeleteCourse && (
                         <button
                           onClick={() => handleDelete(course.id)}
-                          className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100 flex items-center justify-center shadow-sm"
+                          className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
                           title={t.deleteCourse}
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
@@ -368,17 +390,17 @@ export default function AdminCoursesPage() {
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* ─── Pagination ─── */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
-          <p className="text-xs text-slate-500 font-medium">
-            {t.showing} <span className="font-bold text-slate-700">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-700">{endIndex}</span> {t.of} <span className="font-bold text-slate-700">{totalItems}</span>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200 mt-2">
+          <p className={TYPOGRAPHY.body}>
+            {t.showing} <span className="font-semibold text-slate-900">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-semibold text-slate-900">{endIndex}</span> {t.of} <span className="font-semibold text-slate-900">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-1 overflow-x-auto">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={safeCurrentPage === 1 || totalPages === 0}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+              className={`${BUTTONS.ghost} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
             </button>
@@ -393,10 +415,11 @@ export default function AdminCoursesPage() {
                         <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                            ? 'bg-indigo-600 text-white border border-indigo-700'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${
+                            safeCurrentPage === page
+                              ? 'bg-primary-600 text-white shadow-sm'
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
                         >
                           {page}
                         </button>
@@ -408,10 +431,11 @@ export default function AdminCoursesPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                        ? 'bg-indigo-600 text-white border border-indigo-700'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${
+                        safeCurrentPage === page
+                          ? 'bg-primary-600 text-white shadow-sm'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
                     >
                       {page}
                     </button>
@@ -422,7 +446,7 @@ export default function AdminCoursesPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={safeCurrentPage === totalPages || totalPages === 0}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+              className={`${BUTTONS.ghost} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
             </button>
