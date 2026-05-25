@@ -9,7 +9,7 @@ export const TYPOGRAPHY = {
 };
 
 export const UI_COMPONENTS = {
-  pageContainer: 'space-y-6 pb-8 bg-background min-h-screen p-4 md:p-8',
+  pageContainer: 'space-y-6 pb-8 bg-background min-h-screen p-4 max-w-7xl mx-auto',
   card: 'bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col',
   cardInteractive: 'bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col hover:shadow-md hover:border-slate-300 transition-all cursor-pointer',
   cardHeader: 'flex justify-between items-center mb-6 border-b border-slate-100 pb-4',

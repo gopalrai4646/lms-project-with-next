@@ -18,7 +18,7 @@ export default function ResponsiveLayout({ children }: Props) {
         isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'
       } pl-0`}
     >
-      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="p-4 md:p-2 max-w-7xl mx-auto">
         {children}
       </div>
     </main>
