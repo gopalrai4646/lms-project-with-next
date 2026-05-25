@@ -397,7 +397,7 @@ export default function NewCoursePage() {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
               {videoEntries.map((entry, index) => (
-                <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl group hover:border-primary-200 transition-all">
+                <div key={index} className={UI_COMPONENTS.cardRowItem}>
                   <div className="flex items-center gap-3 min-w-0 flex-grow">
                     <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500 shrink-0 border border-slate-200">
                       {index + 1}

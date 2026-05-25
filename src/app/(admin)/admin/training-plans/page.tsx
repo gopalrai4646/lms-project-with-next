@@ -184,7 +184,7 @@ export default function AdminTrainingPlansPage() {
 
       {/* ─── Content Area ─── */}
       {loading && trainingPlans.length === 0 ? (
-        <div className={`${UI_COMPONENTS.card} items-center justify-center py-12`}>
+        <div className={`${UI_COMPONENTS.emptyStateCard} py-12`}>
           <div
             className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"
             role="status"
@@ -193,16 +193,16 @@ export default function AdminTrainingPlansPage() {
           <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingTrainingPlans}</p>
         </div>
       ) : paginatedPlans.length === 0 ? (
-        <div className={`${UI_COMPONENTS.card} items-center justify-center py-16`}>
+        <div className={UI_COMPONENTS.emptyStateCard}>
           <Search className="text-slate-300" size={48} aria-hidden />
           <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noTrainingPlansFound}</p>
         </div>
       ) : viewMode === 'list' ? (
         /* ─── List View ─── */
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left min-w-[640px]">
-              <thead className="bg-slate-50/80 border-b border-slate-200">
+        <div className={UI_COMPONENTS.tableWrapper}>
+          <div className={UI_COMPONENTS.tableContainer}>
+            <table className={UI_COMPONENTS.table}>
+              <thead className={UI_COMPONENTS.tableHeader}>
                 <tr>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.trainingPlanInfo}</th>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>{t.courses}</th>
@@ -282,7 +282,7 @@ export default function AdminTrainingPlansPage() {
         </div>
       ) : (
         /* ─── Grid View ─── */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-in fade-in duration-500">
+        <div className={UI_COMPONENTS.gridContainer}>
           {paginatedPlans.map((plan) => (
             <div
               key={plan.id}
@@ -357,7 +357,7 @@ export default function AdminTrainingPlansPage() {
 
       {/* ─── Pagination ─── */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200 mt-2">
+        <div className={`${UI_COMPONENTS.pagination} mt-2`}>
           <p className={TYPOGRAPHY.body}>
             {t.showing}{' '}
             <span className="font-semibold text-slate-900">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to}{' '}

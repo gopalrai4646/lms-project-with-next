@@ -203,7 +203,7 @@ export default function AdminUsersPage() {
       </div>
 
       {loading && users.length === 0 ? (
-        <div className={`${UI_COMPONENTS.card} items-center justify-center py-12`}>
+        <div className={`${UI_COMPONENTS.emptyStateCard} py-12`}>
           <div
             className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"
             role="status"
@@ -212,17 +212,17 @@ export default function AdminUsersPage() {
           <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingUsers}</p>
         </div>
       ) : paginatedUsers.length === 0 ? (
-        <div className={`${UI_COMPONENTS.card} items-center justify-center py-16`}>
+        <div className={UI_COMPONENTS.emptyStateCard}>
           <Search className="text-slate-300" size={48} aria-hidden />
           <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noUsersFound}</p>
-          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs text-center`}>{t.tryAdjustingFilters}</p>
+          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>{t.tryAdjustingFilters}</p>
         </div>
       ) : viewMode === 'list' ? (
         /* ─── List View ─── */
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left min-w-[800px]">
-              <thead className="bg-slate-50/80 border-b border-slate-200">
+        <div className={UI_COMPONENTS.tableWrapper}>
+          <div className={UI_COMPONENTS.tableContainer}>
+            <table className={UI_COMPONENTS.table}>
+              <thead className={UI_COMPONENTS.tableHeader}>
                 <tr>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.userProfile}</th>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.role}</th>
@@ -234,7 +234,7 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedUsers.map((user: User) => (
-                  <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={user.id} className={UI_COMPONENTS.tableRow}>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 font-semibold text-lg flex items-center justify-center shrink-0 border border-primary-100 overflow-hidden group-hover:scale-105 transition-transform duration-300">
@@ -336,7 +336,7 @@ export default function AdminUsersPage() {
         </div>
       ) : (
         /* ─── Grid View ─── */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-in fade-in duration-500">
+        <div className={UI_COMPONENTS.gridContainer}>
           {paginatedUsers.map((user: User) => (
             <div
               key={user.id}
@@ -437,7 +437,7 @@ export default function AdminUsersPage() {
 
       {/* ─── Pagination ─── */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200">
+        <div className={UI_COMPONENTS.pagination}>
           <p className={TYPOGRAPHY.body}>
             {t.showing} <span className="font-semibold text-slate-900">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to}{' '}
             <span className="font-semibold text-slate-900">{endIndex}</span> {t.of}{' '}

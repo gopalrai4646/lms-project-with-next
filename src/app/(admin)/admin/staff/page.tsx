@@ -373,7 +373,7 @@ export default function StaffManagementPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className={UI_COMPONENTS.gridContainer}>
             {staffUsers.map(user => {
               const userRole = roles.find(r => r.id === user.staffRoleId);
               return (
@@ -440,9 +440,10 @@ export default function StaffManagementPage() {
 
       {/* ─── Role Modal ─── */}
       {showRoleModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 animate-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
+        <div className={UI_COMPONENTS.modalBackdrop}>
+          <div className={UI_COMPONENTS.modalContent}>
+            <div className="p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
               <h2 className={TYPOGRAPHY.h2}>
                 {editingRole ? i18nT('admin.staff.editRole', { name: editingRole.name }) : t.staff.createRole}
               </h2>
@@ -550,6 +551,7 @@ export default function StaffManagementPage() {
                 >
                   {loading ? t.savingEllipsis : editingRole ? i18nT('admin.staff.updateRoleBtn') : t.staff.createRoleBtn}
                 </button>
+              </div>
               </div>
             </div>
           </div>

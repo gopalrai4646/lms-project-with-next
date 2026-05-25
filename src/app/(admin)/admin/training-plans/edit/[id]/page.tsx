@@ -311,8 +311,8 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
                 </div>
               ) : (
                 curriculumCourses.map((course: any, index) => (
-                  <div key={course.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-white border border-slate-200 rounded-xl group hover:border-primary-200 transition-all">
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-grow">
+                  <div key={course.id} className={UI_COMPONENTS.cardRowItem}>
+                    <div className="flex items-center gap-3 min-w-0 flex-grow">
                       <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500 shrink-0 border border-slate-200">
                         {index + 1}
                       </div>

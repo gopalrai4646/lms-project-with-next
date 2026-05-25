@@ -21,6 +21,20 @@ export const UI_COMPONENTS = {
   segmentedControl: 'flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50',
   segmentedItem: 'px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 hover:text-slate-700',
   segmentedItemActive: 'px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white text-slate-900 shadow-sm',
+  
+  // Layout wrappers added for centralization
+  emptyStateCard: 'bg-white rounded-xl border border-slate-200 shadow-sm p-8 flex flex-col items-center justify-center text-center',
+  tableWrapper: 'bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500',
+  tableContainer: 'overflow-x-auto w-full',
+  table: 'w-full text-left min-w-[800px]',
+  tableHeader: 'bg-slate-50/80 border-b border-slate-200',
+  tableRow: 'hover:bg-slate-50/50 transition-colors group',
+  gridContainer: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-in fade-in duration-500',
+  pagination: 'flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200',
+  modalBackdrop: 'fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4',
+  modalContent: 'bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-xl border border-slate-200/60 animate-in fade-in zoom-in-95 duration-200',
+  cardRowItem: 'flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl group hover:border-primary-200 transition-all',
+  formSection: 'pt-8 mt-8 border-t border-slate-200',
 };
 
 export const BUTTONS = {

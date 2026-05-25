@@ -202,21 +202,21 @@ export default function AdminCoursesPage() {
 
       {/* ─── Content Area ─── */}
       {loading && courses.length === 0 ? (
-        <div className={`${UI_COMPONENTS.card} items-center justify-center py-12`}>
+        <div className={`${UI_COMPONENTS.emptyStateCard} py-12`}>
           <div className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"></div>
           <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingCourses}</p>
         </div>
       ) : paginatedCourses.length === 0 ? (
-        <div className={`${UI_COMPONENTS.card} items-center justify-center py-16`}>
+        <div className={UI_COMPONENTS.emptyStateCard}>
           <Search className="text-slate-300" size={48} />
           <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noCoursesFound}</p>
         </div>
       ) : viewMode === 'list' ? (
         /* ─── List View ─── */
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left min-w-[900px]">
-              <thead className="bg-slate-50/80 border-b border-slate-200">
+        <div className={UI_COMPONENTS.tableWrapper}>
+          <div className={UI_COMPONENTS.tableContainer}>
+            <table className={UI_COMPONENTS.table}>
+              <thead className={UI_COMPONENTS.tableHeader}>
                 <tr>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.courseInfo}</th>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.instructor}</th>
@@ -228,7 +228,7 @@ export default function AdminCoursesPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedCourses.map((course) => (
-                  <tr key={course.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={course.id} className={UI_COMPONENTS.tableRow}>
                     <td className="px-5 py-3 w-1/3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border border-slate-200/50 group-hover:scale-105 transition-transform duration-300">
@@ -299,7 +299,7 @@ export default function AdminCoursesPage() {
         </div>
       ) : (
         /* ─── Grid View ─── */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-in fade-in duration-500">
+        <div className={UI_COMPONENTS.gridContainer}>
           {paginatedCourses.map((course) => (
             <div
               key={course.id}
@@ -376,7 +376,7 @@ export default function AdminCoursesPage() {
 
       {/* ─── Pagination ─── */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200 mt-2">
+        <div className={`${UI_COMPONENTS.pagination} mt-2`}>
           <p className={TYPOGRAPHY.body}>
             {t.showing} <span className="font-semibold text-slate-900">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-semibold text-slate-900">{endIndex}</span> {t.of} <span className="font-semibold text-slate-900">{totalItems}</span>
           </p>
