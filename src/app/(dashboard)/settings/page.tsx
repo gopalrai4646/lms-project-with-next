@@ -117,7 +117,7 @@ export default function SettingsPage() {
           }
         }} className="space-y-8">
           
-          {/* Profile Information Section */}
+          {/* Profile & Security Section */}
           <section>
             <div className="flex items-center gap-2 mb-4">
               <h2 className={TYPOGRAPHY.h2}>{ts.profileInfo}</h2>
@@ -130,86 +130,6 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Row 1: Photo + Full Name side by side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50">
-                <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
-                  <div className="w-20 h-20 rounded-full bg-white border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary-400 group-hover:shadow-lg group-hover:shadow-primary-100/50">
-                    {photoPreview ? (
-                      <img src={photoPreview} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <UserIcon className="text-slate-300" size={32} />
-                    )}
-                  </div>
-                  <div className="absolute inset-0 rounded-full bg-primary-600/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
-                    <Camera className="text-white" size={18} />
-                  </div>
-                  <input 
-                    id="settings-photo-upload"
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                  />
-                </div>
-                <div>
-                  <h3 className={`${TYPOGRAPHY.h3} mb-1`}>{ts.profilePhoto || "Photo"}</h3>
-                  <p className={`${TYPOGRAPHY.body} text-xs`}>
-                    Click to update your avatar. PNG or JPG supported.
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.fullName}</label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={UI_COMPONENTS.input}
-                  placeholder="Your name"
-                />
-              </div>
-            </div>
-
-            {/* Row 2: Phone + Email side by side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div>
-                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{ts.phoneNumber || "Phone Number"}</label>
-                <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                  <input 
-                    type="tel" 
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className={`${UI_COMPONENTS.input} !pl-10`}
-                    placeholder="+1 234 567 890"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.email}</label>
-                <input 
-                  type="email" 
-                  value={user?.email || ''}
-                  disabled
-                  className={`${UI_COMPONENTS.input} bg-slate-50 text-slate-500 cursor-not-allowed opacity-80`}
-                />
-                <p className="mt-2 text-xs text-slate-400 font-medium flex items-center gap-1.5">
-                  <AlertCircle size={12} />
-                  {ts.emailCannotChange}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Security Separator */}
-          <section className="pt-8 border-t border-slate-100">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className={TYPOGRAPHY.h2}>{t.changePassword}</h2>
-            </div>
-            
             {(passError || (error && passError)) && (
               <div className="mb-4 flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
                 <AlertCircle size={18} className="shrink-0" />
@@ -224,7 +144,78 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Row 1: Photo, Full Name, Phone side by side (3 columns) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50 h-full">
+                <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
+                  <div className="w-14 h-14 rounded-full bg-white border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary-400 group-hover:shadow-lg group-hover:shadow-primary-100/50">
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <UserIcon className="text-slate-300" size={24} />
+                    )}
+                  </div>
+                  <div className="absolute inset-0 rounded-full bg-primary-600/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
+                    <Camera className="text-white" size={16} />
+                  </div>
+                  <input 
+                    id="settings-photo-upload"
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                  />
+                </div>
+                <div>
+                  <h3 className={`${TYPOGRAPHY.h3} mb-1 leading-tight`}>{ts.profilePhoto || "Photo"}</h3>
+                  <p className={`${TYPOGRAPHY.body} text-[11px] leading-tight`}>
+                    Click to update avatar.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.fullName}</label>
+                <input 
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={UI_COMPONENTS.input}
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{ts.phoneNumber || "Phone Number"}</label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+                  <input 
+                    type="tel" 
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className={`${UI_COMPONENTS.input} !pl-10`}
+                    placeholder="+1 234 567 890"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Email, Passwords side by side (3 columns) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.email}</label>
+                <input 
+                  type="email" 
+                  value={user?.email || ''}
+                  disabled
+                  className={`${UI_COMPONENTS.input} bg-slate-50 text-slate-500 cursor-not-allowed opacity-80`}
+                />
+                <p className="mt-2 text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+                  <AlertCircle size={12} />
+                  {ts.emailCannotChange}
+                </p>
+              </div>
+
               <div>
                 <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.newPassword}</label>
                 <div className="relative">

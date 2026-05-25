@@ -361,13 +361,13 @@ export default function AdminDashboard() {
             <div className={`${UI_COMPONENTS.segmentedControl}`}>
               <button 
                 onClick={() => setDauTimeframe('week')}
-                className={dauTimeframe === 'week' ? 'segmented-item-active' : 'segmented-item'}
+                className={dauTimeframe === 'week' ? UI_COMPONENTS.segmentedItemActive : UI_COMPONENTS.segmentedItem}
               >
                 {t.week || 'Week'}
               </button>
               <button 
                 onClick={() => setDauTimeframe('month')}
-                className={dauTimeframe === 'month' ? 'segmented-item-active' : 'segmented-item'}
+                className={dauTimeframe === 'month' ? UI_COMPONENTS.segmentedItemActive : UI_COMPONENTS.segmentedItem}
               >
                 {t.month || 'Month'}
               </button>

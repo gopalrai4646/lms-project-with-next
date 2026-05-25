@@ -110,7 +110,7 @@ export default function AdminCoursesPage() {
       )}
 
       {/* ─── Toolbar: 3 rows (mobile) → 2 rows (md) → 1 row (lg) ─── */}
-      <div className={`${UI_COMPONENTS.card} !p-4 w-full min-w-0`}>
+      <div className={`${UI_COMPONENTS.card} !p-2 w-full min-w-0`}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full">
           {/* Row 1–2: Search + visibility */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center w-full min-w-0 lg:flex-1 lg:min-w-0">

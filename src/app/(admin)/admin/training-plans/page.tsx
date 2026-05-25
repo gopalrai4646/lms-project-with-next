@@ -107,7 +107,7 @@ export default function AdminTrainingPlansPage() {
       )}
 
       {/* ─── Toolbar: 2 rows (mobile) → 1 row (lg) ─── */}
-      <div className={`${UI_COMPONENTS.card} !p-4 w-full min-w-0`}>
+      <div className={`${UI_COMPONENTS.card} !p-2 w-full min-w-0`}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full">
           <div className="relative w-full min-w-0 lg:flex-1">
             <Search
