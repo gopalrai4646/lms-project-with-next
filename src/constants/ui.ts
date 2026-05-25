@@ -28,4 +28,5 @@ export const BUTTONS = {
   secondary: 'flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed',
   ghost: 'flex items-center justify-center gap-2 px-3 py-1.5 bg-transparent text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-100 transition-colors',
   danger: 'flex items-center justify-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors',
+  tint: 'flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-50 text-primary-600 border border-primary-100 rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed',
 };
