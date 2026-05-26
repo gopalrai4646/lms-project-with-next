@@ -6,6 +6,7 @@ import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { useTranslation } from 'react-i18next';
+import { TYPOGRAPHY, UI_COMPONENTS } from '@/constants/ui';
 import { 
   BarChart, 
   Bar, 
@@ -66,20 +67,21 @@ export default function TopTrainingPlansPage() {
 
   if (isInitialLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      <div className={UI_COMPONENTS.emptyStateCard}>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary-600 mb-4"></div>
+        <h3 className={TYPOGRAPHY.h3}>Loading analytics...</h3>
       </div>
     );
   }
 
   if (trainingPlans.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-in fade-in duration-500">
-        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
-          <Award size={40} />
+      <div className={UI_COMPONENTS.emptyStateCard}>
+        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-5 border border-slate-100 shadow-sm text-slate-400">
+          <Award size={32} />
         </div>
-        <h2 className="text-2xl font-bold text-slate-400">{adminT.noTrainingPathsAvailable}</h2>
-        <p className="text-slate-400 mt-2 max-w-sm">
+        <h2 className={TYPOGRAPHY.h2}>{adminT.noTrainingPathsAvailable}</h2>
+        <p className={`${TYPOGRAPHY.body} mt-2 max-w-sm`}>
           {adminT.noTrainingPathsAvailableSubtitle}
         </p>
       </div>
@@ -89,18 +91,18 @@ export default function TopTrainingPlansPage() {
   const colors = ['#8B5CF6', '#F43F5E', '#10B981', '#4F46E5', '#F59E0B'];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-16">
+    <div className="space-y-6 animate-in fade-in duration-700 pb-8">
       <header>
-        <div className="flex items-center gap-3 mb-2 text-violet-600 font-bold text-sm uppercase tracking-widest">
-            <Award size={20} />
+        <div className="flex items-center gap-2 mb-3 text-primary-600 font-semibold text-xs uppercase tracking-widest">
+            <Award size={16} />
             {adminT.trainingPaths}
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900">{adminT.topTrainingPlansTitle}</h1>
-        <p className="text-slate-500 mt-1 max-w-2xl">{adminT.topTrainingPlansSubtitle}</p>
+        <h1 className={TYPOGRAPHY.h1}>{adminT.topTrainingPlansTitle}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1.5 max-w-2xl`}>{adminT.topTrainingPlansSubtitle}</p>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-1/2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
+        <div className={`${UI_COMPONENTS.card} w-full lg:w-1/2 min-h-[350px]`}>
           <div 
             className="h-[320px] w-full transition-all duration-700 mx-auto"
             style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
@@ -155,30 +157,30 @@ export default function TopTrainingPlansPage() {
         </div>
         
         <div className="w-full lg:w-1/2 self-start">
-            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <TrendingUp size={14} className="text-violet-500" />
+            <div className={UI_COMPONENTS.card}>
+                <h4 className={`${TYPOGRAPHY.label} mb-6 flex items-center gap-2`}>
+                    <TrendingUp size={14} className="text-primary-500" />
                     {adminT.leaderboard}
                 </h4>
-                <div className="space-y-5">
+                <div className="space-y-3">
                     {chartData.map((tp, i) => (
-                        <div key={i} className="flex items-center justify-between group">
-                            <div className="flex items-center gap-4">
-                                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shadow-md transition-transform group-hover:scale-110" style={{ backgroundColor: colors[i % colors.length] }}>
+                        <div key={i} className="flex items-center justify-between group p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors">
+                            <div className="flex items-center gap-4 overflow-hidden pr-3">
+                                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold text-white shadow-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }}>
                                     {i + 1}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-sm font-bold text-slate-700 truncate max-w-[150px] group-hover:text-violet-600 transition-colors">{tp.name}</p>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{tp.courses} {adminT.tpCoursesCount}</p>
-                                        <span className="w-1 h-1 rounded-full bg-slate-200"></span>
-                                        <p className="text-[10px] text-slate-500 font-bold">{tp.assignments} {adminT.enrolledLabel || 'Enrolled'}</p>
+                                    <p className="text-sm font-semibold text-slate-700 truncate group-hover:text-primary-600 transition-colors">{tp.name}</p>
+                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                                        <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-tight whitespace-nowrap">{tp.courses} {adminT.tpCoursesCount}</p>
+                                        <span className="w-1 h-1 rounded-full bg-slate-200 hidden sm:block shrink-0"></span>
+                                        <p className="text-[10px] text-slate-500 font-semibold whitespace-nowrap">{tp.assignments} {adminT.enrolledLabel || 'Enrolled'}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <span className="text-sm font-black text-slate-900 block">${tp.revenue.toLocaleString()}</span>
-                                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{adminT.revenueLabel || 'Revenue'}</span>
+                            <div className="text-right shrink-0 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                                <span className="text-sm font-bold text-slate-900 block">${tp.revenue.toLocaleString()}</span>
+                                <span className="text-[10px] font-semibold text-primary-500 uppercase tracking-widest">{adminT.revenueLabel || 'Revenue'}</span>
                             </div>
                         </div>
                     ))}
