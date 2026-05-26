@@ -16,6 +16,7 @@ interface CustomSelectProps {
   icon?: React.ReactNode;
   className?: string;
   triggerClassName?: string;
+  dropdownClassName?: string;
   size?: 'sm' | 'md';
 }
 
@@ -27,6 +28,7 @@ export default function CustomSelect({
   icon,
   className = '',
   triggerClassName = '',
+  dropdownClassName = '',
   size = 'md',
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -136,12 +138,13 @@ export default function CustomSelect({
         <ul
           ref={listRef}
           role="listbox"
-          className="
+          className={`
             absolute z-50 mt-1.5 w-full min-w-[140px]
             bg-white border border-slate-200 rounded-lg shadow-lg
             py-1 max-h-[220px] overflow-y-auto
             animate-in fade-in slide-in-from-top-1 duration-150
-          "
+            ${dropdownClassName}
+          `}
         >
           {options.map((option, index) => {
             const isSelected = String(option.value) === String(value);

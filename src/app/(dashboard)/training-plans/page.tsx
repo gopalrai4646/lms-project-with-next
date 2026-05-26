@@ -63,7 +63,7 @@ export default function UserTrainingPlansPage() {
                 <div className="p-5 flex flex-col flex-1">
                   <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">{plan.name}</h3>
                   <p className={`${TYPOGRAPHY.body} mb-6 line-clamp-3 flex-1`}>{plan.description}</p>
-                  
+
                   <span className="text-sm font-bold text-primary-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto capitalize">
                     View Plan <ArrowRight size={16} />
                   </span>
@@ -75,7 +75,7 @@ export default function UserTrainingPlansPage() {
       ) : (
         <div className={UI_COMPONENTS.emptyStateCard}>
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-             <ClipboardList size={40} />
+            <ClipboardList size={40} />
           </div>
           <h3 className={TYPOGRAPHY.h3}>{t.noTrainingPlansAssigned || 'No training plans assigned'}</h3>
           <p className={`${TYPOGRAPHY.body} max-w-md mx-auto`}>

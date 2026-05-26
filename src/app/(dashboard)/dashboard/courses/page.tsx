@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import CourseCard from '@/components/common/CourseCard';
+import CustomSelect from '@/components/common/CustomSelect';
 import ProgressRing from '@/components/charts/ProgressRing';
 import {
   Search,
@@ -157,109 +158,108 @@ export default function MyCoursesPage() {
 
 
 
-      {/* ─── Toolbar: 3 rows (mobile) → 2 rows (md) → 1 row (lg) ─── */}
-      <div className={`${UI_COMPONENTS.card} !p-2 w-full min-w-0`}>
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full min-w-0">
-          
-          {/* Group 1: Tabs & Search */}
-          <div className="flex flex-col gap-3 md:flex-row md:items-center w-full min-w-0 lg:flex-1 lg:min-w-0">
-            {/* Tabs */}
-            <div className="overflow-x-auto no-scrollbar w-full md:w-auto shrink-0">
-              <div className="flex gap-1.5 bg-slate-100/50 rounded-lg p-1 w-max">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
-                      activeTab === tab.key
-                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    {tab.label}
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                        activeTab === tab.key
-                          ? 'bg-slate-100 text-slate-700'
-                          : 'bg-slate-200/50 text-slate-400'
-                      }`}
-                    >
-                      {tab.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {/* Search */}
-            <div className="relative w-full min-w-0 md:flex-1 shrink-0">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                size={16}
-                aria-hidden
-              />
-              <input
-                type="search"
-                placeholder={t.searchCourses || 'Search your courses...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${UI_COMPONENTS.input} pl-9 w-full py-1.5`}
-                aria-label={t.searchCourses}
-              />
-            </div>
+      {/* Filters Bar */}
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-4 flex flex-col xl:flex-row gap-4 xl:items-center">
+
+        {/* Tabs */}
+        <div className="overflow-x-auto no-scrollbar w-full xl:flex-1">
+          <div className="flex gap-2 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 justify-center px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                {tab.label}
+
+                <span
+                  className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key
+                    ? 'bg-indigo-100 text-indigo-600'
+                    : 'bg-slate-200 text-slate-500'
+                    }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Side Group: Search and Controls */}
+        <div className="flex flex-col lg:flex-row gap-4 w-full xl:w-auto lg:items-center">
+          
+          {/* Search */}
+          <div className="relative w-full lg:flex-1 xl:w-72 shrink-0">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+              <Search size={18} />
+            </span>
+
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t.searchCourses || 'Search your courses...'}
+              className={`${UI_COMPONENTS.input} pl-11 py-2.5 rounded-2xl`}
+            />
           </div>
 
-          {/* Group 2: Controls */}
-          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
-            
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+
             {/* Items Per Page */}
-            <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
-              <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
-                {t.itemsPerPage || 'Items'}
+            <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 flex-1 sm:flex-none">
+              <span className="text-sm font-semibold text-slate-500 whitespace-nowrap">
+                {t.itemsPerPage || 'Items'}:
               </span>
-              <div className="relative w-full lg:w-[5.5rem] lg:shrink-0">
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                  className={`${UI_COMPONENTS.input} w-full py-1.5 px-3 text-sm appearance-none cursor-pointer`}
-                >
-                  {[8, 12, 16, 20].map((val) => (
-                    <option key={val} value={val}>{val}</option>
-                  ))}
-                </select>
-              </div>
+
+              <CustomSelect
+                options={[
+                  { value: 8, label: '8' },
+                  { value: 12, label: '12' },
+                  { value: 16, label: '16' },
+                  { value: 20, label: '20' },
+                ]}
+                value={itemsPerPage}
+                onChange={(val) => setItemsPerPage(Number(val))}
+                size="sm"
+                className="w-20"
+                triggerClassName="bg-white font-bold rounded-xl"
+                dropdownClassName="right-0 !w-auto !min-w-[80px]"
+              />
             </div>
 
             {/* View Toggle */}
-            <div className={`${UI_COMPONENTS.segmentedControl} w-full min-w-0 p-1 lg:p-0.5`} role="group">
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner flex-1">
               <button
-                type="button"
                 onClick={() => setViewMode('grid')}
-                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`flex-1 flex items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${viewMode === 'grid'
+                  ? 'bg-white shadow-md text-indigo-600'
+                  : 'text-slate-500 hover:bg-slate-200/50'
+                  }`}
                 title={adminT?.gridView || 'Grid View'}
               >
-                <LayoutGrid size={16} />
+                <LayoutGrid size={18} />
               </button>
+
               <button
-                type="button"
                 onClick={() => setViewMode('list')}
-                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`flex-1 flex items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${viewMode === 'list'
+                  ? 'bg-white shadow-md text-indigo-600'
+                  : 'text-slate-500 hover:bg-slate-200/50'
+                  }`}
                 title={adminT?.listView || 'List View'}
               >
-                <List size={16} />
+                <List size={18} />
               </button>
             </div>
           </div>
         </div>
       </div>
+
 
       {/* Course Content */}
       {coursesLoading && enrolledCourses.length === 0 ? (
@@ -400,10 +400,10 @@ export default function MyCoursesPage() {
                         <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                        ? 'bg-primary-600 text-white border border-primary-700'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
+                            ? 'bg-primary-600 text-white border border-primary-700'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
                         >
                           {page}
                         </button>
