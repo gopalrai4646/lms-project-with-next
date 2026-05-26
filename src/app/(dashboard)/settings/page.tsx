@@ -144,8 +144,8 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Row 1: Photo, Full Name, Phone side by side (3 columns) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            {/* Row 1: Photo, Full Name, Phone side by side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
               <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50 h-full">
                 <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('settings-photo-upload')?.click()}>
                   <div className="w-14 h-14 rounded-full bg-white border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary-400 group-hover:shadow-lg group-hover:shadow-primary-100/50">
@@ -198,10 +198,8 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Row 2: Email, Passwords side by side (3 columns) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              {/* Email, Passwords */}
               <div>
                 <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.email}</label>
                 <input 
