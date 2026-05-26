@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { enrollCourseRequest, saveCourseRequest } from '@/store/slices/authSlice';
 import { useTranslation } from 'react-i18next';
 import { Video, Heart, BookOpen, Play } from 'lucide-react';
+import { UI_COMPONENTS, BUTTONS, TYPOGRAPHY } from '@/constants/ui';
 
 interface CourseCardProps {
   course: Course;
@@ -75,13 +76,13 @@ export default function CourseCard({ course }: CourseCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col border border-slate-100">
+    <div className={`${UI_COMPONENTS.cardInteractive} !p-0 overflow-hidden flex-col h-full`}>
       {/* Top half - Grey area */}
-      <div className="bg-[#F8FAFD] p-5 relative h-52 flex flex-col">
+      <div className="bg-slate-50 border-b border-slate-100 p-5 relative h-52 flex flex-col">
         {/* Header icons */}
         <div className="flex justify-between items-start z-10 relative">
-          <div className="bg-[#2d3142] text-white px-3 py-1.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm">
-            <Video size={16} /> {videoCount} {videoCount === 1 ? 'video' : 'videos'}
+          <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+            <Video size={14} /> {videoCount} {videoCount === 1 ? 'video' : 'videos'}
           </div>
           
           <button
@@ -130,34 +131,34 @@ export default function CourseCard({ course }: CourseCardProps) {
           <span className="text-sm font-medium text-slate-400 whitespace-nowrap shrink-0">
             • {course.instructor || `${videoCount} teacher`}
           </span>
-          <span className="px-2.5 py-0.5 bg-purple-50 text-purple-600 text-sm font-bold rounded-full whitespace-nowrap shrink-0 ml-auto">
+          <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg whitespace-nowrap shrink-0 ml-auto">
             {course.price > 0 ? `$${course.price}` : t.free?.toUpperCase() || 'FREE'}
           </span>
         </div>
 
         {isEnrolled && (
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.yourProgress || 'YOUR PROGRESS'}</span>
-              <span className="text-xs font-bold text-[#4A55E2]">{progressPercentage}%</span>
+              <span className="text-xs font-bold text-primary-600">{progressPercentage}%</span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#4A55E2] rounded-full transition-all duration-500"
+                className="h-full bg-primary-600 rounded-full transition-all duration-500"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
           </div>
         )}
 
-        <div className={`space-y-3 ${isEnrolled ? '' : 'pt-2'}`}>
+        <div className={`space-y-3 ${isEnrolled ? '' : 'pt-2'} mt-auto`}>
           {isEnrolled && videoCount > 0 && (
             <Link
               href={`/dashboard/courses/${course.id}`}
-              className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl font-bold transition-all hover:bg-emerald-700 shadow flex items-center justify-center gap-2"
+              className={`${BUTTONS.primary} w-full flex items-center justify-center gap-2`}
               onClick={(e) => e.stopPropagation()}
             >
-              <Play size={18} className="fill-current" /> {t.viewCourse || 'View Course'}
+              <Play size={16} className="fill-current" /> {t.viewCourse || 'View Course'}
             </Link>
           )}
 
@@ -165,7 +166,7 @@ export default function CourseCard({ course }: CourseCardProps) {
             <button
               onClick={handleEnroll}
               disabled={authLoading}
-              className="w-full py-3.5 rounded-2xl font-semibold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200"
+              className={`${BUTTONS.primary} w-full`}
             >
               {t.enroll || 'Enroll Now'}
             </button>

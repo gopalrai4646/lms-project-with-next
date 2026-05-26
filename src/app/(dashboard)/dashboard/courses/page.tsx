@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 
 type TabFilter = 'all' | 'in-progress' | 'completed';
 
@@ -147,17 +148,17 @@ export default function MyCoursesPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-1">
+    <div className={UI_COMPONENTS.pageContainer}>
       {/* Header */}
       <header>
-        <h1 className="text-3xl font-extrabold text-slate-900">{t.myCourses || 'My Courses'}</h1>
-        <p className="text-slate-500 mt-1">{t.myCoursesSubtitle || 'Track your learning progress and manage your enrolled courses.'}</p>
+        <h1 className={TYPOGRAPHY.h1}>{t.myCourses || 'My Courses'}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1`}>{t.myCoursesSubtitle || 'Track your learning progress and manage your enrolled courses.'}</p>
       </header>
 
 
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 p-4 flex flex-col xl:flex-row gap-4 xl:items-center">
+      <div className={`${UI_COMPONENTS.card} flex flex-col xl:flex-row gap-4 xl:items-center`}>
 
         {/* Tabs */}
         <div className="overflow-x-auto no-scrollbar w-full xl:flex-1">
@@ -167,7 +168,7 @@ export default function MyCoursesPage() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
-                  ? 'bg-white text-indigo-600 shadow-sm'
+                  ? 'bg-white text-primary-600 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
                   }`}
               >
@@ -175,7 +176,7 @@ export default function MyCoursesPage() {
 
                 <span
                   className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key
-                    ? 'bg-indigo-100 text-indigo-600'
+                    ? 'bg-primary-100 text-primary-600'
                     : 'bg-slate-200 text-slate-500'
                     }`}
                 >
@@ -197,7 +198,7 @@ export default function MyCoursesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.searchCourses || 'Search your courses...'}
-            className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none text-sm transition-all bg-slate-50 text-slate-900 placeholder:text-slate-400"
+            className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none text-sm transition-all bg-slate-50 text-slate-900 placeholder:text-slate-400"
           />
         </div>
 
@@ -213,7 +214,7 @@ export default function MyCoursesPage() {
             <select
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
+              className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
             >
               {[8, 12, 16, 20].map((val) => (
                 <option key={val} value={val}>
@@ -228,7 +229,7 @@ export default function MyCoursesPage() {
             <button
               onClick={() => setViewMode('grid')}
               className={`flex-1 p-2.5 rounded-xl flex items-center justify-center transition-all duration-300 ${viewMode === 'grid'
-                ? 'bg-white shadow-md text-indigo-600'
+                ? 'bg-white shadow-md text-primary-600'
                 : 'text-slate-500 hover:bg-slate-200/50'
                 }`}
               title={adminT?.gridView || 'Grid View'}
@@ -239,7 +240,7 @@ export default function MyCoursesPage() {
             <button
               onClick={() => setViewMode('list')}
               className={`flex-1 p-2.5 rounded-xl flex items-center justify-center transition-all duration-300 ${viewMode === 'list'
-                ? 'bg-white shadow-md text-indigo-600'
+                ? 'bg-white shadow-md text-primary-600'
                 : 'text-slate-500 hover:bg-slate-200/50'
                 }`}
               title={adminT?.listView || 'List View'}
@@ -266,7 +267,7 @@ export default function MyCoursesPage() {
           </div>
         ) : (
           /* List View */
-          <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden">
+          <div className={`${UI_COMPONENTS.card} !p-0 overflow-hidden`}>
             <div className="overflow-x-auto">
               <table className="w-full text-left min-w-[700px]">
                 <thead className="bg-slate-50 border-b border-slate-100">
@@ -294,7 +295,7 @@ export default function MyCoursesPage() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-bold text-slate-900 text-sm truncate group-hover:text-indigo-600 transition-colors">{course.title}</p>
+                              <p className="font-bold text-slate-900 text-sm truncate group-hover:text-primary-600 transition-colors">{course.title}</p>
                               <p className="text-xs text-slate-400">{course.videos?.length || 0} lessons</p>
                             </div>
                           </div>
@@ -304,7 +305,7 @@ export default function MyCoursesPage() {
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden max-w-[120px]">
                               <div
-                                className={`h-full rounded-full transition-all ${pct >= 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                                className={`h-full rounded-full transition-all ${pct >= 100 ? 'bg-emerald-500' : 'bg-primary-500'}`}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -328,7 +329,7 @@ export default function MyCoursesPage() {
                         <td className="px-6 py-2 text-right">
                           <Link
                             href={`/dashboard/courses/${course.id}`}
-                            className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-1"
+                            className="px-4 py-2 bg-primary-50 text-primary-600 rounded-xl text-xs font-bold hover:bg-primary-100 transition-all flex items-center justify-center gap-1"
                           >
                             {pct > 0 ? (t.continue || 'Continue') : (t.viewCourse || 'Start')} <ArrowRight size={14} />
                           </Link>
@@ -342,22 +343,22 @@ export default function MyCoursesPage() {
           </div>
         )
       ) : (
-        <div className="text-center py-16 bg-white rounded-[28px] border border-dashed border-slate-200 shadow-sm">
+        <div className={UI_COMPONENTS.emptyStateCard}>
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
             {activeTab === 'completed' ? <GraduationCap size={48} /> : <BookOpen size={48} />}
           </div>
-          <h3 className="text-xl font-bold text-slate-900 mb-2">
+          <h3 className={TYPOGRAPHY.h3}>
             {activeTab === 'all' ? (t.noEnrolledCourses || 'No courses enrolled yet') :
               activeTab === 'in-progress' ? (t.noInProgress || 'No courses in progress') :
                 (t.noCompleted || 'No completed courses yet')}
           </h3>
-          <p className="text-slate-500 mb-6 max-w-md mx-auto">
+          <p className={`${TYPOGRAPHY.body} max-w-md mx-auto`}>
             {activeTab === 'all' ? (t.enrollToStart || 'Explore available courses from your dashboard and start learning today!') :
               activeTab === 'in-progress' ? (t.startACourse || 'Start any enrolled course to see your progress here.') :
                 (t.finishACourse || 'Complete all videos in a course to mark it as done.')}
           </p>
           {activeTab === 'all' && (
-            <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center gap-2">
+            <Link href="/dashboard" className={`${BUTTONS.primary} mt-6`}>
               <Search size={18} /> {t.discover || 'Browse Courses'}
             </Link>
           )}
@@ -389,10 +390,10 @@ export default function MyCoursesPage() {
                         <span className="w-4 text-center text-slate-400 text-xs">…</span>
                         <button
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                            ? 'bg-indigo-600 text-white border border-indigo-700'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
+                        ? 'bg-primary-600 text-white border border-primary-700'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                         >
                           {page}
                         </button>
@@ -405,7 +406,7 @@ export default function MyCoursesPage() {
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                        ? 'bg-indigo-600 text-white border border-indigo-700'
+                        ? 'bg-primary-600 text-white border border-primary-700'
                         : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                     >
