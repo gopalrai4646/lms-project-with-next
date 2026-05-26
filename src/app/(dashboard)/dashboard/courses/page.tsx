@@ -157,96 +157,106 @@ export default function MyCoursesPage() {
 
 
 
-      {/* Filters Bar */}
-      <div className={`${UI_COMPONENTS.card} flex flex-col xl:flex-row gap-4 xl:items-center`}>
-
-        {/* Tabs */}
-        <div className="overflow-x-auto no-scrollbar w-full xl:flex-1">
-          <div className="flex gap-2 bg-slate-100 rounded-2xl p-1 w-max min-w-full">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
-                  ? 'bg-white text-primary-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                {tab.label}
-
-                <span
-                  className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key
-                    ? 'bg-primary-100 text-primary-600'
-                    : 'bg-slate-200 text-slate-500'
+      {/* ─── Toolbar: 3 rows (mobile) → 2 rows (md) → 1 row (lg) ─── */}
+      <div className={`${UI_COMPONENTS.card} !p-2 w-full min-w-0`}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full min-w-0">
+          
+          {/* Group 1: Tabs & Search */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center w-full min-w-0 lg:flex-1 lg:min-w-0">
+            {/* Tabs */}
+            <div className="overflow-x-auto no-scrollbar w-full md:w-auto shrink-0">
+              <div className="flex gap-1.5 bg-slate-100/50 rounded-lg p-1 w-max">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                      activeTab === tab.key
+                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
+                  >
+                    {tab.label}
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                        activeTab === tab.key
+                          ? 'bg-slate-100 text-slate-700'
+                          : 'bg-slate-200/50 text-slate-400'
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="relative w-full min-w-0 md:flex-1 shrink-0">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                size={16}
+                aria-hidden
+              />
+              <input
+                type="search"
+                placeholder={t.searchCourses || 'Search your courses...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`${UI_COMPONENTS.input} pl-9 w-full py-1.5`}
+                aria-label={t.searchCourses}
+              />
+            </div>
+          </div>
+
+          {/* Group 2: Controls */}
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
+            
+            {/* Items Per Page */}
+            <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
+              <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
+                {t.itemsPerPage || 'Items'}
+              </span>
+              <div className="relative w-full lg:w-[5.5rem] lg:shrink-0">
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                  className={`${UI_COMPONENTS.input} w-full py-1.5 px-3 text-sm appearance-none cursor-pointer`}
                 >
-                  {tab.count}
-                </span>
+                  {[8, 12, 16, 20].map((val) => (
+                    <option key={val} value={val}>{val}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* View Toggle */}
+            <div className={`${UI_COMPONENTS.segmentedControl} w-full min-w-0 p-1 lg:p-0.5`} role="group">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title={adminT?.gridView || 'Grid View'}
+              >
+                <LayoutGrid size={16} />
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="relative w-full xl:w-72 shrink-0">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-            <Search size={18} />
-          </span>
-
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t.searchCourses || 'Search your courses...'}
-            className="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none text-sm transition-all bg-slate-50 text-slate-900 placeholder:text-slate-400"
-          />
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto shrink-0">
-
-          {/* Items Per Page */}
-          <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100 flex-1 sm:flex-none">
-            <span className="text-sm font-semibold text-slate-500 whitespace-nowrap">
-              {t.itemsPerPage || 'Items'}:
-            </span>
-
-            <select
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
-            >
-              {[8, 12, 16, 20].map((val) => (
-                <option key={val} value={val}>
-                  {val}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* View Toggle */}
-          <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner flex-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`flex-1 p-2.5 rounded-xl flex items-center justify-center transition-all duration-300 ${viewMode === 'grid'
-                ? 'bg-white shadow-md text-primary-600'
-                : 'text-slate-500 hover:bg-slate-200/50'
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
-              title={adminT?.gridView || 'Grid View'}
-            >
-              <LayoutGrid size={18} />
-            </button>
-
-            <button
-              onClick={() => setViewMode('list')}
-              className={`flex-1 p-2.5 rounded-xl flex items-center justify-center transition-all duration-300 ${viewMode === 'list'
-                ? 'bg-white shadow-md text-primary-600'
-                : 'text-slate-500 hover:bg-slate-200/50'
-                }`}
-              title={adminT?.listView || 'List View'}
-            >
-              <List size={18} />
-            </button>
+                title={adminT?.listView || 'List View'}
+              >
+                <List size={16} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -313,9 +323,9 @@ export default function MyCoursesPage() {
                           </div>
                         </td>
                         <td className="px-6 py-2 text-center">
-                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
-                            status === 'in-progress' ? 'bg-amber-100 text-amber-600' :
-                              'bg-slate-100 text-slate-500'
+                          <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-bold border ${status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            status === 'in-progress' ? 'bg-primary-50 text-primary-700 border-primary-200' :
+                              'bg-slate-50 text-slate-600 border-slate-200'
                             }`}>
                             {status === 'completed' ? (
                               <span className="flex items-center gap-1.5"><CheckCircle2 size={14} /> {t.completedLabel || 'Completed'}</span>
@@ -329,7 +339,7 @@ export default function MyCoursesPage() {
                         <td className="px-6 py-2 text-right">
                           <Link
                             href={`/dashboard/courses/${course.id}`}
-                            className="px-4 py-2 bg-primary-50 text-primary-600 rounded-xl text-xs font-bold hover:bg-primary-100 transition-all flex items-center justify-center gap-1"
+                            className={`${BUTTONS.primary} !py-1.5 !px-4 !text-xs !rounded-lg inline-flex`}
                           >
                             {pct > 0 ? (t.continue || 'Continue') : (t.viewCourse || 'Start')} <ArrowRight size={14} />
                           </Link>
