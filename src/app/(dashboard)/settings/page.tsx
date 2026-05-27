@@ -76,14 +76,14 @@ export default function SettingsPage() {
   return (
     <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
       {/* ─── Page Header ─── */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-        <div className="flex items-center gap-3">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2 overflow-hidden">
+        <div className="flex items-center gap-3 min-w-0 w-full">
           <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
              <UserIcon size={24} />
           </div>
-          <div>
-            <h1 className={TYPOGRAPHY.h1}>{ts.accountSettings}</h1>
-            <p className={`${TYPOGRAPHY.body} mt-1`}>{ts.manageProfile}</p>
+          <div className="min-w-0 flex-1">
+            <h1 className={`${TYPOGRAPHY.h1} truncate`}>{ts.accountSettings}</h1>
+            <p className={`${TYPOGRAPHY.body} mt-1 truncate`}>{ts.manageProfile}</p>
           </div>
         </div>
       </header>
@@ -124,23 +124,23 @@ export default function SettingsPage() {
             </div>
             
             {error && !passError && (
-              <div className="mb-4 flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
-                <AlertCircle size={18} className="shrink-0" />
-                <span>{error}</span>
+              <div className="mb-4 flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{error}</span>
               </div>
             )}
 
             {(passError || (error && passError)) && (
-              <div className="mb-4 flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
-                <AlertCircle size={18} className="shrink-0" />
-                <span>{passError || error}</span>
+              <div className="mb-4 flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{passError || error}</span>
               </div>
             )}
 
             {passSuccess && (
-              <div className="mb-4 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-500 text-emerald-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
-                <CheckCircle2 size={18} className="shrink-0" />
-                <span>{t.passwordUpdated}</span>
+              <div className="mb-4 flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-500 text-emerald-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
+                <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{t.passwordUpdated}</span>
               </div>
             )}
 
@@ -208,9 +208,9 @@ export default function SettingsPage() {
                   disabled
                   className={`${UI_COMPONENTS.input} bg-slate-50 text-slate-500 cursor-not-allowed opacity-80`}
                 />
-                <p className="mt-2 text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
-                  <AlertCircle size={12} />
-                  {ts.emailCannotChange}
+                <p className="mt-2 text-[11px] text-slate-400 font-medium flex items-start gap-1.5">
+                  <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">{ts.emailCannotChange}</span>
                 </p>
               </div>
 
