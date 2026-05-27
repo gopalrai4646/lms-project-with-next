@@ -172,11 +172,10 @@ export default function AdminUsersPage() {
               <button
                 type="button"
                 onClick={() => handleViewToggle('list')}
-                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
-                  viewMode === 'list'
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${viewMode === 'list'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                  }`}
                 title={t.listView}
                 aria-pressed={viewMode === 'list'}
               >
@@ -186,11 +185,10 @@ export default function AdminUsersPage() {
               <button
                 type="button"
                 onClick={() => handleViewToggle('grid')}
-                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${
-                  viewMode === 'grid'
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${viewMode === 'grid'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                  }`}
                 title={t.gridView}
                 aria-pressed={viewMode === 'grid'}
               >
@@ -254,11 +252,10 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-5 py-3">
                       <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${
-                          user.role === 'admin'
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${user.role === 'admin'
                             ? 'bg-rose-50 text-rose-600 border-rose-200'
                             : 'bg-slate-50 text-slate-600 border-slate-200'
-                        }`}
+                          }`}
                       >
                         {user.role}
                       </span>
@@ -340,36 +337,40 @@ export default function AdminUsersPage() {
           {paginatedUsers.map((user: User) => (
             <div
               key={user.id}
-              className={`${UI_COMPONENTS.card} relative group hover:shadow-md hover:border-slate-300 transition-all`}
+              className={`${UI_COMPONENTS.card} !p-0 overflow-hidden relative group hover:shadow-md hover:border-slate-300 transition-all`}
             >
-              <div className="absolute top-4 right-4 z-10">
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${
-                    user.role === 'admin'
-                      ? 'bg-rose-50 text-rose-600 border-rose-200'
-                      : 'bg-slate-50 text-slate-600 border-slate-200'
-                  }`}
-                >
-                  {user.role}
-                </span>
-              </div>
-              <div className="flex flex-col items-center text-center pt-2 pb-4">
-                <div className="w-16 h-16 rounded-xl bg-primary-50 text-primary-600 font-semibold text-2xl flex items-center justify-center border border-primary-100 overflow-hidden mb-3 group-hover:scale-105 transition-transform duration-300">
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-                  )}
+              <div className="relative h-40 bg-slate-100 overflow-hidden border-b border-slate-100">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-primary-50 text-primary-600 font-semibold text-4xl">
+                    {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                
+                <div className="absolute top-4 right-4 z-10">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border shadow-sm backdrop-blur-sm ${user.role === 'admin'
+                        ? 'bg-rose-50/90 text-rose-600 border-rose-200'
+                        : 'bg-white/90 text-slate-600 border-slate-200'
+                      }`}
+                  >
+                    {user.role}
+                  </span>
                 </div>
-                <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1 w-full`}>
-                  {user.name || t.noName}
-                </h3>
-                <p className={`${TYPOGRAPHY.body} text-xs mt-0.5 truncate w-full`}>{user.email}</p>
               </div>
+              
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex flex-col items-center text-center pb-4">
+                  <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1 w-full`}>
+                    {user.name || t.noName}
+                  </h3>
+                  <p className={`${TYPOGRAPHY.body} text-xs mt-0.5 truncate w-full`}>{user.email}</p>
+                </div>
 
-              <div className="pt-4 border-t border-slate-100 flex flex-col gap-4">
-                <div>
-                  <p className={`${TYPOGRAPHY.label} mb-2`}>{t.enrolledCourses}</p>
+                <div className="pt-4 border-t border-slate-100 flex flex-col gap-4 mt-auto">
+                  <div>
+                    <p className={`${TYPOGRAPHY.label} mb-2`}>{t.enrolledCourses}</p>
                   {(() => {
                     const validUserCourses = getValidEnrolledCourses(user.enrolledCourses);
                     if (validUserCourses.length > 0) {
@@ -431,6 +432,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
             </div>
+          </div>
           ))}
         </div>
       )}
@@ -472,11 +474,10 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${
-                            safeCurrentPage === page
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${safeCurrentPage === page
                               ? 'bg-primary-600 text-white shadow-sm'
                               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
+                            }`}
                           aria-current={safeCurrentPage === page ? 'page' : undefined}
                         >
                           {page}
@@ -490,11 +491,10 @@ export default function AdminUsersPage() {
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${
-                        safeCurrentPage === page
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${safeCurrentPage === page
                           ? 'bg-primary-600 text-white shadow-sm'
                           : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                        }`}
                       aria-current={safeCurrentPage === page ? 'page' : undefined}
                     >
                       {page}
