@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { Camera, Phone, User as UserIcon, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import { VALIDATION_LIMITS } from '@/constants/validation';
 
 export default function SettingsPage() {
   const { user, loading, error } = useAppSelector((state) => state.auth);
@@ -24,6 +25,7 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passError, setPassError] = useState<string | null>(null);
   const [passSuccess, setPassSuccess] = useState(false);
+  const [formErrors, setFormErrors] = useState<{name?: string; phoneNumber?: string; newPassword?: string; confirmPassword?: string}>({});
 
   useEffect(() => {
     if (user) {
@@ -94,25 +96,57 @@ export default function SettingsPage() {
           e.preventDefault();
           setPassError(null);
           setPassSuccess(false);
+          setFormErrors({});
 
           const hasProfileChanges = name !== user?.displayName || phoneNumber !== (user?.phoneNumber || '') || photoFile;
           const hasPasswordChanges = newPassword !== '' || confirmPassword !== '';
 
           // 1. Handle Profile Update
           if (hasProfileChanges) {
+            let hasProfileError = false;
+            const pErrors: {name?: string; phoneNumber?: string} = {};
+            
+            const nameLength = name.trim().length;
+            if (nameLength < VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH || nameLength > VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH) {
+              pErrors.name = `Full name must be between ${VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH} and ${VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH} characters.`;
+              hasProfileError = true;
+            }
+            
+            if (phoneNumber) {
+              const digitsOnly = phoneNumber.replace(/\D/g, '');
+              if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
+                pErrors.phoneNumber = `Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`;
+                hasProfileError = true;
+              }
+            }
+
+            if (hasProfileError) {
+              setFormErrors(pErrors);
+              return;
+            }
+
             handleProfileSubmit(e);
           }
 
           // 2. Handle Password Update
           if (hasPasswordChanges) {
-            if (newPassword !== confirmPassword) {
-              setPassError(t.passwordMismatch);
-              return;
-            }
+            let hasPassError = false;
+            const pwErrors: {newPassword?: string; confirmPassword?: string} = {};
+
             if (newPassword.length < 6) {
-              setPassError(t.passwordMinLength);
+              pwErrors.newPassword = t.passwordMinLength;
+              hasPassError = true;
+            }
+            if (newPassword !== confirmPassword) {
+              pwErrors.confirmPassword = t.passwordMismatch;
+              hasPassError = true;
+            }
+
+            if (hasPassError) {
+              setFormErrors(prev => ({ ...prev, ...pwErrors }));
               return;
             }
+            
             dispatch(updatePasswordRequest({ password: newPassword }));
           }
         }} className="space-y-8">
@@ -179,10 +213,18 @@ export default function SettingsPage() {
                 <input 
                   type="text" 
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={UI_COMPONENTS.input}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined }));
+                  }}
+                  className={`${UI_COMPONENTS.input} ${formErrors.name ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                   placeholder={ts.namePlaceholder || "Your name"}
                 />
+                {formErrors.name && (
+                  <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                    {formErrors.name}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -192,11 +234,19 @@ export default function SettingsPage() {
                   <input 
                     type="tel" 
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className={`${UI_COMPONENTS.input} !pl-10`}
+                    onChange={(e) => {
+                      setPhoneNumber(e.target.value);
+                      if (formErrors.phoneNumber) setFormErrors(prev => ({ ...prev, phoneNumber: undefined }));
+                    }}
+                    className={`${UI_COMPONENTS.input} !pl-10 ${formErrors.phoneNumber ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                     placeholder={ts.phonePlaceholder || "+1 234 567 890"}
                   />
                 </div>
+                {formErrors.phoneNumber && (
+                  <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                    {formErrors.phoneNumber}
+                  </p>
+                )}
               </div>
 
               {/* Email, Passwords */}
@@ -221,11 +271,19 @@ export default function SettingsPage() {
                   <input 
                     type="password" 
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className={`${UI_COMPONENTS.input} !pl-10`}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      if (formErrors.newPassword) setFormErrors(prev => ({ ...prev, newPassword: undefined }));
+                    }}
+                    className={`${UI_COMPONENTS.input} !pl-10 ${formErrors.newPassword ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                     placeholder={ts.newPasswordPlaceholder || "Leave blank to keep current"}
                   />
                 </div>
+                {formErrors.newPassword && (
+                  <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                    {formErrors.newPassword}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -235,11 +293,19 @@ export default function SettingsPage() {
                   <input 
                     type="password" 
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`${UI_COMPONENTS.input} !pl-10`}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (formErrors.confirmPassword) setFormErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                    }}
+                    className={`${UI_COMPONENTS.input} !pl-10 ${formErrors.confirmPassword ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                     placeholder={ts.confirmPasswordPlaceholder || "Confirm new password"}
                   />
                 </div>
+                {formErrors.confirmPassword && (
+                  <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                    {formErrors.confirmPassword}
+                  </p>
+                )}
               </div>
             </div>
           </section>

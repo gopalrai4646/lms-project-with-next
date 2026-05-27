@@ -18,4 +18,9 @@ export const VALIDATION_LIMITS = {
     MAX_SIZE_BYTES: 2 * 1024 * 1024,
     ACCEPTED_TYPES: 'image/png,image/jpeg,image/webp',
   },
+  AUTH: {
+    NAME_MIN_LENGTH: 2,
+    NAME_MAX_LENGTH: 20,
+    PHONE_LENGTH: 10,
+  }
 };

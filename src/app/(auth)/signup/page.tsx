@@ -7,9 +7,10 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { signupRequest, googleLoginRequest, clearError } from '@/store/slices/authSlice';
 import { useTranslation } from 'react-i18next';
 import { uploadToCloudinary } from '@/utils/cloudinary';
-import { Camera } from 'lucide-react';
+import { Camera, AlertCircle } from 'lucide-react';
 
 import { AUTH_UI } from '@/constants/ui';
+import { VALIDATION_LIMITS } from '@/constants/validation';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -18,6 +19,7 @@ export default function SignupPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [role, setRole] = useState<'student' | 'admin'>('student');
   const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [formErrors, setFormErrors] = useState<{name?: string; email?: string; password?: string; phoneNumber?: string; general?: string}>({});
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [adminExists, setAdminExists] = useState<boolean | null>(null);
@@ -74,6 +76,50 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormErrors({});
+    
+    let hasError = false;
+    const errors: {name?: string; email?: string; password?: string; phoneNumber?: string; general?: string} = {};
+
+    if (!name.trim()) {
+      errors.name = t.fullName + " is required.";
+      hasError = true;
+    } else {
+      const nameLength = name.trim().length;
+      if (nameLength < VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH || nameLength > VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH) {
+        errors.name = `Full name must be between ${VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH} and ${VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH} characters.`;
+        hasError = true;
+      }
+    }
+
+    if (!email.trim()) {
+      errors.email = t.email + " is required.";
+      hasError = true;
+    } else if (!email.toLowerCase().endsWith('@gmail.com')) {
+      errors.email = 'Email must end with @gmail.com.';
+      hasError = true;
+    }
+
+    if (!password.trim()) {
+      errors.password = t.password + " is required.";
+      hasError = true;
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+      hasError = true;
+    }
+
+    if (phoneNumber) {
+      const digitsOnly = phoneNumber.replace(/\D/g, '');
+      if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
+        errors.phoneNumber = `Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`;
+        hasError = true;
+      }
+    }
+
+    if (hasError) {
+      setFormErrors(errors);
+      return;
+    }
     
     let uploadedPhotoURL: string | undefined = undefined;
     
@@ -83,6 +129,7 @@ export default function SignupPage() {
         const url = await uploadToCloudinary(profileFile);
         uploadedPhotoURL = url;
       } catch (err: any) {
+        setFormErrors({ general: "Failed to upload profile photo." });
         return; 
       } finally {
         setUploading(false);
@@ -125,16 +172,14 @@ export default function SignupPage() {
           <p className={AUTH_UI.subtitle}>{t.joinLearners}</p>
         </div>
 
-        {error && (
+        {(formErrors.general || error) && (
           <div className="mb-4 p-3 bg-rose-50/50 border border-rose-200 text-rose-600 text-[13px] font-medium rounded-xl flex items-start gap-3">
-            <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p>{error}</p>
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p>{formErrors.general || error}</p>
           </div>
         )}
 
-        <form className="space-y-3.5" onSubmit={handleSubmit}>
+        <form className="space-y-3.5" onSubmit={handleSubmit} noValidate>
           {adminExists === false && (
             <div>
               <label className={AUTH_UI.label}>{t.role}</label>
@@ -191,44 +236,73 @@ export default function SignupPage() {
             <label className={AUTH_UI.label}>{t.fullName}</label>
             <input 
               type="text" 
-              required
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={AUTH_UI.input}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined }));
+              }}
+              className={`${AUTH_UI.input} ${formErrors.name ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
               placeholder={t.namePlaceholder || "John Doe"}
             />
+            {formErrors.name && (
+              <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                {formErrors.name}
+              </p>
+            )}
           </div>
           <div>
             <label className={AUTH_UI.label}>{t.email}</label>
             <input 
               type="email" 
-              required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={AUTH_UI.input}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (formErrors.email) setFormErrors(prev => ({ ...prev, email: undefined }));
+              }}
+              className={`${AUTH_UI.input} ${formErrors.email ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
               placeholder="name@gmail.com"
             />
+            {formErrors.email && (
+              <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                {formErrors.email}
+              </p>
+            )}
           </div>
           <div>
             <label className={AUTH_UI.label}>Phone Number</label>
             <input 
               type="tel" 
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className={AUTH_UI.input}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value);
+                if (formErrors.phoneNumber) setFormErrors(prev => ({ ...prev, phoneNumber: undefined }));
+              }}
+              className={`${AUTH_UI.input} ${formErrors.phoneNumber ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
               placeholder={t.phonePlaceholder || "+1 234 567 890"}
             />
+            {formErrors.phoneNumber && (
+              <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                {formErrors.phoneNumber}
+              </p>
+            )}
           </div>
           <div>
             <label className={AUTH_UI.label}>{t.password}</label>
             <input 
               type="password" 
-              required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={AUTH_UI.input}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (formErrors.password) setFormErrors(prev => ({ ...prev, password: undefined }));
+              }}
+              className={`${AUTH_UI.input} ${formErrors.password ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
               placeholder={t.passwordPlaceholder || "••••••••"}
             />
+            {formErrors.password && (
+              <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                {formErrors.password}
+              </p>
+            )}
           </div>
           
           <div className="pt-2">

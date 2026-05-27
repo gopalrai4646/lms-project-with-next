@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { forgotPasswordRequest, clearError } from '@/store/slices/authSlice';
 import { useTranslation } from 'react-i18next';
+import { AlertCircle } from 'lucide-react';
 
 import { AUTH_UI } from '@/constants/ui';
 import { Key } from 'lucide-react';
@@ -12,6 +13,7 @@ import { Key } from 'lucide-react';
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [formErrors, setFormErrors] = useState<{email?: string; general?: string}>({});
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
@@ -31,6 +33,13 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormErrors({});
+
+    if (!email.trim()) {
+      setFormErrors({ email: t.email + " is required." });
+      return;
+    }
+
     dispatch(forgotPasswordRequest({ email }));
     setSubmitted(true);
   };
@@ -53,12 +62,10 @@ export default function ForgotPasswordPage() {
           <p className={AUTH_UI.subtitle}>{t.resetSubtitle}</p>
         </div>
 
-        {error && (
+        {(formErrors.general || error) && (
           <div className="mb-6 p-4 bg-rose-50/50 border border-rose-200 text-rose-600 text-[13px] font-medium rounded-xl flex items-start gap-3">
-            <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p>{error}</p>
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p>{formErrors.general || error}</p>
           </div>
         )}
 
@@ -77,17 +84,24 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <div>
               <label className={AUTH_UI.label}>{t.email}</label>
               <input 
                 type="email" 
-                required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={AUTH_UI.input}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (formErrors.email) setFormErrors({});
+                }}
+                className={`${AUTH_UI.input} ${formErrors.email ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                 placeholder="name@gmail.com"
               />
+              {formErrors.email && (
+                <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                  {formErrors.email}
+                </p>
+              )}
             </div>
             <div className="pt-2">
               <button 

@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginRequest, googleLoginRequest, clearError } from '@/store/slices/authSlice';
 import { useTranslation } from 'react-i18next';
+import { AlertCircle } from 'lucide-react';
 
 import { AUTH_UI } from '@/constants/ui';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [formErrors, setFormErrors] = useState<{email?: string; password?: string; general?: string}>({});
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, role, loading, error } = useAppSelector((state) => state.auth);
@@ -39,6 +41,26 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormErrors({});
+
+    let hasError = false;
+    const errors: {email?: string; password?: string} = {};
+
+    if (!email.trim()) {
+      errors.email = "No email found.";
+      hasError = true;
+    }
+
+    if (!password.trim()) {
+      errors.password = t.password + " is required.";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setFormErrors(errors);
+      return;
+    }
+
     dispatch(loginRequest({ email, pass: password }));
   };
 
@@ -68,26 +90,31 @@ export default function LoginPage() {
           <p className={AUTH_UI.subtitle}>{t.signInSubtitle}</p>
         </div>
 
-        {error && (
+        {(formErrors.general || error) && (
           <div className="mb-6 p-4 bg-rose-50/50 border border-rose-200 text-rose-600 text-[13px] font-medium rounded-xl flex items-start gap-3">
-            <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p>{error}</p>
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p>{formErrors.general || error}</p>
           </div>
         )}
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
           <div>
             <label className={AUTH_UI.label}>{t.email}</label>
             <input 
               type="email" 
-              required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={AUTH_UI.input}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (formErrors.email) setFormErrors(prev => ({ ...prev, email: undefined }));
+              }}
+              className={`${AUTH_UI.input} ${formErrors.email ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
               placeholder="name@gmail.com"
             />
+            {formErrors.email && (
+              <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                {formErrors.email}
+              </p>
+            )}
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -96,12 +123,19 @@ export default function LoginPage() {
             </div>
             <input 
               type="password" 
-              required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={AUTH_UI.input}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (formErrors.password) setFormErrors(prev => ({ ...prev, password: undefined }));
+              }}
+              className={`${AUTH_UI.input} ${formErrors.password ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
               placeholder={t.passwordPlaceholder || "••••••••"}
             />
+            {formErrors.password && (
+              <p className="text-rose-500 text-xs mt-1.5 font-medium">
+                {formErrors.password}
+              </p>
+            )}
           </div>
           <div className="pt-2">
             <button 
