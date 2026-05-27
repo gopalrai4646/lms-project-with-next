@@ -180,7 +180,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-              placeholder="John Doe"
+              placeholder={t.namePlaceholder || "John Doe"}
             />
           </div>
           <div>
@@ -191,7 +191,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-              placeholder="name@example.com"
+              placeholder="name@gmail.com"
             />
           </div>
           <div>
@@ -201,7 +201,7 @@ export default function SignupPage() {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-              placeholder="+1 234 567 890"
+              placeholder={t.phonePlaceholder || "+1 234 567 890"}
             />
           </div>
           <div>
@@ -212,7 +212,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-              placeholder="••••••••"
+              placeholder={t.passwordPlaceholder || "••••••••"}
             />
           </div>
           <button 

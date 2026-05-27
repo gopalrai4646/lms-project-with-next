@@ -275,9 +275,9 @@ export default function StaffManagementPage() {
             {roles.map(role => (
               <div key={role.id} className={`${UI_COMPONENTS.cardInteractive} group`}>
                 <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1`}>{role.name}</h3>
-                    <p className={`${TYPOGRAPHY.body} text-xs mt-1 line-clamp-2`}>{role.description || 'No description'}</p>
+                  <div className="flex-1 min-w-0 pr-2">
+                    <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1 break-all`}>{role.name}</h3>
+                    <p className={`${TYPOGRAPHY.body} text-xs mt-1 line-clamp-2 break-all`}>{role.description || 'No description'}</p>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                     <button
@@ -468,7 +468,7 @@ export default function StaffManagementPage() {
                   type="text"
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
-                  placeholder="e.g. Content Manager"
+                  placeholder={t.roleNamePlaceholder || "e.g. Content Manager"}
                   className={UI_COMPONENTS.input}
                 />
               </div>
@@ -480,7 +480,7 @@ export default function StaffManagementPage() {
                   type="text"
                   value={roleDescription}
                   onChange={(e) => setRoleDescription(e.target.value)}
-                  placeholder="e.g. Can manage courses and training plans"
+                  placeholder={t.roleDescPlaceholder || "e.g. Can manage courses and training plans"}
                   className={UI_COMPONENTS.input}
                 />
               </div>
@@ -577,7 +577,7 @@ export default function StaffManagementPage() {
                   type="text"
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
-                  placeholder="e.g. John Smith"
+                  placeholder={t.staffNamePlaceholder || "e.g. John Smith"}
                   className={UI_COMPONENTS.input}
                 />
               </div>
@@ -589,7 +589,7 @@ export default function StaffManagementPage() {
                   type="email"
                   value={staffEmail}
                   onChange={(e) => setStaffEmail(e.target.value)}
-                  placeholder="e.g. john@company.com"
+                  placeholder="name@gmail.com"
                   className={UI_COMPONENTS.input}
                 />
               </div>
@@ -602,7 +602,7 @@ export default function StaffManagementPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={staffPassword}
                     onChange={(e) => setStaffPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
+                    placeholder={t.passwordMinPlaceholder || "Min. 6 characters"}
                     className={`${UI_COMPONENTS.input} pr-10`}
                   />
                   <button

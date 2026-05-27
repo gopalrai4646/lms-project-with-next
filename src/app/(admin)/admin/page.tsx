@@ -386,7 +386,7 @@ export default function AdminDashboard() {
               <div key={course.id}>
                 <div className="flex justify-between items-baseline mb-2">
                   <span className="text-sm font-medium text-slate-700 truncate max-w-[70%]">{course.title}</span>
-                  <span className="text-xs font-semibold text-slate-900">{course.percent}% <span className="text-slate-400 font-normal">assigned</span></span>
+                  <span className="text-xs font-semibold text-slate-900">{course.percent}% <span className="text-slate-400 font-normal">{t.assigned?.toLowerCase() || 'assigned'}</span></span>
                 </div>
                 <div className={`${UI_COMPONENTS.progressTrack}`}>
                   <div className={`${UI_COMPONENTS.progressFill}`} style={{ width: `${course.percent}%` }}></div>

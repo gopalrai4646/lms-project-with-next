@@ -181,7 +181,7 @@ export default function SettingsPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className={UI_COMPONENTS.input}
-                  placeholder="Your name"
+                  placeholder={ts.namePlaceholder || "Your name"}
                 />
               </div>
 
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className={`${UI_COMPONENTS.input} !pl-10`}
-                    placeholder="+1 234 567 890"
+                    placeholder={ts.phonePlaceholder || "+1 234 567 890"}
                   />
                 </div>
               </div>
@@ -223,7 +223,7 @@ export default function SettingsPage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className={`${UI_COMPONENTS.input} !pl-10`}
-                    placeholder="Leave blank to keep current"
+                    placeholder={ts.newPasswordPlaceholder || "Leave blank to keep current"}
                   />
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default function SettingsPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className={`${UI_COMPONENTS.input} !pl-10`}
-                    placeholder="Confirm new password"
+                    placeholder={ts.confirmPasswordPlaceholder || "Confirm new password"}
                   />
                 </div>
               </div>

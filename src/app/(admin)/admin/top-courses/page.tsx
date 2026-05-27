@@ -86,8 +86,8 @@ export default function TopCoursesPage() {
         <p className={`${TYPOGRAPHY.body} mt-1.5 max-w-2xl`}>{adminT.topCoursesSubtitle}</p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className={`${UI_COMPONENTS.card} lg:col-span-3 min-h-[350px]`}>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className={`${UI_COMPONENTS.card} w-full lg:w-1/2 min-h-[350px]`}>
           <div 
             className="h-[320px] w-full transition-all duration-700 mx-auto"
             style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
@@ -144,7 +144,7 @@ export default function TopCoursesPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="w-full lg:w-1/2 self-start">
             <div className={UI_COMPONENTS.card}>
                 <h4 className={`${TYPOGRAPHY.label} mb-5`}>{adminT.currentTop5}</h4>
                 <div className="space-y-3">

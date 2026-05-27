@@ -207,7 +207,7 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
                   maxLength={VALIDATION_LIMITS.TRAINING_PLAN.NAME_MAX_LENGTH}
                   minLength={VALIDATION_LIMITS.TRAINING_PLAN.NAME_MIN_LENGTH}
                   className={`${UI_COMPONENTS.input} ${formErrors.name ? '!border-rose-500 !ring-rose-200' : ''}`}
-                  placeholder="e.g. Frontend Masterclass"
+                  placeholder={t.planTitlePlaceholder || "e.g. Frontend Masterclass"}
                 />
                 <div className="flex justify-between items-start mt-1.5">
                   <div className="flex-1">
@@ -231,7 +231,7 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
                   maxLength={VALIDATION_LIMITS.TRAINING_PLAN.DESCRIPTION_MAX_LENGTH}
                   minLength={VALIDATION_LIMITS.TRAINING_PLAN.DESCRIPTION_MIN_LENGTH}
                   className={`${UI_COMPONENTS.input} resize-none ${formErrors.description ? '!border-rose-500 !ring-rose-200' : ''}`}
-                  placeholder="Describe this training plan..."
+                  placeholder={t.planDescPlaceholder || "Describe this training plan..."}
                 />
                 <div className="flex justify-between items-start mt-1.5">
                   <div className="flex-1">
@@ -414,7 +414,7 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
                   autoFocus
                   value={courseSearch}
                   onChange={(e) => setCourseSearch(e.target.value)}
-                  placeholder="Search by title or instructor..."
+                  placeholder={t.searchCoursePlaceholder || "Search by title or instructor..."}
                   className={`${UI_COMPONENTS.input} !pl-10`}
                 />
               </div>

@@ -108,7 +108,11 @@
     "google": "Google",
     "phoneNumber": "Phone Number",
     "profilePhoto": "Profile Photo",
-    "uploadingPhoto": "Uploading photo..."
+    "uploadingPhoto": "Uploading photo...",
+    "emailPlaceholder": "nom@exemple.fr",
+    "passwordPlaceholder": "••••••••",
+    "namePlaceholder": "Jean Dupont",
+    "phonePlaceholder": "+33 1 23 45 67 89"
   },
   "settings": {
     "accountSettings": "Paramètres du Compte",
@@ -120,7 +124,11 @@
     "updating": "Mise à jour...",
     "phoneNumber": "Numéro de téléphone",
     "profilePhoto": "Photo de profil",
-    "uploadingPhoto": "Téléchargement de la photo..."
+    "uploadingPhoto": "Téléchargement de la photo...",
+    "namePlaceholder": "Votre nom",
+    "phonePlaceholder": "+33 1 23 45 67 89",
+    "newPasswordPlaceholder": "Laissez vide pour conserver",
+    "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe"
   },
   "admin": {
     "adminConsole": "Tableau de Bord",
@@ -386,7 +394,15 @@
         "top_courses": { "label": "Analyses", "desc": "Stats cours" },
         "top_training_plans": { "label": "Analyses", "desc": "Stats plans" }
       }
-    }
+    },
+    "planTitlePlaceholder": "ex. Masterclass Frontend",
+    "planDescPlaceholder": "Décrivez ce plan de formation...",
+    "searchCoursePlaceholder": "Rechercher par titre ou instructeur...",
+    "roleNamePlaceholder": "ex. Gestionnaire de contenu",
+    "roleDescPlaceholder": "ex. Peut gérer les cours et plans",
+    "staffNamePlaceholder": "ex. Jean Dupont",
+    "staffEmailPlaceholder": "ex. jean@entreprise.fr",
+    "passwordMinPlaceholder": "Min. 6 caractères"
   },
   "coursePlayer": {
     "loadingCourse": "Chargement du cours...",

@@ -108,7 +108,11 @@
     "google": "Google",
     "phoneNumber": "Phone Number",
     "profilePhoto": "Profile Photo",
-    "uploadingPhoto": "Uploading photo..."
+    "uploadingPhoto": "Uploading photo...",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "••••••••",
+    "namePlaceholder": "John Doe",
+    "phonePlaceholder": "+1 234 567 890"
   },
   "settings": {
     "accountSettings": "Account Settings",
@@ -120,7 +124,11 @@
     "updating": "Updating...",
     "phoneNumber": "Phone Number",
     "profilePhoto": "Profile Photo",
-    "uploadingPhoto": "Uploading photo..."
+    "uploadingPhoto": "Uploading photo...",
+    "namePlaceholder": "Your name",
+    "phonePlaceholder": "+1 234 567 890",
+    "newPasswordPlaceholder": "Leave blank to keep current",
+    "confirmPasswordPlaceholder": "Confirm new password"
   },
   "admin": {
     "adminConsole": "Dashboard",
@@ -382,7 +390,15 @@
         "top_courses": { "label": "Analytics", "desc": "Course stats" },
         "top_training_plans": { "label": "Analytics", "desc": "TP stats" }
       }
-    }
+    },
+    "planTitlePlaceholder": "e.g. Frontend Masterclass",
+    "planDescPlaceholder": "Describe this training plan...",
+    "searchCoursePlaceholder": "Search by title or instructor...",
+    "roleNamePlaceholder": "e.g. Content Manager",
+    "roleDescPlaceholder": "e.g. Can manage courses and training plans",
+    "staffNamePlaceholder": "e.g. John Smith",
+    "staffEmailPlaceholder": "e.g. john@company.com",
+    "passwordMinPlaceholder": "Min. 6 characters"
   },
   "coursePlayer": {
     "loadingCourse": "Loading course...",

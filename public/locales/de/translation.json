@@ -108,7 +108,11 @@
     "google": "Google",
     "phoneNumber": "Phone Number",
     "profilePhoto": "Profile Photo",
-    "uploadingPhoto": "Uploading photo..."
+    "uploadingPhoto": "Uploading photo...",
+    "emailPlaceholder": "name@beispiel.de",
+    "passwordPlaceholder": "••••••••",
+    "namePlaceholder": "Max Mustermann",
+    "phonePlaceholder": "+49 123 456 789"
   },
   "settings": {
     "accountSettings": "Kontoeinstellungen",
@@ -120,7 +124,11 @@
     "updating": "Aktualisieren...",
     "phoneNumber": "Telefonnummer",
     "profilePhoto": "Profilbild",
-    "uploadingPhoto": "Foto wird hochgeladen..."
+    "uploadingPhoto": "Foto wird hochgeladen...",
+    "namePlaceholder": "Dein Name",
+    "phonePlaceholder": "+49 123 456 789",
+    "newPasswordPlaceholder": "Leer lassen zum Beibehalten",
+    "confirmPasswordPlaceholder": "Neues Passwort bestätigen"
   },
   "admin": {
     "adminConsole": "Dashboard",
@@ -387,7 +395,15 @@
         "top_courses": { "label": "Analyse", "desc": "Kurs-Stats" },
         "top_training_plans": { "label": "Analyse", "desc": "TP-Stats" }
       }
-    }
+    },
+    "planTitlePlaceholder": "z.B. Frontend Meisterkurs",
+    "planDescPlaceholder": "Beschreibe diesen Trainingsplan...",
+    "searchCoursePlaceholder": "Nach Titel oder Dozent suchen...",
+    "roleNamePlaceholder": "z.B. Inhaltsmanager",
+    "roleDescPlaceholder": "z.B. Kann Kurse und Trainingspläne verwalten",
+    "staffNamePlaceholder": "z.B. Max Mustermann",
+    "staffEmailPlaceholder": "z.B. max@firma.de",
+    "passwordMinPlaceholder": "Min. 6 Zeichen"
   },
   "coursePlayer": {
     "loadingCourse": "Kurs wird geladen...",
