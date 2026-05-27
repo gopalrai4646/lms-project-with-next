@@ -70,7 +70,9 @@
     "to": "to",
     "of": "of",
     "prev": "Prev",
-    "next": "Next"
+    "next": "Next",
+    "noCoursesInPlan": "No courses available in this plan yet.",
+    "stalledLearnersSub": "No activity in 7 days"
   },
   "auth": {
     "login": "Login",
@@ -209,7 +211,7 @@
     "role": "Role",
     "enrolledCourses": "Enrolled Courses",
     "loadingUsers": "Loading users...",
-    "noUsersFound": "No users found matching your filters.",
+    "noUsersFound": "No users found matching your criteria.",
     "noName": "No Name",
     "more": "more",
     "noEnrollments": "No enrollments",
@@ -366,29 +368,86 @@
     },
     "permissions": {
       "groups": {
-        "dashboard": { "label": "Dashboard" },
-        "courses": { "label": "Courses" },
-        "training_plans": { "label": "Training Plans" },
-        "users": { "label": "User Management" },
-        "top_courses": { "label": "Top Courses Analytics" },
-        "top_training_plans": { "label": "Top Training Plans Analytics" }
+        "dashboard": {
+          "label": "Dashboard"
+        },
+        "courses": {
+          "label": "Courses"
+        },
+        "training_plans": {
+          "label": "Training Plans"
+        },
+        "users": {
+          "label": "User Management"
+        },
+        "top_courses": {
+          "label": "Top Courses Analytics"
+        },
+        "top_training_plans": {
+          "label": "Top Training Plans Analytics"
+        }
       },
       "sub": {
-        "dashboard": { "label": "Dashboard", "desc": "Platform overview" },
-        "courses_read": { "label": "View", "desc": "Read-only access" },
-        "courses_create": { "label": "Create", "desc": "Create courses" },
-        "courses_edit": { "label": "Edit", "desc": "Manage existing" },
-        "courses_delete": { "label": "Delete", "desc": "Remove courses" },
-        "training_plans_read": { "label": "View", "desc": "Read-only access" },
-        "training_plans_create": { "label": "Create", "desc": "Create plans" },
-        "training_plans_edit": { "label": "Edit", "desc": "Update plans" },
-        "training_plans_delete": { "label": "Delete", "desc": "Remove plans" },
-        "training_plans_assign": { "label": "Assign", "desc": "Enroll users" },
-        "users_read": { "label": "View", "desc": "Browse users" },
-        "users_impersonate": { "label": "Impersonate", "desc": "Login as user" },
-        "users_delete": { "label": "Delete", "desc": "Delete user profile" },
-        "top_courses": { "label": "Analytics", "desc": "Course stats" },
-        "top_training_plans": { "label": "Analytics", "desc": "TP stats" }
+        "dashboard": {
+          "label": "Dashboard",
+          "desc": "Platform overview"
+        },
+        "courses_read": {
+          "label": "View",
+          "desc": "Read-only access"
+        },
+        "courses_create": {
+          "label": "Create",
+          "desc": "Create courses"
+        },
+        "courses_edit": {
+          "label": "Edit",
+          "desc": "Manage existing"
+        },
+        "courses_delete": {
+          "label": "Delete",
+          "desc": "Remove courses"
+        },
+        "training_plans_read": {
+          "label": "View",
+          "desc": "Read-only access"
+        },
+        "training_plans_create": {
+          "label": "Create",
+          "desc": "Create plans"
+        },
+        "training_plans_edit": {
+          "label": "Edit",
+          "desc": "Update plans"
+        },
+        "training_plans_delete": {
+          "label": "Delete",
+          "desc": "Remove plans"
+        },
+        "training_plans_assign": {
+          "label": "Assign",
+          "desc": "Enroll users"
+        },
+        "users_read": {
+          "label": "View",
+          "desc": "Browse users"
+        },
+        "users_impersonate": {
+          "label": "Impersonate",
+          "desc": "Login as user"
+        },
+        "users_delete": {
+          "label": "Delete",
+          "desc": "Delete user profile"
+        },
+        "top_courses": {
+          "label": "Analytics",
+          "desc": "Course stats"
+        },
+        "top_training_plans": {
+          "label": "Analytics",
+          "desc": "TP stats"
+        }
       }
     },
     "planTitlePlaceholder": "e.g. Frontend Masterclass",
@@ -398,7 +457,14 @@
     "roleDescPlaceholder": "e.g. Can manage courses and training plans",
     "staffNamePlaceholder": "e.g. John Smith",
     "staffEmailPlaceholder": "e.g. john@company.com",
-    "passwordMinPlaceholder": "Min. 6 characters"
+    "passwordMinPlaceholder": "Min. 6 characters",
+    "noCoursesAdded": "No courses added to the curriculum yet.",
+    "noMatchingCourses": "No matching courses found.",
+    "noRolesCreated": "No Roles Created Yet",
+    "noRoleDescription": "No description",
+    "noStaffMembers": "No Staff Members Yet",
+    "noReportsToShow": "No reports to show",
+    "noReportsDescription": "Your analytics dashboard is empty because there are no courses or training plans created yet."
   },
   "coursePlayer": {
     "loadingCourse": "Loading course...",
@@ -457,7 +523,11 @@
       "title": "Global Advantage",
       "subtitle_1": "Breaking barriers through linguistic precision. Our platform delivers",
       "subtitle_2": "Native Translations, ensuring technical nuances are never lost.",
-      "langs": ["English (Global)", "Deutsch (Native)", "Français (Native)"]
+      "langs": [
+        "English (Global)",
+        "Deutsch (Native)",
+        "Français (Native)"
+      ]
     },
     "security": {
       "badge": "Enterprise Grade",

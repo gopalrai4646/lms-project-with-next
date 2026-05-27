@@ -194,7 +194,7 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
             })
           ) : (
             <div className={UI_COMPONENTS.emptyStateCard}>
-              <p className={`${TYPOGRAPHY.body} font-medium italic`}>No courses available in this plan yet.</p>
+              <p className={`${TYPOGRAPHY.body} font-medium italic`}>{t.noCoursesInPlan || "No courses available in this plan yet."}</p>
             </div>
           )}
         </div>

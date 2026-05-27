@@ -70,7 +70,9 @@
     "to": "à",
     "of": "sur",
     "prev": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "noCoursesInPlan": "Aucun cours disponible dans ce plan pour le moment.",
+    "stalledLearnersSub": "Aucune activité en 7 jours"
   },
   "auth": {
     "login": "Connexion",
@@ -209,7 +211,7 @@
     "role": "Rôle",
     "enrolledCourses": "Cours Inscrits",
     "loadingUsers": "Chargement des utilisateurs...",
-    "noUsersFound": "Aucun utilisateur ne correspond à vos filtres.",
+    "noUsersFound": "Aucun utilisateur trouvé correspondant à vos critères.",
     "noName": "Pas de Nom",
     "more": "de plus",
     "noEnrollments": "Aucune inscription",
@@ -369,30 +371,90 @@
     },
     "permissions": {
       "groups": {
-        "dashboard": { "label": "Tableau de bord" },
-        "courses": { "label": "Cours" },
-        "training_plans": { "label": "Plans de formation" },
-        "users": { "label": "Gestion des utilisateurs" },
-        "top_courses": { "label": "Analyses des meilleurs cours" },
-        "top_training_plans": { "label": "Analyses des meilleurs plans" }
+        "dashboard": {
+          "label": "Tableau de bord"
+        },
+        "courses": {
+          "label": "Cours"
+        },
+        "training_plans": {
+          "label": "Plans de formation"
+        },
+        "users": {
+          "label": "Gestion des utilisateurs"
+        },
+        "top_courses": {
+          "label": "Analyses des meilleurs cours"
+        },
+        "top_training_plans": {
+          "label": "Analyses des meilleurs plans"
+        }
       },
       "sub": {
-        "dashboard": { "label": "Tableau de bord", "desc": "Aperçu général" },
-        "courses_read": { "label": "Voir", "desc": "Accès lecture seule" },
-        "courses_create": { "label": "Créer", "desc": "Créer des cours" },
-        "courses_edit": { "label": "Modifier", "desc": "Gérer l'existant" },
-        "courses_delete": { "label": "Supprimer", "desc": "Retirer les cours" },
-        "courses_enroll": { "label": "Inscrire", "desc": "Assigner des cours" },
-        "training_plans_read": { "label": "Voir", "desc": "Accès lecture seule" },
-        "training_plans_create": { "label": "Créer", "desc": "Créer des plans" },
-        "training_plans_edit": { "label": "Modifier", "desc": "Mettre à jour" },
-        "training_plans_delete": { "label": "Supprimer", "desc": "Retirer les plans" },
-        "training_plans_assign": { "label": "Assigner", "desc": "Inscrire des utilisateurs" },
-        "users_read": { "label": "Voir", "desc": "Liste utilisateurs" },
-        "users_impersonate": { "label": "Incarner", "desc": "Se connecter comme" },
-        "users_delete": { "label": "Supprimer", "desc": "Supprimer le profil" },
-        "top_courses": { "label": "Analyses", "desc": "Stats cours" },
-        "top_training_plans": { "label": "Analyses", "desc": "Stats plans" }
+        "dashboard": {
+          "label": "Tableau de bord",
+          "desc": "Aperçu général"
+        },
+        "courses_read": {
+          "label": "Voir",
+          "desc": "Accès lecture seule"
+        },
+        "courses_create": {
+          "label": "Créer",
+          "desc": "Créer des cours"
+        },
+        "courses_edit": {
+          "label": "Modifier",
+          "desc": "Gérer l'existant"
+        },
+        "courses_delete": {
+          "label": "Supprimer",
+          "desc": "Retirer les cours"
+        },
+        "courses_enroll": {
+          "label": "Inscrire",
+          "desc": "Assigner des cours"
+        },
+        "training_plans_read": {
+          "label": "Voir",
+          "desc": "Accès lecture seule"
+        },
+        "training_plans_create": {
+          "label": "Créer",
+          "desc": "Créer des plans"
+        },
+        "training_plans_edit": {
+          "label": "Modifier",
+          "desc": "Mettre à jour"
+        },
+        "training_plans_delete": {
+          "label": "Supprimer",
+          "desc": "Retirer les plans"
+        },
+        "training_plans_assign": {
+          "label": "Assigner",
+          "desc": "Inscrire des utilisateurs"
+        },
+        "users_read": {
+          "label": "Voir",
+          "desc": "Liste utilisateurs"
+        },
+        "users_impersonate": {
+          "label": "Incarner",
+          "desc": "Se connecter comme"
+        },
+        "users_delete": {
+          "label": "Supprimer",
+          "desc": "Supprimer le profil"
+        },
+        "top_courses": {
+          "label": "Analyses",
+          "desc": "Stats cours"
+        },
+        "top_training_plans": {
+          "label": "Analyses",
+          "desc": "Stats plans"
+        }
       }
     },
     "planTitlePlaceholder": "ex. Masterclass Frontend",
@@ -402,7 +464,14 @@
     "roleDescPlaceholder": "ex. Peut gérer les cours et plans",
     "staffNamePlaceholder": "ex. Jean Dupont",
     "staffEmailPlaceholder": "ex. jean@entreprise.fr",
-    "passwordMinPlaceholder": "Min. 6 caractères"
+    "passwordMinPlaceholder": "Min. 6 caractères",
+    "noCoursesAdded": "Aucun cours n'a encore été ajouté au programme.",
+    "noMatchingCourses": "Aucun cours correspondant trouvé.",
+    "noRolesCreated": "Aucun rôle créé pour le moment",
+    "noRoleDescription": "Pas de description",
+    "noStaffMembers": "Aucun membre du personnel pour le moment",
+    "noReportsToShow": "Aucun rapport à afficher",
+    "noReportsDescription": "Votre tableau de bord d'analyse est vide car aucun cours ou plan de formation n'a encore été créé."
   },
   "coursePlayer": {
     "loadingCourse": "Chargement du cours...",
@@ -461,7 +530,11 @@
       "title": "Avantage Global",
       "subtitle_1": "Briser les barrières grâce à la précision linguistique. Notre plateforme propose des",
       "subtitle_2": "Traductions Natives, garantissant que les nuances techniques ne sont jamais perdues.",
-      "langs": ["Anglais (Global)", "Allemand (Natif)", "Français (Natif)"]
+      "langs": [
+        "Anglais (Global)",
+        "Allemand (Natif)",
+        "Français (Natif)"
+      ]
     },
     "security": {
       "badge": "Qualité Entreprise",

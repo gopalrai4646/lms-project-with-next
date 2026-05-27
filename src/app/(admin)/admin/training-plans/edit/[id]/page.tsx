@@ -306,8 +306,9 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
             {/* Curriculum List */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
               {curriculumCourses.length === 0 ? (
-                <div className="xl:col-span-2 text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                  <p className="text-slate-500 font-medium text-sm">No courses added to the curriculum yet.</p>
+                <div className="py-12 flex flex-col items-center justify-center text-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                  <BookOpen className="w-10 h-10 text-slate-300 mb-3" />
+                  <p className="text-slate-500 font-medium text-sm">{t.noCoursesAdded || "No courses added to the curriculum yet."}</p>
                 </div>
               ) : (
                 curriculumCourses.map((course: any, index) => (
@@ -420,8 +421,8 @@ export default function EditTrainingPlanPage({ params }: { params: Promise<{ id:
               </div>
               <div className="space-y-1.5 max-h-[60vh] overflow-y-auto no-scrollbar pr-1">
                 {availableToAdd.length === 0 ? (
-                  <div className="text-center py-8 bg-slate-50 rounded-lg border border-slate-100">
-                    <p className="text-slate-500 text-sm font-medium">No matching courses found.</p>
+                  <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200">
+                    <p className="text-slate-500 text-sm font-medium">{t.noMatchingCourses || "No matching courses found."}</p>
                   </div>
                 ) : (
                   availableToAdd.map(course => (

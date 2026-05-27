@@ -267,7 +267,7 @@ export default function StaffManagementPage() {
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
               <KeyRound size={28} className="text-slate-400" />
             </div>
-            <h3 className={`${TYPOGRAPHY.h3} mb-2`}>No Roles Created Yet</h3>
+            <h3 className={`${TYPOGRAPHY.h3} mb-2`}>{t.noRolesCreated || "No Roles Created Yet"}</h3>
             <p className={`${TYPOGRAPHY.body} max-w-sm mx-auto`}>Create your first role to start assigning staff members with specific admin permissions.</p>
           </div>
         ) : (
@@ -277,7 +277,7 @@ export default function StaffManagementPage() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1 min-w-0 pr-2">
                     <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1 break-all`}>{role.name}</h3>
-                    <p className={`${TYPOGRAPHY.body} text-xs mt-1 line-clamp-2 break-all`}>{role.description || 'No description'}</p>
+                    <p className={`${TYPOGRAPHY.body} text-xs mt-1 line-clamp-2 break-all`}>{role.description || (t.noRoleDescription || 'No description')}</p>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                     <button
@@ -365,7 +365,7 @@ export default function StaffManagementPage() {
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
               <UserPlus size={28} className="text-slate-400" />
             </div>
-            <h3 className={`${TYPOGRAPHY.h3} mb-2`}>No Staff Members Yet</h3>
+            <h3 className={`${TYPOGRAPHY.h3} mb-2`}>{t.noStaffMembers || "No Staff Members Yet"}</h3>
             <p className={`${TYPOGRAPHY.body} max-w-sm mx-auto`}>
               {roles.length === 0
                 ? 'Create a role first, then add staff members.'
