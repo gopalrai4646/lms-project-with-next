@@ -18,6 +18,12 @@ export default function LoginPage() {
   const { t: i18nT } = useTranslation();
   const t = i18nT('auth', { returnObjects: true }) as any;
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (user) {
       if (role === 'admin') {
@@ -39,6 +45,10 @@ export default function LoginPage() {
   const handleGoogleLogin = () => {
     dispatch(googleLoginRequest());
   };
+
+  if (!mounted) {
+    return null; // Prevent hydration mismatch
+  }
 
   return (
     <div className={AUTH_UI.wrapper}>

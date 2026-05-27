@@ -17,6 +17,12 @@ export default function ForgotPasswordPage() {
   const { t: i18nT } = useTranslation();
   const t = i18nT('auth', { returnObjects: true }) as any;
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     return () => {
       dispatch(clearError());
@@ -28,6 +34,10 @@ export default function ForgotPasswordPage() {
     dispatch(forgotPasswordRequest({ email }));
     setSubmitted(true);
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className={AUTH_UI.wrapper}>

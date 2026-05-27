@@ -27,6 +27,12 @@ export default function SignupPage() {
   const { t: i18nT } = useTranslation();
   const t = i18nT('auth', { returnObjects: true }) as any;
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const checkAdmin = async () => {
       try {
@@ -96,6 +102,10 @@ export default function SignupPage() {
   const handleGoogleLogin = () => {
     dispatch(googleLoginRequest());
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className={AUTH_UI.wrapper}>
