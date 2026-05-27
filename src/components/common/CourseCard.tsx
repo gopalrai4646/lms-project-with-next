@@ -77,48 +77,38 @@ export default function CourseCard({ course }: CourseCardProps) {
 
   return (
     <div className={`${UI_COMPONENTS.cardInteractive} !p-0 overflow-hidden flex-col h-full`}>
-      {/* Top half - Grey area */}
-      <div className="bg-slate-50 border-b border-slate-100 p-5 relative h-52 flex flex-col">
-        {/* Header icons */}
-        <div className="flex justify-between items-start z-10 relative">
-          <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+      {/* Top half - Cover Image */}
+      <div className="relative h-48 bg-slate-100 overflow-hidden border-b border-slate-100 group cursor-pointer">
+        {course.thumbnail ? (
+          <img 
+            src={course.thumbnail} 
+            alt={course.title} 
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-slate-300 bg-slate-50">
+            <BookOpen size={48} />
+          </div>
+        )}
+
+        {/* Header icons (floating over image) */}
+        <div className="absolute inset-0 p-4 flex justify-between items-start z-10 pointer-events-none">
+          <div className="bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm border border-slate-700/50 pointer-events-auto">
             <Video size={14} /> {videoCount} {videoCount === 1 ? 'video' : 'videos'}
           </div>
           
           <button
             onClick={handleSave}
-            className="p-2 transition-all hover:scale-110 active:scale-95 group/heart outline-none"
+            className="p-2 transition-all hover:scale-110 active:scale-95 group/heart outline-none pointer-events-auto"
             title={isSaved ? t.saved : t.save}
           >
             <Heart 
-              size={26} 
-              className={`transition-colors duration-300 ${
-                isSaved ? 'text-rose-500 fill-rose-500' : 'text-slate-400 group-hover/heart:text-rose-500'
+              size={22} 
+              className={`transition-colors duration-300 drop-shadow-md ${
+                isSaved ? 'text-rose-500 fill-rose-500' : 'text-white group-hover/heart:text-rose-500 group-hover/heart:fill-rose-500/30'
               }`} 
             />
           </button>
-        </div>
-
-        {/* Centered Thumbnail */}
-        <div className="absolute inset-0 flex items-center justify-center pt-8 group cursor-pointer">
-          <div className="relative">
-            {/* Tooltip */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#252525] text-white text-[11px] px-3 py-1.5 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
-              Preview
-            </div>
-            
-            {course.thumbnail ? (
-              <img 
-                src={course.thumbnail} 
-                alt={course.title} 
-                className="w-[180px] h-[105px] object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <div className="w-[180px] h-[105px] bg-white rounded shadow-md flex items-center justify-center group-hover:scale-105 transition-transform duration-300 text-slate-300">
-                <BookOpen size={48} />
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
