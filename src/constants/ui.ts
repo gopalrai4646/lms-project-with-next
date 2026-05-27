@@ -62,3 +62,23 @@ export const LANDING_UI = {
   securityCard: 'bg-[#111] border border-white/10 p-6 sm:p-8 rounded-[2rem] shadow-2xl relative overflow-hidden',
   footer: 'py-10 bg-zinc-50 border-t border-zinc-200 text-zinc-500 px-6',
 };
+
+export const AUTH_UI = {
+  wrapper: 'min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] relative overflow-hidden',
+  backgroundPattern: 'absolute inset-0 pointer-events-none bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-50',
+  card: 'relative max-w-[420px] w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100 p-6 sm:p-8 z-10',
+  logoWrapper: 'w-10 h-10 bg-white rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-center mx-auto mb-4 overflow-hidden',
+  title: 'text-xl font-bold tracking-tight text-zinc-900 mb-1.5',
+  subtitle: 'text-xs text-zinc-500 font-medium',
+  label: 'block text-[13px] font-semibold text-zinc-700 mb-1.5',
+  input: 'w-full px-4 py-2.5 bg-zinc-50/50 border border-zinc-200 rounded-xl text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all',
+  buttonPrimary: 'w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold rounded-xl shadow-sm transition-all active:scale-[0.98] flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed',
+  buttonGoogle: 'w-full py-3 px-4 bg-white border border-zinc-200 rounded-xl flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all font-semibold text-zinc-700 active:scale-[0.98] shadow-sm',
+  dividerWrapper: 'relative mb-5 mt-6',
+  dividerLine: 'absolute inset-0 flex items-center',
+  dividerLineInner: 'w-full border-t border-zinc-200',
+  dividerText: 'relative flex justify-center text-[13px]',
+  dividerTextInner: 'px-4 bg-white text-zinc-500 font-medium',
+  link: 'text-zinc-900 hover:text-zinc-700 font-bold transition-colors underline-offset-4 hover:underline',
+  footerText: 'text-zinc-500 text-xs font-medium',
+};
