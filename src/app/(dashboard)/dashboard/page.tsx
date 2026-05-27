@@ -177,34 +177,33 @@ export default function DashboardPage() {
       {/* ─── Welcome Hero Banner ─── */}
       <div className="relative overflow-hidden rounded-[24px] bg-slate-900 p-8 md:p-10 text-white shadow-xl border border-slate-800">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-900/40 via-slate-900/0 to-transparent -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 backdrop-blur-3xl"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest mb-2">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest mb-2 truncate">
                 {new Date().toLocaleDateString(language === 'de' ? 'de-DE' : language === 'fr' ? 'fr-FR' : 'en-IN', 
                   { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
                 )}
               </p>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-white">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-white truncate">
                 {isNewUser ? `${t.hello}, ${firstName}!` : `${t.welcome}, ${firstName}!`}
               </h1>
-              <p className="text-slate-400 text-lg max-w-lg">{t.subtitle}</p>
+              <p className="text-slate-400 text-lg max-w-lg truncate">{t.subtitle}</p>
             </div>
             {continueLearning.length > 0 && (
               <Link
                 href={`/dashboard/courses/${continueLearning[0].id}`}
-                className="flex items-center gap-4 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/25 transition-all group shrink-0"
+                className="flex items-center gap-4 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/25 transition-all group shrink-0 max-w-full overflow-hidden"
               >
-                <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
+                <div className="w-14 h-14 shrink-0 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
                   <ProgressRing percentage={continueLearning[0].progress} size={48} strokeWidth={4} showLabel={false} />
                 </div>
-                <div>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{t.continue || 'Continue Learning'}</p>
-                  <p className="font-bold text-white truncate max-w-[180px]">{continueLearning[0].title}</p>
-                  <p className="text-xs text-slate-400">{continueLearning[0].progress}% complete</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider truncate">{t.continue || 'Continue Learning'}</p>
+                  <p className="font-bold text-white truncate md:max-w-[180px] lg:max-w-[200px]">{continueLearning[0].title}</p>
+                  <p className="text-xs text-slate-400 truncate">{continueLearning[0].progress}% complete</p>
                 </div>
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={24} />
+                <ArrowRight className="shrink-0 group-hover:translate-x-1 transition-transform" size={24} />
               </Link>
             )}
           </div>
@@ -301,7 +300,7 @@ export default function DashboardPage() {
                 <div className="p-5 flex-1 flex items-center gap-4 min-w-0">
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-slate-900 truncate group-hover:text-primary-600 transition-colors">{course.title}</p>
-                    <p className="text-xs text-slate-500 mt-1">{course.instructor}</p>
+                    <p className="text-xs text-slate-500 mt-1 truncate">{course.instructor}</p>
                     <div className="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary-500 rounded-full transition-all duration-500"
@@ -309,7 +308,9 @@ export default function DashboardPage() {
                       />
                     </div>
                   </div>
-                  <ProgressRing percentage={course.progress} size={48} strokeWidth={4} />
+                  <div className="shrink-0">
+                    <ProgressRing percentage={course.progress} size={48} strokeWidth={4} />
+                  </div>
                 </div>
               </Link>
             ))}

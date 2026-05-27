@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Star, X } from 'lucide-react';
 import { useAppDispatch } from '@/store/hooks';
 import { updateRatingRequest } from '@/store/slices/progressSlice';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 
 interface CourseRatingModalProps {
   courseId: string;
@@ -24,23 +25,20 @@ export default function CourseRatingModal({ courseId, userId, courseTitle, onDis
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="relative p-8 text-center">
+    <div className={`${UI_COMPONENTS.modalBackdrop} z-[100]`}>
+      <div className={`${UI_COMPONENTS.modalContent} max-w-md p-0`}>
+        <div className="relative p-8 text-center bg-white">
           <button 
             onClick={onDismiss}
-            className="absolute right-4 top-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all"
+            className="absolute right-4 top-4 p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all"
+            aria-label="Close"
           >
             <X size={20} />
           </button>
 
-          <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <Star size={40} fill="currentColor" />
-          </div>
-
-          <h3 className="text-2xl font-black text-slate-900 mb-2">Enjoying this course?</h3>
-          <p className="text-slate-500 mb-8 leading-relaxed px-4">
-            Congratulations on finishing <span className="font-bold text-slate-700">{courseTitle}</span>! How would you rate your learning experience?
+          <h3 className={`${TYPOGRAPHY.h2} mb-2`}>Enjoying this course?</h3>
+          <p className={`${TYPOGRAPHY.body} mb-8 px-2`}>
+            Congratulations on finishing <span className="font-bold text-slate-900">{courseTitle}</span>! How would you rate your learning experience?
           </p>
 
           <div className="flex items-center justify-center gap-2 mb-10">
@@ -64,21 +62,17 @@ export default function CourseRatingModal({ courseId, userId, courseTitle, onDis
             ))}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             <button
               onClick={handleSubmit}
               disabled={rating === 0}
-              className={`w-full py-4 rounded-2xl font-black text-lg transition-all shadow-lg ${
-                rating > 0 
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100 hover:shadow-indigo-200' 
-                  : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
-              }`}
+              className={`${BUTTONS.primary} w-full !py-3.5 !text-base !font-bold ${rating > 0 ? 'shadow-lg shadow-primary-600/20' : ''}`}
             >
               Submit Rating
             </button>
             <button
               onClick={onDismiss}
-              className="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors"
+              className={`${BUTTONS.ghost} w-full !py-3 !text-sm`}
             >
               Rate Later
             </button>

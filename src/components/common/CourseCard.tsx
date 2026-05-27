@@ -114,14 +114,17 @@ export default function CourseCard({ course }: CourseCardProps) {
 
       {/* Bottom half - White area */}
       <div className="p-6 flex flex-col bg-white">
-        <div className="flex items-center gap-2 mb-5 overflow-hidden">
-          <h3 className="text-sm font-bold text-slate-900 truncate min-w-0" title={course.title}>
-            {course.title}
-          </h3>
-          <span className="text-sm font-medium text-slate-400 whitespace-nowrap shrink-0">
-            • {course.instructor || `${videoCount} teacher`}
-          </span>
-          <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg whitespace-nowrap shrink-0 ml-auto">
+        <div className="flex items-center justify-between gap-3 mb-5 w-full overflow-hidden">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-slate-900 truncate shrink min-w-0" title={course.title}>
+              {course.title}
+            </h3>
+            <span className="text-sm font-medium text-slate-400 shrink-0 hidden xs:block">•</span>
+            <span className="text-sm font-medium text-slate-400 truncate shrink min-w-0" title={course.instructor}>
+              {course.instructor || `${videoCount} teacher`}
+            </span>
+          </div>
+          <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg whitespace-nowrap shrink-0">
             {course.price > 0 ? `$${course.price}` : t.free?.toUpperCase() || 'FREE'}
           </span>
         </div>

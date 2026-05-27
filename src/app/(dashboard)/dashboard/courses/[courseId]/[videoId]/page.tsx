@@ -176,14 +176,16 @@ export default function LessonPage() {
 
   return (
     <div className={`${UI_COMPONENTS.pageContainer} max-w-7xl`}>
-      <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className={TYPOGRAPHY.h1}>{course.title}</h1>
-          <p className={`${TYPOGRAPHY.body} mt-2 flex items-center gap-2`}>
-            <span className="font-medium text-slate-700">{t.by} {course.instructor}</span>
-            <span className="text-slate-300">•</span>
-            <span>{videoList.length} {videoList.length !== 1 ? t.videos : t.video}</span>
-          </p>
+      <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 overflow-hidden">
+        <div className="flex-1 min-w-0">
+          <h1 className={`${TYPOGRAPHY.h1} truncate`} title={course.title}>{course.title}</h1>
+          <div className={`${TYPOGRAPHY.body} mt-2 flex items-center gap-2 min-w-0`}>
+            <span className="font-medium text-slate-700 truncate max-w-[150px] sm:max-w-md shrink" title={course.instructor}>
+              {t.by} {course.instructor}
+            </span>
+            <span className="text-slate-300 shrink-0">•</span>
+            <span className="shrink-0">{videoList.length} {videoList.length !== 1 ? t.videos : t.video}</span>
+          </div>
         </div>
         
         {/* Progress Pill */}
