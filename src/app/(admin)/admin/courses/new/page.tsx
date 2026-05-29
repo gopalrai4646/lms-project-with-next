@@ -6,8 +6,10 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createCourseRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { useTranslation } from 'react-i18next';
-import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video } from 'lucide-react';
+import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video, ChevronUp, ChevronDown, Trash2, AlertCircle, Globe, Lock } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import { VALIDATION_LIMITS } from '@/constants/validation';
 
 interface VideoEntry {
   title: string;
@@ -33,6 +35,7 @@ export default function NewCoursePage() {
       router.push('/admin');
     }
   }, [role, canCreate, router]);
+
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,13 +54,21 @@ export default function NewCoursePage() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{title?: string; description?: string; instructor?: string; thumbnail?: string; videos?: string}>({});
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      if (file.size > VALIDATION_LIMITS.IMAGE.MAX_SIZE_BYTES) {
+        setUploadError(`Thumbnail must be under ${VALIDATION_LIMITS.IMAGE.MAX_SIZE_MB}MB`);
+        return;
+      }
+      
       setThumbnailFile(file);
       setThumbnailPreview(URL.createObjectURL(file));
       setUploadError(null);
+      setFormErrors(prev => ({ ...prev, thumbnail: undefined }));
     }
   };
 
@@ -82,6 +93,9 @@ export default function NewCoursePage() {
 
   const updateVideoEntry = (index: number, field: keyof VideoEntry, value: any) => {
     setVideoEntries(prev => prev.map((entry, i) => i === index ? { ...entry, [field]: value } : entry));
+    if (field === 'file' || field === 'title') {
+      setFormErrors(prev => ({ ...prev, videos: undefined }));
+    }
   };
 
   const getVideoDuration = (file: File): Promise<number> => {
@@ -114,25 +128,55 @@ export default function NewCoursePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    let hasError = false;
+    const errors: {title?: string; description?: string; instructor?: string; thumbnail?: string; videos?: string} = {};
+
+    if (!formData.title.trim()) {
+      errors.title = "Course title is required.";
+      hasError = true;
+    } else if (formData.title.length < VALIDATION_LIMITS.COURSE.TITLE_MIN_LENGTH) {
+      errors.title = `Title must be at least ${VALIDATION_LIMITS.COURSE.TITLE_MIN_LENGTH} characters.`;
+      hasError = true;
+    }
+    
+    if (!formData.description.trim()) {
+      errors.description = "Description is required.";
+      hasError = true;
+    } else if (formData.description.length < VALIDATION_LIMITS.COURSE.DESCRIPTION_MIN_LENGTH) {
+      errors.description = `Description must be at least ${VALIDATION_LIMITS.COURSE.DESCRIPTION_MIN_LENGTH} characters.`;
+      hasError = true;
+    }
+
+    if (!formData.instructor.trim()) {
+      errors.instructor = "Instructor name is required.";
+      hasError = true;
+    } else if (formData.instructor.length < VALIDATION_LIMITS.COURSE.INSTRUCTOR_MIN_LENGTH) {
+      errors.instructor = `Instructor must be at least ${VALIDATION_LIMITS.COURSE.INSTRUCTOR_MIN_LENGTH} characters.`;
+      hasError = true;
+    }
+
+    if (!thumbnailFile) {
+      errors.thumbnail = "Please upload a course thumbnail.";
+      hasError = true;
+    }
+
     const validEntries = videoEntries.filter(v => v.file);
     if (validEntries.length === 0) {
-      setUploadError(t.addAtLeastOneVideo);
-      return;
+      errors.videos = t.addAtLeastOneVideo || "Please add at least one video.";
+      hasError = true;
+    } else if (videoEntries.some(v => v.file && !v.title.trim())) {
+      errors.videos = t.giveEachVideoTitle || "Please provide a title for all videos.";
+      hasError = true;
     }
-    if (videoEntries.some(v => v.file && !v.title.trim())) {
-      setUploadError(t.giveEachVideoTitle);
-      return;
-    }
-    if (!thumbnailFile) {
-      setUploadError('Please upload a course thumbnail.');
-      return;
-    }
+
+    setFormErrors(errors);
+    if (hasError) return;
 
     try {
       setSubmitting(true);
       setUploadError(null);
 
-      const thumbnailUrl = await uploadToCloudinary(thumbnailFile);
+      const thumbnailUrl = await uploadToCloudinary(thumbnailFile as File);
 
       const uploadedVideos = [];
       for (let i = 0; i < videoEntries.length; i++) {
@@ -174,199 +218,286 @@ export default function NewCoursePage() {
   if (role && !canCreate) return null;
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{t.createNewCourse}</h1>
-        <p className="text-slate-500">{t.uploadVideoDetails}</p>
+    <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
+      <header className="mb-6">
+        <h1 className={TYPOGRAPHY.h1}>{t.createNewCourse || "New Course"}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1`}>{t.uploadVideoDetails || "Upload videos and set up course details."}</p>
       </header>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden p-6 md:p-8">
+      <div className={UI_COMPONENTS.card}>
         {(error || uploadError) && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm font-medium">
-            {error || uploadError}
+          <div className="mb-6 flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium">
+            <AlertCircle size={18} className="shrink-0" />
+            <span>{error || uploadError}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.courseTitleLabel}</label>
-              <input
-                type="text"
-                required
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder={t.courseTitlePlaceholder}
-              />
-            </div>
+        <form onSubmit={handleSubmit} noValidate className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.courseTitleLabel || "Course Title"} *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  maxLength={VALIDATION_LIMITS.COURSE.TITLE_MAX_LENGTH}
+                  minLength={VALIDATION_LIMITS.COURSE.TITLE_MIN_LENGTH}
+                  className={`${UI_COMPONENTS.input} ${formErrors.title ? '!border-rose-500 !ring-rose-200' : ''}`}
+                  placeholder={t.courseTitlePlaceholder || "e.g. Introduction to React"}
+                />
+                <div className="flex justify-between items-start mt-1.5">
+                  <div className="flex-1">
+                    {formErrors.title && (
+                      <p className="text-sm text-rose-500 font-medium">{formErrors.title}</p>
+                    )}
+                  </div>
+                  <p className="text-xs font-medium text-slate-500 text-right shrink-0 ml-4">
+                    {formData.title.length}/{VALIDATION_LIMITS.COURSE.TITLE_MAX_LENGTH}
+                  </p>
+                </div>
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.descriptionLabel}</label>
-              <textarea
-                required
-                rows={4}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder={t.descriptionPlaceholder}
-              />
+              <div>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.descriptionLabel || "Description"} *</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  maxLength={VALIDATION_LIMITS.COURSE.DESCRIPTION_MAX_LENGTH}
+                  minLength={VALIDATION_LIMITS.COURSE.DESCRIPTION_MIN_LENGTH}
+                  className={`${UI_COMPONENTS.input} resize-none ${formErrors.description ? '!border-rose-500 !ring-rose-200' : ''}`}
+                  placeholder={t.descriptionPlaceholder || "Describe this course..."}
+                />
+                <div className="flex justify-between items-start mt-1.5">
+                  <div className="flex-1">
+                    {formErrors.description && (
+                      <p className="text-sm text-rose-500 font-medium">{formErrors.description}</p>
+                    )}
+                  </div>
+                  <p className="text-xs font-medium text-slate-500 text-right shrink-0 ml-4">
+                    {formData.description.length}/{VALIDATION_LIMITS.COURSE.DESCRIPTION_MAX_LENGTH}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.instructorNameLabel}</label>
+              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.coverImage || "Course Thumbnail"} *</label>
+              <div 
+                onClick={() => thumbnailInputRef.current?.click()}
+                className="w-full border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center hover:border-primary-400 hover:bg-slate-50 transition-all cursor-pointer relative overflow-hidden group h-[220px]"
+              >
+                <input
+                  type="file"
+                  ref={thumbnailInputRef}
+                  onChange={handleThumbnailChange}
+                  accept={VALIDATION_LIMITS.IMAGE.ACCEPTED_TYPES}
+                  className="hidden"
+                />
+                {thumbnailPreview ? (
+                  <>
+                    <img src={thumbnailPreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover z-0" />
+                    <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 backdrop-blur-[1px]">
+                      <span className="text-white font-medium flex items-center gap-2 text-sm">
+                        <Pencil size={16} /> {t.descriptionLabel ? "Change Thumbnail" : "Change Thumbnail"}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center z-10">
+                    <ImageIcon className="text-slate-300 block mx-auto mb-3" size={40} />
+                    <p className="text-sm font-medium text-slate-600">Click to upload thumbnail</p>
+                    <p className="text-xs text-slate-400 mt-1">Recommended size: 1280x720px</p>
+                  </div>
+                )}
+              </div>
+              {formErrors.thumbnail && (
+                <p className="mt-2 text-sm text-rose-500 font-medium">{formErrors.thumbnail}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.instructorNameLabel || "Instructor"} *</label>
               <input
                 type="text"
                 required
                 value={formData.instructor}
                 onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900 placeholder:text-slate-400"
-                placeholder={t.instructorNamePlaceholder}
+                maxLength={VALIDATION_LIMITS.COURSE.INSTRUCTOR_MAX_LENGTH}
+                minLength={VALIDATION_LIMITS.COURSE.INSTRUCTOR_MIN_LENGTH}
+                className={`${UI_COMPONENTS.input} ${formErrors.instructor ? '!border-rose-500 !ring-rose-200' : ''}`}
+                placeholder={t.instructorNamePlaceholder || "Instructor Name"}
               />
+              <div className="flex justify-between items-start mt-1.5">
+                <div className="flex-1">
+                  {formErrors.instructor && (
+                    <p className="text-sm text-rose-500 font-medium">{formErrors.instructor}</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.priceLabel}</label>
+              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.priceLabel || "Price (₹)"}</label>
               <input
                 type="number"
                 required
                 min="0"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
+                className={UI_COMPONENTS.input}
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">{t.courseVisibility || "Visibility"}</label>
-              <select
-                value={formData.visibility}
-                onChange={(e) => setFormData({ ...formData, visibility: e.target.value as 'public' | 'private' })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white text-slate-900"
-              >
-                <option value="public">{t.public || "Public (Visible to everyone)"}</option>
-                <option value="private">{t.private || "Private (Training Plans only)"}</option>
-              </select>
-            </div>
-            
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Course Thumbnail</label>
-              <div 
-                onClick={() => thumbnailInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center hover:border-indigo-400 hover:bg-slate-50 transition-all cursor-pointer relative overflow-hidden group min-h-[200px]"
-              >
-                <input
-                  type="file"
-                  ref={thumbnailInputRef}
-                  onChange={handleThumbnailChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                {thumbnailPreview ? (
-                  <>
-                    <img src={thumbnailPreview} alt="Thumbnail preview" className="absolute inset-0 w-full h-full object-cover z-0" />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <span className="text-white font-semibold flex items-center gap-2"><Pencil size={18} /> Change Thumbnail</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center z-10">
-                    <ImageIcon className="text-slate-300 block mx-auto mb-2" size={48} />
-                    <p className="text-sm font-medium text-slate-600">Click to upload thumbnail</p>
-                    <p className="text-xs text-slate-400 mt-1">Recommended size: 1280x720 (16:9)</p>
-                  </div>
-                )}
+            <div className="flex flex-col h-full sm:col-span-2 lg:col-span-1">
+              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.courseVisibility || "Visibility"} *</label>
+              <div className="flex bg-slate-100 p-1 rounded-xl flex-1 mt-auto border border-slate-200/60 max-h-[46px]">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, visibility: 'public' })}
+                  className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold rounded-lg transition-all px-2 overflow-hidden ${formData.visibility === 'public' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <Globe size={16} className="shrink-0" /> <span className="truncate">{t.visibilityPublic || "Public"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, visibility: 'private' })}
+                  className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold rounded-lg transition-all px-2 overflow-hidden ${formData.visibility === 'private' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <Lock size={16} className="shrink-0" /> <span className="truncate">{t.visibilityPrivate || "Private"}</span>
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Multi-Video Upload Section */}
-          <div className="border-t border-slate-100 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <label className="text-sm font-semibold text-slate-700">{t.courseVideos}</label>
+          <div className="pt-8 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+              <div>
+                <h2 className={TYPOGRAPHY.h2}>{t.courseVideos || "Course Videos"}</h2>
+              </div>
               <button
                 type="button"
                 onClick={addVideoEntry}
-                className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-bold rounded-xl hover:bg-indigo-100 transition-all flex items-center gap-1"
+                className={`${BUTTONS.tint} w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 text-sm !py-1.5`}
               >
-                <Plus size={16} /> {t.addVideo}
+                <Plus size={16} /> {t.addVideo || "Add Video"}
               </button>
             </div>
 
-            <div className="space-y-4">
+            {formErrors.videos && (
+              <div className="mb-3">
+                <p className="text-sm text-rose-500 font-medium">{formErrors.videos}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
               {videoEntries.map((entry, index) => (
-                <div key={index} className="bg-slate-50 rounded-2xl p-4 border border-slate-100 relative">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="w-7 h-7 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-xs font-bold shrink-0">
+                <div key={index} className={UI_COMPONENTS.cardRowItem}>
+                  <div className="flex items-center gap-3 min-w-0 flex-grow">
+                    <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500 shrink-0 border border-slate-200">
                       {index + 1}
-                    </span>
-                    <input
-                      type="text"
-                      value={entry.title}
-                      onChange={(e) => updateVideoEntry(index, 'title', e.target.value)}
-                      placeholder={t.videoTitle}
-                      className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none bg-white text-slate-900 placeholder:text-slate-400"
-                    />
-                    <div className="flex items-center gap-1">
-                      <button type="button" onClick={() => moveVideo(index, 'up')} disabled={index === 0}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveUp}><ArrowUp size={16} /></button>
-                      <button type="button" onClick={() => moveVideo(index, 'down')} disabled={index === videoEntries.length - 1}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-colors rounded-lg hover:bg-white" title={t.moveDown}><ArrowDown size={16} /></button>
-                      {videoEntries.length > 1 && (
-                        <button type="button" onClick={() => removeVideoEntry(index)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-white" title={t.remove}><X size={16} /></button>
-                      )}
+                    </div>
+                    
+                    <div className="flex-grow min-w-0 flex flex-col gap-2">
+                      <input 
+                        type="text" 
+                        value={entry.title}
+                        onChange={(e) => updateVideoEntry(index, 'title', e.target.value)}
+                        placeholder={t.videoTitle || "Video Title"}
+                        className={`${UI_COMPONENTS.input} !py-1.5 !text-sm`} 
+                      />
+                      
+                      <div 
+                        onClick={() => fileInputRefs.current[index]?.click()}
+                        className="w-full border border-dashed border-slate-200 rounded-lg p-2 text-center hover:border-primary-400 hover:bg-slate-50 transition-all cursor-pointer bg-slate-50/50"
+                      >
+                        <input 
+                          type="file" 
+                          ref={(el) => { fileInputRefs.current[index] = el; }}
+                          onChange={(e) => handleFileChange(index, e)} 
+                          accept="video/*" 
+                          className="hidden" 
+                        />
+                        <p className="text-xs font-medium text-slate-600 truncate px-2">
+                          {entry.uploading ? (
+                            <span className="text-primary-600 flex items-center justify-center gap-1.5"><Loader2 size={14} className="animate-spin" /> {t.uploadingEllipsis || "Uploading..."}</span>
+                          ) : entry.uploaded ? (
+                            <span className="text-emerald-600 flex items-center justify-center gap-1.5"><CheckCircle2 size={14} /> {t.videoAttached || "Video attached"}</span>
+                          ) : entry.file ? (
+                            <span className="flex items-center justify-center gap-1.5"><Video size={14} /> {entry.file.name}</span>
+                          ) : (
+                            <span className="text-slate-400">{t.clickToSelectVideo || "Click to attach video file"}</span>
+                          )}
+                        </p>
+                      </div>
                     </div>
                   </div>
-
-                  <div
-                    onClick={() => fileInputRefs.current[index]?.click()}
-                    className="w-full border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-indigo-400 hover:bg-white transition-all cursor-pointer"
-                  >
-                    <input
-                      type="file"
-                      ref={(el) => { fileInputRefs.current[index] = el; }}
-                      onChange={(e) => handleFileChange(index, e)}
-                      accept="video/*"
-                      className="hidden"
-                    />
-                    <p className="text-sm font-medium text-slate-600">
-                      {entry.uploading ? (
-                        <span className="text-indigo-600 flex items-center justify-center gap-2"><Loader2 size={16} className="animate-spin" /> {t.uploadingEllipsis}</span>
-                      ) : entry.uploaded ? (
-                        <span className="text-emerald-600 flex items-center justify-center gap-2"><CheckCircle2 size={16} /> {t.videoAttached}</span>
-                      ) : entry.file ? (
-                        <span className="flex items-center justify-center gap-2"><Video size={16} /> {entry.file.name}</span>
-                      ) : (
-                        <span className="text-slate-400">{t.clickToSelectVideo}</span>
-                      )}
-                    </p>
+                  
+                  <div className="flex items-center justify-end gap-1 shrink-0 sm:ml-auto w-full sm:w-auto pt-2 mt-1 sm:pt-0 sm:mt-0 border-t sm:border-0 border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => moveVideo(index, 'up')}
+                      disabled={index === 0}
+                      className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-slate-900 disabled:opacity-30 disabled:hover:text-slate-400`}
+                      title={t.moveUp || "Move Up"}
+                    >
+                      <ChevronUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveVideo(index, 'down')}
+                      disabled={index === videoEntries.length - 1}
+                      className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-slate-900 disabled:opacity-30 disabled:hover:text-slate-400`}
+                      title={t.moveDown || "Move Down"}
+                    >
+                      <ChevronDown size={16} />
+                    </button>
+                    
+                    {videoEntries.length > 1 && (
+                      <>
+                        <div className="w-px h-4 bg-slate-200 mx-1"></div>
+                        <button
+                          type="button"
+                          onClick={() => removeVideoEntry(index)}
+                          className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
+                          title={t.remove || "Remove"}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="pt-4 flex flex-col sm:flex-row gap-4">
-            <button
-              type="submit"
-              disabled={createLoading || submitting}
-              className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto"
-            >
-              {(createLoading || submitting) && (
-                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              )}
-              {submitting ? t.uploadingVideo : createLoading ? t.savingCourse : t.createCourseBtn}
-            </button>
+          <div className="pt-6 flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-8 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all w-full sm:w-auto"
+              className={`${BUTTONS.secondary} w-full sm:w-auto`}
             >
-              {t.cancel}
+              {t.cancel || "Cancel"}
+            </button>
+            <button
+              type="submit"
+              disabled={createLoading || submitting}
+              className={`${BUTTONS.primary} w-full sm:w-auto`}
+            >
+              {(submitting || createLoading) ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  {t.uploadingVideo || "Saving..."}
+                </>
+              ) : (
+                t.createCourseBtn || "Create Course"
+              )}
             </button>
           </div>
         </form>

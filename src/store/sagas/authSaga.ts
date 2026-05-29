@@ -1,5 +1,6 @@
 import { call, put, takeLatest, all, take, fork, cancel, select } from 'redux-saga/effects';
 import { ALL_PERMISSIONS, Permission } from '@/lib/permissions';
+import { VALIDATION_LIMITS } from '@/constants/validation';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -203,7 +204,9 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
       console.error('Unexpected Login Error:', error);
     }
     
-    if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-credential') {
+    if (errorCode === 'auth/invalid-email') {
+      message = 'No email found.';
+    } else if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-credential') {
       message = 'Invalid email or password.';
     } else if (errorCode === 'auth/network-request-failed' || error?.message?.includes('offline')) {
       message = 'Please check your internet connection.';
@@ -222,6 +225,21 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
   try {
     const { email, pass, name, role, photoURL, phoneNumber } = action.payload;
     const normalizedEmail = email.toLowerCase();
+
+    // Backend validation
+    const nameLength = name.trim().length;
+    if (nameLength < VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH || nameLength > VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH) {
+      throw new Error(`Full name must be between ${VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH} and ${VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH} characters.`);
+    }
+    if (!normalizedEmail.endsWith('@gmail.com')) {
+      throw new Error('Email must end with @gmail.com.');
+    }
+    if (phoneNumber) {
+      const digitsOnly = phoneNumber.replace(/\D/g, '');
+      if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
+        throw new Error(`Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`);
+      }
+    }
 
     // Check if email is banned
     const bannedDoc = yield call(getDoc, doc(db, 'bannedEmails', normalizedEmail));
@@ -390,6 +408,10 @@ function* handleUpdatePassword(action: ReturnType<typeof updatePasswordRequest>)
       throw new Error('Password updates are disabled while impersonating for security reasons.');
     }
     
+    if (password.length < 6) {
+      throw new Error('Password must be at least 6 characters long.');
+    }
+    
     const currentUser: User = auth.currentUser!;
     yield call(updatePassword, currentUser, password);
     yield put(updatePasswordSuccess());
@@ -410,6 +432,21 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
     const isImpersonating = state.auth.isImpersonating;
     
     if (!targetUid) throw new Error('User context not found.');
+
+    // Backend validation
+    if (displayName !== undefined) {
+      const nameLength = displayName.trim().length;
+      if (nameLength < VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH || nameLength > VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH) {
+        throw new Error(`Full name must be between ${VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH} and ${VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH} characters.`);
+      }
+    }
+    
+    if (phoneNumber) {
+      const digitsOnly = phoneNumber.replace(/\D/g, '');
+      if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
+        throw new Error(`Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`);
+      }
+    }
 
     const currentUser: User = auth.currentUser!;
     

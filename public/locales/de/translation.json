@@ -70,7 +70,9 @@
     "to": "bis",
     "of": "von",
     "prev": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "noCoursesInPlan": "Noch keine Kurse in diesem Plan verfügbar.",
+    "stalledLearnersSub": "Keine Aktivität in 7 Tagen"
   },
   "auth": {
     "login": "Einloggen",
@@ -108,7 +110,11 @@
     "google": "Google",
     "phoneNumber": "Phone Number",
     "profilePhoto": "Profile Photo",
-    "uploadingPhoto": "Uploading photo..."
+    "uploadingPhoto": "Uploading photo...",
+    "emailPlaceholder": "name@beispiel.de",
+    "passwordPlaceholder": "••••••••",
+    "namePlaceholder": "Max Mustermann",
+    "phonePlaceholder": "+49 123 456 789"
   },
   "settings": {
     "accountSettings": "Kontoeinstellungen",
@@ -120,7 +126,11 @@
     "updating": "Aktualisieren...",
     "phoneNumber": "Telefonnummer",
     "profilePhoto": "Profilbild",
-    "uploadingPhoto": "Foto wird hochgeladen..."
+    "uploadingPhoto": "Foto wird hochgeladen...",
+    "namePlaceholder": "Dein Name",
+    "phonePlaceholder": "+49 123 456 789",
+    "newPasswordPlaceholder": "Leer lassen zum Beibehalten",
+    "confirmPasswordPlaceholder": "Neues Passwort bestätigen"
   },
   "admin": {
     "adminConsole": "Dashboard",
@@ -201,7 +211,7 @@
     "role": "Rolle",
     "enrolledCourses": "Eingeschriebene Kurse",
     "loadingUsers": "Benutzer werden geladen...",
-    "noUsersFound": "Keine Benutzer gefunden, die Ihren Filtern entsprechen.",
+    "noUsersFound": "Keine Benutzer gefunden, die Ihren Kriterien entsprechen.",
     "noName": "Kein Name",
     "more": "mehr",
     "noEnrollments": "Keine Einschreibungen",
@@ -362,32 +372,107 @@
     },
     "permissions": {
       "groups": {
-        "dashboard": { "label": "Dashboard" },
-        "courses": { "label": "Kurse" },
-        "training_plans": { "label": "Trainingspläne" },
-        "users": { "label": "Benutzerverwaltung" },
-        "top_courses": { "label": "Top Kurse Analytics" },
-        "top_training_plans": { "label": "Top Trainingspläne Analytics" }
+        "dashboard": {
+          "label": "Dashboard"
+        },
+        "courses": {
+          "label": "Kurse"
+        },
+        "training_plans": {
+          "label": "Trainingspläne"
+        },
+        "users": {
+          "label": "Benutzerverwaltung"
+        },
+        "top_courses": {
+          "label": "Top Kurse Analytics"
+        },
+        "top_training_plans": {
+          "label": "Top Trainingspläne Analytics"
+        }
       },
       "sub": {
-        "dashboard": { "label": "Dashboard", "desc": "Plattform-Übersicht" },
-        "courses_read": { "label": "Anzeigen", "desc": "Nur Lesezugriff" },
-        "courses_create": { "label": "Erstellen", "desc": "Kurse erstellen" },
-        "courses_edit": { "label": "Bearbeiten", "desc": "Bestehende verwalten" },
-        "courses_delete": { "label": "Löschen", "desc": "Kurse entfernen" },
-        "courses_enroll": { "label": "Einschreiben", "desc": "Kurse zuweisen" },
-        "training_plans_read": { "label": "Anzeigen", "desc": "Nur Lesezugriff" },
-        "training_plans_create": { "label": "Erstellen", "desc": "Pläne erstellen" },
-        "training_plans_edit": { "label": "Bearbeiten", "desc": "Pläne aktualisieren" },
-        "training_plans_delete": { "label": "Löschen", "desc": "Pläne entfernen" },
-        "training_plans_assign": { "label": "Zuweisen", "desc": "Benutzer einschreiben" },
-        "users_read": { "label": "Anzeigen", "desc": "Benutzerliste" },
-        "users_impersonate": { "label": "Imitieren", "desc": "Als User anmelden" },
-        "users_delete": { "label": "Löschen", "desc": "Benutzerprofil löschen" },
-        "top_courses": { "label": "Analyse", "desc": "Kurs-Stats" },
-        "top_training_plans": { "label": "Analyse", "desc": "TP-Stats" }
+        "dashboard": {
+          "label": "Dashboard",
+          "desc": "Plattform-Übersicht"
+        },
+        "courses_read": {
+          "label": "Anzeigen",
+          "desc": "Nur Lesezugriff"
+        },
+        "courses_create": {
+          "label": "Erstellen",
+          "desc": "Kurse erstellen"
+        },
+        "courses_edit": {
+          "label": "Bearbeiten",
+          "desc": "Bestehende verwalten"
+        },
+        "courses_delete": {
+          "label": "Löschen",
+          "desc": "Kurse entfernen"
+        },
+        "courses_enroll": {
+          "label": "Einschreiben",
+          "desc": "Kurse zuweisen"
+        },
+        "training_plans_read": {
+          "label": "Anzeigen",
+          "desc": "Nur Lesezugriff"
+        },
+        "training_plans_create": {
+          "label": "Erstellen",
+          "desc": "Pläne erstellen"
+        },
+        "training_plans_edit": {
+          "label": "Bearbeiten",
+          "desc": "Pläne aktualisieren"
+        },
+        "training_plans_delete": {
+          "label": "Löschen",
+          "desc": "Pläne entfernen"
+        },
+        "training_plans_assign": {
+          "label": "Zuweisen",
+          "desc": "Benutzer einschreiben"
+        },
+        "users_read": {
+          "label": "Anzeigen",
+          "desc": "Benutzerliste"
+        },
+        "users_impersonate": {
+          "label": "Imitieren",
+          "desc": "Als User anmelden"
+        },
+        "users_delete": {
+          "label": "Löschen",
+          "desc": "Benutzerprofil löschen"
+        },
+        "top_courses": {
+          "label": "Analyse",
+          "desc": "Kurs-Stats"
+        },
+        "top_training_plans": {
+          "label": "Analyse",
+          "desc": "TP-Stats"
+        }
       }
-    }
+    },
+    "planTitlePlaceholder": "z.B. Frontend Meisterkurs",
+    "planDescPlaceholder": "Beschreibe diesen Trainingsplan...",
+    "searchCoursePlaceholder": "Nach Titel oder Dozent suchen...",
+    "roleNamePlaceholder": "z.B. Inhaltsmanager",
+    "roleDescPlaceholder": "z.B. Kann Kurse und Trainingspläne verwalten",
+    "staffNamePlaceholder": "z.B. Max Mustermann",
+    "staffEmailPlaceholder": "z.B. max@firma.de",
+    "passwordMinPlaceholder": "Min. 6 Zeichen",
+    "noCoursesAdded": "Noch keine Kurse zum Lehrplan hinzugefügt.",
+    "noMatchingCourses": "Keine passenden Kurse gefunden.",
+    "noRolesCreated": "Noch keine Rollen erstellt",
+    "noRoleDescription": "Keine Beschreibung",
+    "noStaffMembers": "Noch keine Mitarbeiter",
+    "noReportsToShow": "Keine Berichte anzuzeigen",
+    "noReportsDescription": "Ihr Analyse-Dashboard ist leer, da noch keine Kurse oder Trainingspläne erstellt wurden."
   },
   "coursePlayer": {
     "loadingCourse": "Kurs wird geladen...",
@@ -446,7 +531,11 @@
       "title": "Globaler Vorteil",
       "subtitle_1": "Barrieren überwinden durch sprachliche Präzision. Unsere Plattform liefert",
       "subtitle_2": "Muttersprachliche Übersetzungen, damit technische Nuancen nie verloren gehen.",
-      "langs": ["Englisch (Global)", "Deutsch (Native)", "Französisch (Native)"]
+      "langs": [
+        "Englisch (Global)",
+        "Deutsch (Native)",
+        "Französisch (Native)"
+      ]
     },
     "security": {
       "badge": "Unternehmensklasse",

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import CourseRatingModal from '@/components/common/CourseRatingModal';
 import { Star, Lock, Award, Inbox, Video as VideoIcon, Check, Play } from 'lucide-react';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '0:00';
@@ -32,6 +33,7 @@ export default function LessonPage() {
   const t = i18nT('coursePlayer', { returnObjects: true }) as any;
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSyncRef = useRef<number>(0);
+  const activeItemRef = useRef<HTMLAnchorElement>(null);
 
   const [detectedDurations, setDetectedDurations] = useState<Record<string, number>>({});
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -57,6 +59,12 @@ export default function LessonPage() {
     : course?.videoUrl
       ? [{ title: t.courseContent, url: course.videoUrl, order: 0, duration: 0 }]
       : [];
+
+  useEffect(() => {
+    if (activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [videoId, videoList.length]);
 
   const calculateCourseProgress = useCallback((): number => {
     if (!courseProgress || videoList.length === 0) return 0;
@@ -149,14 +157,14 @@ export default function LessonPage() {
 
   if (!isEnrolled) {
     return (
-      <div className="max-w-4xl mx-auto py-12 px-4">
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-12 text-center">
-          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-600">
-             <Lock size={40} />
+      <div className={UI_COMPONENTS.pageContainer}>
+        <div className={`${UI_COMPONENTS.emptyStateCard} max-w-2xl mx-auto mt-12 bg-amber-50/50 border-amber-100`}>
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-600 ring-8 ring-amber-50">
+             <Lock size={40} strokeWidth={1.5} />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">{t.enrollmentRequired}</h2>
-          <p className="text-slate-600 mb-6">{t.enrollmentMessage}</p>
-          <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all">
+          <h2 className={TYPOGRAPHY.h2}>{t.enrollmentRequired}</h2>
+          <p className={`${TYPOGRAPHY.body} mb-8 max-w-md`}>{t.enrollmentMessage}</p>
+          <Link href="/dashboard" className={BUTTONS.primary}>
             {t.backToDashboard}
           </Link>
         </div>
@@ -167,41 +175,53 @@ export default function LessonPage() {
   const coursePercentage = calculateCourseProgress();
 
   return (
-    <div className="max-w-6xl mx-auto pb-8 pt-2 px-4">
-      <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{course.title}</h1>
-        <p className="text-slate-500 mt-1 text-sm">{t.by} {course.instructor} • {videoList.length} {videoList.length !== 1 ? t.videos : t.video}</p>
+    <div className={`${UI_COMPONENTS.pageContainer} max-w-7xl`}>
+      <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 overflow-hidden">
+        <div className="flex-1 min-w-0">
+          <h1 className={`${TYPOGRAPHY.h1} truncate`} title={course.title}>{course.title}</h1>
+          <div className={`${TYPOGRAPHY.body} mt-2 flex items-center gap-2 min-w-0`}>
+            <span className="font-medium text-slate-700 truncate max-w-[150px] sm:max-w-md shrink" title={course.instructor}>
+              {t.by} {course.instructor}
+            </span>
+            <span className="text-slate-300 shrink-0">•</span>
+            <span className="shrink-0">{videoList.length} {videoList.length !== 1 ? t.videos : t.video}</span>
+          </div>
+        </div>
         
-        <div className="mt-4 bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-bold text-slate-700">{t.courseProgress}</span>
-            <span className={`text-sm font-extrabold ${coursePercentage === 100 ? 'text-emerald-600' : 'text-indigo-600'}`}>
+        {/* Progress Pill */}
+        <div className="bg-white rounded-full border border-slate-200 shadow-sm px-4 py-2 flex items-center justify-center gap-4 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className={`${TYPOGRAPHY.label} !mb-0`}>{t.courseProgress}</span>
+            <span className={`text-sm font-bold ${coursePercentage === 100 ? 'text-emerald-600' : 'text-primary-600'}`}>
               {coursePercentage}%
             </span>
           </div>
-          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+          <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
             <div 
-              className={`h-full rounded-full transition-all duration-500 ${coursePercentage === 100 ? 'bg-emerald-500' : 'bg-indigo-600'}`}
+              className={`h-full rounded-full transition-all duration-500 ${coursePercentage === 100 ? 'bg-emerald-500' : 'bg-primary-600'}`}
               style={{ width: `${coursePercentage}%` }}
             />
           </div>
           {coursePercentage === 100 && (
-            <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1.5 uppercase tracking-wider">
-              <Award size={14} /> {t.courseCompleted}
-            </p>
+            <Award size={16} className="text-emerald-500" />
           )}
         </div>
+      </header>
 
       {videoList.length === 0 ? (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center text-slate-400">
-          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-             <Inbox size={40} />
+        <div className={UI_COMPONENTS.emptyStateCard}>
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 ring-8 ring-slate-50/50">
+             <Inbox size={40} strokeWidth={1.5} />
           </div>
-          <p className="font-medium">{t.noVideosYet}</p>
+          <h3 className={TYPOGRAPHY.h3}>{t.noVideosYet}</h3>
+          <p className={TYPOGRAPHY.body}>Check back later for newly added content.</p>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-8 mt-10">
-          <div className="flex-1">
-            <div className="bg-black rounded-2xl overflow-hidden shadow-xl aspect-video">
+        <div className="flex flex-col lg:flex-row gap-6 mt-6">
+          <div className="flex-1 flex flex-col gap-6">
+            
+            {/* Video Player */}
+            <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-xl aspect-video ring-1 ring-slate-900/10 border border-slate-800">
               {activeVideo ? (
                 <video
                   ref={videoRef}
@@ -217,30 +237,31 @@ export default function LessonPage() {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/50 text-center p-8">
+                <div className="w-full h-full flex items-center justify-center text-slate-500 text-center p-8 bg-slate-900/50">
                   <div className="max-w-xs flex flex-col items-center">
-                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                       <VideoIcon size={40} className="text-white/20" />
+                    <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                       <VideoIcon size={32} className="text-slate-600" />
                     </div>
-                    <p className="text-lg font-bold">{t.selectVideo}</p>
+                    <p className="text-lg font-semibold text-slate-400">{t.selectVideo}</p>
                   </div>
                 </div>
               )}
             </div>
-            {/* Active video info removed for cleaner UI */}
             
-            <div className="mt-4 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-3">{t.aboutCourse}</h3>
-              <p className="text-slate-600 leading-relaxed">{course.description}</p>
+            {/* About Course */}
+            <div className={`${UI_COMPONENTS.card} border-slate-200/60`}>
+              <h3 className={`${TYPOGRAPHY.h3} mb-3`}>{t.aboutCourse}</h3>
+              <p className={TYPOGRAPHY.body}>{course.description}</p>
             </div>
           </div>
 
-          <div className="lg:w-80 shrink-0">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 bg-slate-50">
-                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{t.courseContent}</h3>
+          {/* Playlist Sidebar */}
+          <div className="lg:w-[380px] shrink-0">
+            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden sticky top-6">
+              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <h3 className={TYPOGRAPHY.h3}>{t.courseContent}</h3>
               </div>
-              <div className="divide-y divide-slate-50 max-h-[500px] overflow-y-auto">
+              <div className="divide-y divide-slate-100 max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">
                 {videoList.map((video, index) => {
                   const completed = isVideoCompleted(index);
                   const vidProgress = getVideoProgress(index);
@@ -249,32 +270,42 @@ export default function LessonPage() {
                   return (
                     <Link
                       key={index}
+                      ref={isCurrent ? activeItemRef : null}
                       href={`/dashboard/courses/${courseId}/video_${index}${planId ? `?planId=${planId}` : ''}`}
-                      className={`w-full text-left p-4 flex items-start gap-3 transition-all hover:bg-slate-50 ${
-                        isCurrent ? 'bg-indigo-50 border-l-4 border-indigo-600' : 'border-l-4 border-transparent'
+                      className={`w-full text-left p-4 flex items-start gap-3.5 transition-all hover:bg-slate-50/80 border-l-4 ${
+                        isCurrent ? 'bg-primary-50/30 border-primary-600' : 'border-transparent'
                       }`}
                     >
-                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                        completed ? 'bg-emerald-500 text-white' : isCurrent ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-sm border ${
+                        completed 
+                          ? 'bg-emerald-100 text-emerald-600 border-emerald-200' 
+                          : isCurrent 
+                            ? 'bg-primary-600 text-white border-primary-700 ring-4 ring-primary-50' 
+                            : 'bg-white text-slate-500 border-slate-200'
                       }`}>
                         {completed ? <Check size={14} strokeWidth={3} /> : isCurrent ? <Play size={10} className="fill-current ml-0.5" /> : index + 1}
                       </span>
-                      <div className="min-w-0 flex-1">
-                        <p className={`text-sm font-semibold truncate ${isCurrent ? 'text-indigo-700' : 'text-slate-700'}`}>
+                      <div className="min-w-0 flex-1 pt-0.5">
+                        <p className={`text-sm font-semibold leading-snug line-clamp-2 ${isCurrent ? 'text-primary-700' : 'text-slate-700'}`}>
                           {video.title}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2 mt-1.5">
                           {video.duration ? (
-                            <span className="text-xs text-slate-400">{formatDuration(video.duration)}</span>
+                            <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{formatDuration(video.duration)}</span>
                           ) : null}
-                          {vidProgress > 0 && !completed && (
-                            <span className="text-xs text-indigo-500 font-medium">{vidProgress}%</span>
+                          {isCurrent && (
+                            <span className="text-[10px] font-bold text-primary-600 uppercase tracking-wider flex items-center gap-1.5 bg-primary-100/50 px-2 py-0.5 rounded-md">
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span> Playing
+                            </span>
+                          )}
+                          {vidProgress > 0 && !completed && !isCurrent && (
+                            <span className="text-[11px] text-primary-500 font-bold">{vidProgress}%</span>
                           )}
                         </div>
                         {vidProgress > 0 && (
-                          <div className="mt-1.5 w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="mt-2.5 w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                             <div 
-                              className={`h-full rounded-full ${completed ? 'bg-emerald-400' : 'bg-indigo-400'}`}
+                              className={`h-full rounded-full ${completed ? 'bg-emerald-400' : 'bg-primary-500'}`}
                               style={{ width: `${vidProgress}%` }}
                             />
                           </div>

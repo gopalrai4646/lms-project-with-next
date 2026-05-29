@@ -11,6 +11,7 @@ import DonutChart from '@/components/charts/DonutChart';
 import BarChart from '@/components/charts/BarChart';
 import ProgressRing from '@/components/charts/ProgressRing';
 import { ArrowRight, BookOpen, ClipboardList } from 'lucide-react';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -172,38 +173,37 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
 
   return (
-    <div className="space-y-10 pb-5">
+    <div className={UI_COMPONENTS.pageContainer}>
       {/* ─── Welcome Hero Banner ─── */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-400 via-indigo-400 to-violet-700 p-8 md:p-10 text-white">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+      <div className="relative overflow-hidden rounded-[24px] bg-slate-900 p-8 md:p-10 text-white shadow-xl border border-slate-800">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-900/40 via-slate-900/0 to-transparent -translate-y-1/2 translate-x-1/3"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <p className="text-indigo-200 text-sm font-medium mb-1">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest mb-2 truncate">
                 {new Date().toLocaleDateString(language === 'de' ? 'de-DE' : language === 'fr' ? 'fr-FR' : 'en-IN', 
                   { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
                 )}
               </p>
-              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-white truncate">
                 {isNewUser ? `${t.hello}, ${firstName}!` : `${t.welcome}, ${firstName}!`}
               </h1>
-              <p className="text-indigo-200 text-lg max-w-lg">{t.subtitle}</p>
+              <p className="text-slate-400 text-lg max-w-lg truncate">{t.subtitle}</p>
             </div>
             {continueLearning.length > 0 && (
               <Link
                 href={`/dashboard/courses/${continueLearning[0].id}`}
-                className="flex items-center gap-4 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/25 transition-all group shrink-0"
+                className="flex items-center gap-4 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/25 transition-all group shrink-0 max-w-full overflow-hidden"
               >
-                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                <div className="w-14 h-14 shrink-0 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
                   <ProgressRing percentage={continueLearning[0].progress} size={48} strokeWidth={4} showLabel={false} />
                 </div>
-                <div>
-                  <p className="text-xs text-indigo-200 font-semibold uppercase tracking-wider">{t.continue || 'Continue Learning'}</p>
-                  <p className="font-bold text-white truncate max-w-[180px]">{continueLearning[0].title}</p>
-                  <p className="text-xs text-indigo-200">{continueLearning[0].progress}% complete</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider truncate">{t.continue || 'Continue Learning'}</p>
+                  <p className="font-bold text-white truncate md:max-w-[180px] lg:max-w-[200px]">{continueLearning[0].title}</p>
+                  <p className="text-xs text-slate-400 truncate">{continueLearning[0].progress}% complete</p>
                 </div>
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={24} />
+                <ArrowRight className="shrink-0 group-hover:translate-x-1 transition-transform" size={24} />
               </Link>
             )}
           </div>
@@ -215,32 +215,46 @@ export default function DashboardPage() {
       {/* ─── Charts Section ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Donut Chart - Completion Overview */}
-        <div className="bg-white rounded-[28px] shadow-sm border border-slate-100 p-6 md:p-8">
-          <h3 className="text-lg font-bold text-slate-900 mb-1">{t.completionOverview || 'Completion Overview'}</h3>
-          <p className="text-sm text-slate-400 mb-6">{t.completionOverviewSub || 'Your overall course completion rate'}</p>
-          <div className="flex flex-col sm:flex-row items-center gap-8">
-            <DonutChart
-              percentage={stats.completionRate}
-              size={180}
-              strokeWidth={16}
-              label={t.completionRate || "Completed"}
-              sublabel={`${stats.completed} of ${stats.enrolled}`}
-            />
-            <div className="flex-1 space-y-4 w-full">
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-100">
-                <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></div>
-                <span className="text-sm font-medium text-slate-700 flex-1">{t.stats?.completed || 'Completed'}</span>
-                <span className="text-sm font-bold text-emerald-600">{stats.completed}</span>
+        <div className={UI_COMPONENTS.card}>
+          <h3 className={TYPOGRAPHY.h2}>{t.completionOverview || 'Completion Overview'}</h3>
+          <p className={`${TYPOGRAPHY.body} mb-6`}>{t.completionOverviewSub || 'Your overall course completion rate'}</p>
+          <div className="flex flex-col sm:flex-row items-center gap-6 xl:gap-8">
+            <div className="shrink-0">
+              <DonutChart
+                percentage={stats.completionRate}
+                size={160}
+                strokeWidth={14}
+                label={t.completionRate || "Completed"}
+                sublabel={`${stats.completed} of ${stats.enrolled}`}
+              />
+            </div>
+            <div className="flex-1 flex flex-col justify-center gap-3 w-full min-w-0">
+              <div className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div>
+                  <span className="text-sm font-medium text-slate-600 truncate" title={t.stats?.completed || 'Completed'}>
+                    {t.stats?.completed || 'Completed'}
+                  </span>
+                </div>
+                <span className="text-sm font-bold text-slate-900 pl-2">{stats.completed}</span>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50 border border-indigo-100">
-                <div className="w-3 h-3 rounded-full bg-indigo-500 shrink-0"></div>
-                <span className="text-sm font-medium text-slate-700 flex-1">{t.stats?.inProgress || 'In Progress'}</span>
-                <span className="text-sm font-bold text-indigo-600">{stats.inProgress}</span>
+              <div className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary-500 shrink-0"></div>
+                  <span className="text-sm font-medium text-slate-600 truncate" title={t.stats?.inProgress || 'In Progress'}>
+                    {t.stats?.inProgress || 'In Progress'}
+                  </span>
+                </div>
+                <span className="text-sm font-bold text-slate-900 pl-2">{stats.inProgress}</span>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                <div className="w-3 h-3 rounded-full bg-slate-300 shrink-0"></div>
-                <span className="text-sm font-medium text-slate-700 flex-1">{t.notStarted || 'Not Started'}</span>
-                <span className="text-sm font-bold text-slate-500">{stats.enrolled - stats.completed - stats.inProgress}</span>
+              <div className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0"></div>
+                  <span className="text-sm font-medium text-slate-600 truncate" title={t.notStarted || 'Not Started'}>
+                    {t.notStarted || 'Not Started'}
+                  </span>
+                </div>
+                <span className="text-sm font-bold text-slate-900 pl-2">{stats.enrolled - stats.completed - stats.inProgress}</span>
               </div>
             </div>
           </div>
@@ -248,9 +262,9 @@ export default function DashboardPage() {
 
         {/* Bar Chart - Weekly Activity (Only if real data exists) */}
         {!weeklyData.every(d => d.value === 0) && (
-          <div className="bg-white rounded-[28px] shadow-sm border border-slate-100 p-6 md:p-8">
-            <h3 className="text-lg font-bold text-slate-900 mb-1">{t.weeklyActivity || 'Weekly Activity'}</h3>
-            <p className="text-sm text-slate-400 mb-6">{t.weeklyActivitySub || 'Videos watched per day this week'}</p>
+          <div className={UI_COMPONENTS.card}>
+            <h3 className={TYPOGRAPHY.h2}>{t.weeklyActivity || 'Weekly Activity'}</h3>
+            <p className={`${TYPOGRAPHY.body} mb-6`}>{t.weeklyActivitySub || 'Videos watched per day this week'}</p>
             <BarChart
               data={weeklyData}
               height={180}
@@ -265,8 +279,8 @@ export default function DashboardPage() {
         <section>
           <div className="flex justify-between items-end mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">{t.continue || 'Continue Learning'}</h2>
-              <p className="text-sm text-slate-500 mt-1">{t.continueSub || 'Pick up where you left off'}</p>
+              <h2 className={TYPOGRAPHY.h1}>{t.continue || 'Continue Learning'}</h2>
+              <p className={`${TYPOGRAPHY.body} mt-1`}>{t.continueSub || 'Pick up where you left off'}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -274,7 +288,7 @@ export default function DashboardPage() {
               <Link
                 key={course.id}
                 href={`/dashboard/courses/${course.id}`}
-                className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all group flex"
+                className={`${UI_COMPONENTS.cardInteractive} !p-0 overflow-hidden group flex-row hover:border-primary-300`}
               >
                 <div className="w-28 shrink-0 bg-slate-100 flex items-center justify-center overflow-hidden">
                   {course.thumbnail ? (
@@ -285,16 +299,18 @@ export default function DashboardPage() {
                 </div>
                 <div className="p-5 flex-1 flex items-center gap-4 min-w-0">
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">{course.title}</p>
-                    <p className="text-xs text-slate-500 mt-1">{course.instructor}</p>
+                    <p className="font-bold text-slate-900 truncate group-hover:text-primary-600 transition-colors">{course.title}</p>
+                    <p className="text-xs text-slate-500 mt-1 truncate">{course.instructor}</p>
                     <div className="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+                        className="h-full bg-primary-500 rounded-full transition-all duration-500"
                         style={{ width: `${course.progress}%` }}
                       />
                     </div>
                   </div>
-                  <ProgressRing percentage={course.progress} size={48} strokeWidth={4} />
+                  <div className="shrink-0">
+                    <ProgressRing percentage={course.progress} size={48} strokeWidth={4} />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -306,11 +322,11 @@ export default function DashboardPage() {
       {assignedPlans.length > 0 && (
         <section>
           <div className="flex justify-between items-end mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">{adminT?.assignedTrainingPlans || 'Assigned Training Plans'}</h2>
+            <h2 className={TYPOGRAPHY.h1}>{adminT?.assignedTrainingPlans || 'Assigned Training Plans'}</h2>
             {assignedPlans.length > 3 && (
               <button 
                 onClick={() => setShowAllPlans(!showAllPlans)}
-                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+                className="text-primary-600 font-semibold hover:text-primary-700 transition-colors text-sm"
               >
                 {showAllPlans ? 'Show Less' : t.viewAll}
               </button>
@@ -318,8 +334,8 @@ export default function DashboardPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(showAllPlans ? assignedPlans : assignedPlans.slice(0, 3)).map((plan) => (
-              <Link href={`/training-plans/${plan.id}`} key={plan.id} className="block group">
-                <div className="bg-white rounded-[28px] overflow-hidden shadow-sm border border-slate-100 group-hover:shadow-xl transition-all h-full flex flex-col">
+              <Link href={`/training-plans/${plan.id}`} key={plan.id} className="block group h-full">
+                <div className={`${UI_COMPONENTS.cardInteractive} !p-0 overflow-hidden h-full flex-col`}>
                   <div className="relative aspect-[16/9] bg-slate-100 overflow-hidden">
                     {plan.image ? (
                       <img src={plan.image} alt={plan.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -329,15 +345,15 @@ export default function DashboardPage() {
                       </div>
                     )}
                     <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-bold rounded-full shadow-sm">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-primary-700 text-xs font-bold rounded-full shadow-sm">
                         {plan.courseIds?.length || 0} {adminT?.courses || 'Courses'}
                       </span>
                     </div>
                   </div>
-                  <div className="p-6 flex flex-col flex-1">
-                    <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">{plan.name}</h3>
-                    <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-1">{plan.description}</p>
-                    <span className="text-sm font-bold text-indigo-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">{plan.name}</h3>
+                    <p className={`${TYPOGRAPHY.body} mb-4 line-clamp-2 flex-1`}>{plan.description}</p>
+                    <span className="text-sm font-bold text-primary-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
                       View Plan <ArrowRight size={16} />
                     </span>
                   </div>
@@ -352,11 +368,11 @@ export default function DashboardPage() {
       {enrolledCourses.length > 0 && (
         <section>
           <div className="flex justify-between items-end mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">{t.myCourses}</h2>
+            <h2 className={TYPOGRAPHY.h1}>{t.myCourses}</h2>
             {enrolledCourses.length > 3 && (
               <button 
                 onClick={() => setShowAllEnrolled(!showAllEnrolled)}
-                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+                className="text-primary-600 font-semibold hover:text-primary-700 transition-colors text-sm"
               >
                 {showAllEnrolled ? 'Show Less' : t.viewAll}
               </button>
@@ -373,11 +389,11 @@ export default function DashboardPage() {
       {/* ─── Discover Courses ─── */}
       <section>
         <div className="flex justify-between items-end mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">{t.discover}</h2>
+          <h2 className={TYPOGRAPHY.h1}>{t.discover}</h2>
           {discoverCourses.length > 3 && (
             <button 
               onClick={() => setShowAllDiscover(!showAllDiscover)}
-              className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+              className="text-primary-600 font-semibold hover:text-primary-700 transition-colors text-sm"
             >
               {showAllDiscover ? 'Show Less' : t.viewAll}
             </button>
@@ -396,8 +412,8 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200">
-            <p className="text-slate-400 font-medium">{t.noNewCourses}</p>
+          <div className={UI_COMPONENTS.emptyStateCard}>
+            <p className={`${TYPOGRAPHY.body} font-medium`}>{t.noNewCourses}</p>
           </div>
         )}
       </section>
@@ -406,11 +422,11 @@ export default function DashboardPage() {
       {savedCourses.length > 0 && (
         <section>
           <div className="flex justify-between items-end mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">{t.savedCourses}</h2>
+            <h2 className={TYPOGRAPHY.h1}>{t.savedCourses}</h2>
             {savedCourses.length > 3 && (
               <button 
                 onClick={() => setShowAllSaved(!showAllSaved)}
-                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+                className="text-primary-600 font-semibold hover:text-primary-700 transition-colors text-sm"
               >
                 {showAllSaved ? 'Show Less' : t.viewAll}
               </button>

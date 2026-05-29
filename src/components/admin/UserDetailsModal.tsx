@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { X, ClipboardList, BookOpen, Heart, Plus, Phone, Calendar, Trash2 } from 'lucide-react';
 import { formatDate } from '@/utils/dateUtils';
 import { hasPermission } from '@/lib/permissions';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import CustomSelect from '@/components/common/CustomSelect';
 
 interface Props {
   user: User;
@@ -96,18 +98,18 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-slate-900">{t.userDetails}</h2>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors">
+    <div className={UI_COMPONENTS.modalBackdrop}>
+      <div className="absolute inset-0 transition-opacity" onClick={onClose} />
+      <div className={`${UI_COMPONENTS.modalContent} relative flex flex-col max-h-[90vh]`}>
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center shrink-0">
+          <h2 className={TYPOGRAPHY.h2}>{t.userDetails}</h2>
+          <button onClick={onClose} className={`${BUTTONS.ghost} !p-2`}>
             <X size={20} />
           </button>
         </div>
-        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div className="p-5 space-y-6 overflow-y-auto no-scrollbar flex-1">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl font-bold shrink-0 shadow-sm border border-indigo-100/50 overflow-hidden">
+            <div className="w-20 h-20 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center text-3xl font-semibold shrink-0 border border-primary-100 overflow-hidden shadow-sm">
               {user.photoURL ? (
                 <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
               ) : (
@@ -115,71 +117,77 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
               )}
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-slate-900 leading-tight">{user.name || t.noNameProvided}</h3>
-              <p className="text-slate-500 font-medium text-sm mt-0.5">{user.email}</p>
+              <h3 className={TYPOGRAPHY.h3}>{user.name || t.noNameProvided}</h3>
+              <p className={`${TYPOGRAPHY.body} text-xs mt-0.5`}>{user.email}</p>
               
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
-                <span className={`px-2.5 py-0.5 text-[10px] font-black tracking-widest uppercase rounded-md border ${user.role === 'admin' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3">
+                <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border ${user.role === 'admin' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                   {user.role}
                 </span>
                 
                 {user.phoneNumber && (
-                  <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
-                    <Phone size={12} className="text-slate-400" />
+                  <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium">
+                    <Phone size={14} className="text-slate-400" />
                     {user.phoneNumber}
                   </div>
                 )}
                 
                 {user.createdAt && (
-                  <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
-                    <Calendar size={12} className="text-slate-400" />
-                    <span className="text-slate-400 font-medium mr-0.5">{t.joinDate}:</span>
-                    {formatDate(user.createdAt, i18n.language, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
+                  <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium">
+                    <Calendar size={14} className="text-slate-400" />
+                    <span>{t.joinDate}:</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatDate(user.createdAt, i18n.language, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ClipboardList size={16} className="text-slate-400" /> {t.assignedTrainingPlans} ({validAssignedPlans.length})
+          <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className={`${TYPOGRAPHY.h3} text-sm flex items-center gap-2`}>
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <ClipboardList size={14} />
+                </div>
+                {t.assignedTrainingPlans} <span className="text-slate-400 font-normal">({validAssignedPlans.length})</span>
               </h4>
               <button 
                 onClick={() => setIsAssigning(!isAssigning)}
-                className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors flex items-center gap-1 ${
+                className={`flex items-center justify-center w-7 h-7 rounded-lg transition-colors ${
                   !canAssignPlans 
                     ? 'text-slate-400 bg-slate-100 cursor-not-allowed opacity-60' 
-                    : 'text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                    : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100/50'
                 }`}
-                disabled={!canAssignPlans && !isAssigning} // Allow closing if already open
-                title={!canAssignPlans ? (t.staff.noPermissionToAssign || "No permission to assign") : ""}
+                disabled={!canAssignPlans && !isAssigning}
+                title={!canAssignPlans ? (t.staff.noPermissionToAssign || "No permission to assign") : (t.assignTrainingPlan)}
               >
-                {isAssigning ? t.cancel : <><Plus size={12} /> {t.assignTrainingPlan}</>}
+                {isAssigning ? <X size={14} /> : <Plus size={14} />}
               </button>
             </div>
             
             {isAssigning && (
-              <div className="mb-3 p-3 bg-white rounded-xl border border-indigo-100 shadow-sm flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
-                <select 
+              <div className="mb-4 p-3 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                <CustomSelect 
                   value={selectedPlanId}
-                  onChange={(e) => setSelectedPlanId(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 bg-white text-slate-900"
-                >
-                  <option value="">{t.selectTrainingPlan}</option>
-                  {trainingPlans.filter(tp => !validAssignedPlans.includes(tp.id)).map(plan => (
-                    <option key={plan.id} value={plan.id}>{plan.name}</option>
-                  ))}
-                </select>
+                  onChange={(val) => setSelectedPlanId(val)}
+                  options={[
+                    { value: '', label: t.selectTrainingPlan || 'Select Training Plan' },
+                    ...trainingPlans.filter(tp => !validAssignedPlans.includes(tp.id)).map(plan => ({
+                      value: plan.id,
+                      label: plan.name
+                    }))
+                  ]}
+                />
                 <button 
                   onClick={handleAssignPlan}
                   disabled={!selectedPlanId}
-                  className="w-full py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className={`${BUTTONS.primary} !bg-indigo-600 hover:!bg-indigo-700 !ring-indigo-600/20`}
                 >
                   {t.assignTrainingPlan}
                 </button>
@@ -187,17 +195,17 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
             )}
 
             {validAssignedPlans.length > 0 ? (
-              <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              <ul className="space-y-2 max-h-48 overflow-y-auto pr-1 no-scrollbar">
                 {validAssignedPlans.map(id => (
-                  <li key={id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-slate-700 shadow-sm group">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span> 
-                      <span className="truncate">{getPlanName(id)}</span>
+                  <li key={id} className={UI_COMPONENTS.listRow}>
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span> 
+                      <span className="truncate text-sm font-medium text-slate-700">{getPlanName(id)}</span>
                     </div>
                     {canAssignPlans && (
                       <button
                         onClick={() => handleUnassignPlan(id)}
-                        className="text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-md hover:bg-rose-50"
+                        className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 shrink-0`}
                         title={t.remove || "Remove"}
                       >
                         <Trash2 size={14} />
@@ -207,45 +215,49 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500 italic p-2 bg-white rounded-xl border border-slate-100 border-dashed text-center">{t.noTrainingPlansAssigned}</p>
+              <p className={`${TYPOGRAPHY.body} text-xs italic p-3 bg-white rounded-xl border border-slate-200 border-dashed text-center`}>{t.noTrainingPlansAssigned}</p>
             )}
           </div>
           
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen size={16} className="text-slate-400" /> {t.enrolledCourses} ({validEnrolledCourses.length})
+          <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className={`${TYPOGRAPHY.h3} text-sm flex items-center gap-2`}>
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center">
+                  <BookOpen size={14} />
+                </div>
+                {t.enrolledCourses} <span className="text-slate-400 font-normal">({validEnrolledCourses.length})</span>
               </h4>
               <button 
                 onClick={() => setIsEnrolling(!isEnrolling)}
-                className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors flex items-center gap-1 ${
+                className={`flex items-center justify-center w-7 h-7 rounded-lg transition-colors ${
                   !canEnrollCourses 
                     ? 'text-slate-400 bg-slate-100 cursor-not-allowed opacity-60' 
-                    : 'text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
+                    : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100/50'
                 }`}
                 disabled={!canEnrollCourses && !isEnrolling}
-                title={!canEnrollCourses ? (t.staff.noPermissionToEnroll || "No permission to enroll") : ""}
+                title={!canEnrollCourses ? (t.staff.noPermissionToEnroll || "No permission to enroll") : (t.enrollInCourse)}
               >
-                {isEnrolling ? t.cancel : <><Plus size={12} /> {t.enrollInCourse || "Enroll in Course"}</>}
+                {isEnrolling ? <X size={14} /> : <Plus size={14} />}
               </button>
             </div>
 
             {isEnrolling && (
-              <div className="mb-3 p-3 bg-white rounded-xl border border-indigo-100 shadow-sm flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
-                <select 
+              <div className="mb-4 p-3 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                <CustomSelect 
                   value={selectedCourseId}
-                  onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 bg-white text-slate-900"
-                >
-                  <option value="">{t.selectCourse || "Select Course"}</option>
-                  {courses.filter(c => !validEnrolledCourses.includes(c.id)).map(course => (
-                    <option key={course.id} value={course.id}>{course.title}</option>
-                  ))}
-                </select>
+                  onChange={(val) => setSelectedCourseId(val)}
+                  options={[
+                    { value: '', label: t.selectCourse || 'Select Course' },
+                    ...courses.filter(c => !validEnrolledCourses.includes(c.id)).map(course => ({
+                      value: course.id,
+                      label: course.title
+                    }))
+                  ]}
+                />
                 <button 
                   onClick={handleEnrollCourse}
                   disabled={!selectedCourseId}
-                  className="w-full py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className={`${BUTTONS.primary} !bg-emerald-600 hover:!bg-emerald-700 !ring-emerald-600/20`}
                 >
                   {t.enrollBtn || "Enroll"}
                 </button>
@@ -253,17 +265,17 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
             )}
 
             {validEnrolledCourses.length > 0 ? (
-              <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              <ul className="space-y-2 max-h-48 overflow-y-auto pr-1 no-scrollbar">
                 {validEnrolledCourses.map(id => (
-                  <li key={id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-indigo-700 shadow-sm group">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span> 
-                      <span className="truncate">{getCourseTitle(id)}</span>
+                  <li key={id} className={UI_COMPONENTS.listRow}>
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span> 
+                      <span className="truncate text-sm font-medium text-slate-700">{getCourseTitle(id)}</span>
                     </div>
                     {canEnrollCourses && (
                       <button
                         onClick={() => handleUnenrollCourse(id)}
-                        className="text-slate-300 hover:text-rose-500 transition-colors p-1 rounded-md hover:bg-rose-50"
+                        className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 shrink-0`}
                         title={t.unenroll || "Unenroll"}
                       >
                         <Trash2 size={14} />
@@ -273,25 +285,28 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500 italic p-2 bg-white rounded-xl border border-slate-100 border-dashed text-center">{t.noCoursesEnrolled}</p>
+              <p className={`${TYPOGRAPHY.body} text-xs italic p-3 bg-white rounded-xl border border-slate-200 border-dashed text-center`}>{t.noCoursesEnrolled}</p>
             )}
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-            <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Heart size={16} className="text-rose-400 fill-rose-400" /> {t.savedCourses} ({validSavedCourses.length})
+          <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-200">
+            <h4 className={`${TYPOGRAPHY.h3} text-sm mb-4 flex items-center gap-2`}>
+              <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-500 flex items-center justify-center">
+                <Heart size={14} className="fill-rose-500/20" />
+              </div>
+              {t.savedCourses} <span className="text-slate-400 font-normal">({validSavedCourses.length})</span>
             </h4>
             {validSavedCourses.length > 0 ? (
-              <ul className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              <ul className="space-y-2 max-h-48 overflow-y-auto pr-1 no-scrollbar">
                 {validSavedCourses.map(id => (
-                  <li key={id} className="flex items-center gap-2 p-3 bg-white border border-slate-100 rounded-xl text-sm font-bold text-rose-600 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-rose-400"></span> 
-                    {getCourseTitle(id)}
+                  <li key={id} className={`${UI_COMPONENTS.listRow} !justify-start gap-2.5`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span> 
+                    <span className="truncate text-sm font-medium text-slate-700">{getCourseTitle(id)}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500 italic p-2 bg-white rounded-xl border border-slate-100 border-dashed text-center">{t.noCoursesSaved}</p>
+              <p className={`${TYPOGRAPHY.body} text-xs italic p-3 bg-white rounded-xl border border-slate-200 border-dashed text-center`}>{t.noCoursesSaved}</p>
             )}
           </div>
         </div>

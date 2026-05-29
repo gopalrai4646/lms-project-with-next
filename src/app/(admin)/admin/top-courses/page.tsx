@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { fetchUsersRequest } from '@/store/slices/userSlice';
 import { useTranslation } from 'react-i18next';
+import { TYPOGRAPHY, UI_COMPONENTS } from '@/constants/ui';
 import { 
   BarChart, 
   Bar, 
@@ -51,20 +52,21 @@ export default function TopCoursesPage() {
 
   if (isInitialLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      <div className={UI_COMPONENTS.emptyStateCard}>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary-600 mb-4"></div>
+        <h3 className={TYPOGRAPHY.h3}>Loading analytics...</h3>
       </div>
     );
   }
 
   if (courses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-in fade-in duration-500">
-        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300">
-          <BookOpen size={40} />
+      <div className={UI_COMPONENTS.emptyStateCard}>
+        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-5 border border-slate-100 shadow-sm text-slate-400">
+          <BookOpen size={32} />
         </div>
-        <h2 className="text-2xl font-bold text-slate-400">{adminT.noCoursesAvailable}</h2>
-        <p className="text-slate-400 mt-2 max-w-sm">
+        <h2 className={TYPOGRAPHY.h2}>{adminT.noCoursesAvailable}</h2>
+        <p className={`${TYPOGRAPHY.body} mt-2 max-w-sm`}>
           {adminT.noCoursesAvailableSubtitle}
         </p>
       </div>
@@ -74,18 +76,18 @@ export default function TopCoursesPage() {
   const colors = ['#4F46E5', '#10B981', '#F59E0B', '#F43F5E', '#8B5CF6'];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-16">
+    <div className="space-y-6 animate-in fade-in duration-700 pb-8">
       <header>
-        <div className="flex items-center gap-3 mb-2 text-indigo-600 font-bold text-sm uppercase tracking-widest">
-            <BarChart2 size={20} />
+        <div className="flex items-center gap-2 mb-3 text-primary-600 font-semibold text-xs uppercase tracking-widest">
+            <BarChart2 size={16} />
             {adminT.analytics}
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900">{adminT.topPerformingCourses}</h1>
-        <p className="text-slate-500 mt-1 max-w-2xl">{adminT.topCoursesSubtitle}</p>
+        <h1 className={TYPOGRAPHY.h1}>{adminT.topPerformingCourses}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1.5 max-w-2xl`}>{adminT.topCoursesSubtitle}</p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm min-h-[350px]">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className={`${UI_COMPONENTS.card} w-full lg:w-1/2 min-h-[350px]`}>
           <div 
             className="h-[320px] w-full transition-all duration-700 mx-auto"
             style={{ maxWidth: chartData.length === 1 ? '100px' : chartData.length === 2 ? '180px' : chartData.length === 3 ? '260px' : chartData.length === 4 ? '340px' : '420px' }}
@@ -142,19 +144,19 @@ export default function TopCoursesPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{adminT.currentTop5}</h4>
-                <div className="space-y-4">
+        <div className="w-full lg:w-1/2 self-start">
+            <div className={UI_COMPONENTS.card}>
+                <h4 className={`${TYPOGRAPHY.label} mb-5`}>{adminT.currentTop5}</h4>
+                <div className="space-y-3">
                     {chartData.map((c, i) => (
-                        <div key={i} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-sm" style={{ backgroundColor: colors[i % colors.length] }}>
+                        <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors">
+                            <div className="flex items-center gap-3 overflow-hidden pr-3">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }}>
                                     {i + 1}
                                 </div>
-                                <span className="text-sm font-bold text-slate-700 truncate max-w-[120px]">{c.name}</span>
+                                <span className="text-sm font-semibold text-slate-700 truncate">{c.name}</span>
                             </div>
-                            <span className="text-sm font-black text-slate-900">{c.enrollments}</span>
+                            <span className="text-sm font-bold text-slate-900 shrink-0 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">{c.enrollments}</span>
                         </div>
                     ))}
                 </div>

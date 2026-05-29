@@ -193,9 +193,9 @@ export default function AdminReport() {
                 <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-8 text-slate-300">
                     <PieChart size={48} />
                 </div>
-                <h1 className="text-3xl font-extrabold text-slate-900 mb-2">No reports to show</h1>
-                <p className="text-slate-500 max-w-sm mb-8">
-                    Your analytics dashboard is empty because there are no courses or training plans created yet.
+                <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{t.noReportsToShow || "No reports to show"}</h1>
+                <p className="text-slate-500 max-w-sm mx-auto">
+                    {t.noReportsDescription || "Your analytics dashboard is empty because there are no courses or training plans created yet."}
                 </p>
                 <Link 
                     href="/admin/courses" 

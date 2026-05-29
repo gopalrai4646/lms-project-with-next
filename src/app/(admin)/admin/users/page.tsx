@@ -8,13 +8,15 @@ import { fetchCoursesRequest } from '@/store/slices/courseSlice';
 import { impersonateUserRequest } from '@/store/slices/authSlice';
 import UserDetailsModal from '@/components/admin/UserDetailsModal';
 import { useTranslation } from 'react-i18next';
-import { Search, List, LayoutGrid, Users, Trash2, ChevronLeft, ChevronRight, Eye, UserSquare2 } from 'lucide-react';
+import { Search, List, LayoutGrid, BookOpen, Trash2, ChevronLeft, ChevronRight, Eye, UserSquare2, Hash } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import CustomSelect from '@/components/common/CustomSelect';
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { users, loading, error } = useAppSelector(state => state.users);
+  const { users, loading } = useAppSelector(state => state.users);
   const { isImpersonating, role, permissions } = useAppSelector(state => state.auth);
   const { courses } = useAppSelector(state => state.courses);
   const { t: i18nT } = useTranslation();
@@ -97,160 +99,186 @@ export default function AdminUsersPage() {
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
+  const courseFilterOptions = useMemo(
+    () => [
+      { value: '', label: t.allCourses },
+      ...courses.map((course) => ({ value: course.id, label: course.title })),
+    ],
+    [courses, t.allCourses]
+  );
+
   if (!isMounted) return null;
 
   return (
-    <div className="space-y-6">
-      {/* Header + Toolbar Combined */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 xl:p-5 flex flex-col xl:flex-row gap-4 xl:items-center">
-        {/* Title */}
-        <div className="shrink-0">
-          <h1 className="text-2xl xl:text-3xl font-extrabold text-slate-900">{t.manageUsers}</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{t.manageUsersSubtitle}</p>
-        </div>
+    <div className="space-y-6 bg-background min-h-screen p-0 animate-in fade-in duration-700">
+      {/* ─── Page Header ─── */}
+      <header>
+        <h1 className={TYPOGRAPHY.h1}>{t.manageUsers}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1`}>{t.manageUsersSubtitle}</p>
+      </header>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row flex-wrap xl:flex-nowrap gap-3 xl:ml-auto xl:items-center w-full xl:w-auto">
-          {/* Search */}
-          <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
-              type="text"
-              placeholder={t.searchPlaceholder}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 text-sm placeholder:text-slate-400"
-            />
-          </div>
-
-          {/* Course Filter */}
-          <div className="relative flex-1 min-w-0 sm:min-w-[160px]">
-            <select
+      {/* ─── Toolbar ─── */}
+      <div className={`${UI_COMPONENTS.card} !p-2 w-full min-w-0`}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3 w-full">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center w-full min-w-0 lg:flex-1 lg:min-w-0">
+            <div className="relative w-full min-w-0 md:flex-1">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                size={16}
+                aria-hidden
+              />
+              <input
+                type="search"
+                placeholder={t.searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`${UI_COMPONENTS.input} pl-10 w-full`}
+                aria-label={t.searchPlaceholder}
+              />
+            </div>
+            <CustomSelect
               value={courseFilter}
-              onChange={(e) => setCourseFilter(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer appearance-none"
-            >
-              <option value="">{t.allCourses}</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </select>
-            <ChevronRight
-              className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 rotate-90"
-              size={16}
+              onChange={(val) => setCourseFilter(String(val))}
+              icon={<BookOpen size={16} />}
+              className="w-full md:w-[11.5rem] md:shrink-0"
+              options={courseFilterOptions}
             />
           </div>
 
-          {/* Items Per Page */}
-          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-2xl border border-slate-100 shrink-0">
-            <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
-              {t.itemsPerPage}:
-            </span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="px-2 py-1 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-sm font-bold text-slate-700 cursor-pointer transition-all"
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
+            <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
+              <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
+                {t.itemsPerPage}
+              </span>
+              <CustomSelect
+                value={itemsPerPage}
+                onChange={(val) => setItemsPerPage(Number(val))}
+                icon={<Hash size={14} />}
+                size="sm"
+                className="w-full lg:w-[5.5rem] lg:shrink-0"
+                options={[
+                  { value: 8, label: '8' },
+                  { value: 12, label: '12' },
+                  { value: 24, label: '24' },
+                  { value: 48, label: '48' },
+                ]}
+              />
+            </div>
+            <div
+              className={`${UI_COMPONENTS.segmentedControl} w-full min-w-0 p-1 lg:p-0.5`}
+              role="group"
+              aria-label={`${t.listView} / ${t.gridView}`}
             >
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-              <option value={24}>24</option>
-              <option value={48}>48</option>
-            </select>
-          </div>
-
-          {/* View Toggle */}
-          <div className="flex bg-slate-100 p-1 rounded-xl shadow-inner shrink-0">
-            <button
-              onClick={() => handleViewToggle('list')}
-              className={`p-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 ${viewMode === 'list'
-                ? 'bg-white shadow-md text-indigo-600 font-bold'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              title={t.listView}
-            >
-              <List size={18} />
-            </button>
-
-            <button
-              onClick={() => handleViewToggle('grid')}
-              className={`p-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 ${viewMode === 'grid'
-                ? 'bg-white shadow-md text-indigo-600 font-bold'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                }`}
-              title={t.gridView}
-            >
-              <LayoutGrid size={18} />
-            </button>
+              <button
+                type="button"
+                onClick={() => handleViewToggle('list')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${viewMode === 'list'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                title={t.listView}
+                aria-pressed={viewMode === 'list'}
+              >
+                <List className="w-5 h-5 lg:w-4 lg:h-4" aria-hidden />
+                <span className="hidden lg:inline">{t.listView}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewToggle('grid')}
+                className={`flex flex-1 items-center justify-center gap-2 min-h-10 lg:min-h-0 px-3 py-2 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-medium rounded-md transition-all ${viewMode === 'grid'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                title={t.gridView}
+                aria-pressed={viewMode === 'grid'}
+              >
+                <LayoutGrid className="w-5 h-5 lg:w-4 lg:h-4" aria-hidden />
+                <span className="hidden lg:inline">{t.gridView}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {loading && users.length === 0 ? (
-        <div className="py-20 text-center text-slate-400 font-medium italic bg-white rounded-[32px] border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-4">
-          <div className="w-10 h-10 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-          {t.loadingUsers}
+        <div className={`${UI_COMPONENTS.emptyStateCard} py-12`}>
+          <div
+            className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"
+            role="status"
+            aria-label={t.loadingUsers}
+          />
+          <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingUsers}</p>
         </div>
       ) : paginatedUsers.length === 0 ? (
-        <div className="py-24 text-center text-slate-400 font-medium italic bg-white rounded-[32px] border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-6 animate-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
-            <Search size={40} />
-          </div>
-          <div>
-            <p className="text-xl text-slate-500 font-bold">{t.noUsersFound}</p>
-            <p className="text-slate-400 mt-1 max-w-xs mx-auto">{t.tryAdjustingFilters}</p>
-          </div>
+        <div className={UI_COMPONENTS.emptyStateCard}>
+          <Search className="text-slate-300" size={48} aria-hidden />
+          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noUsersFound}</p>
+          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>{t.tryAdjustingFilters}</p>
         </div>
       ) : viewMode === 'list' ? (
-        /* List View */
-        <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden animate-in fade-in duration-500">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left min-w-[800px]">
-              <thead className="bg-slate-50/50 border-b border-slate-100">
+        /* ─── List View ─── */
+        <div className={UI_COMPONENTS.tableWrapper}>
+          <div className={UI_COMPONENTS.tableContainer}>
+            <table className={UI_COMPONENTS.table}>
+              <thead className={UI_COMPONENTS.tableHeader}>
                 <tr>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.userProfile}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.role}</th>
-                  <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">{t.enrolledCourses}</th>
-                  {(canRead || canImpersonate || canDeleteUser) && <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{t.actions}</th>}
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.userProfile}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.role}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.enrolledCourses}</th>
+                  {(canRead || canImpersonate || canDeleteUser) && (
+                    <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-right`}>{t.actions}</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedUsers.map((user: User) => (
-                  <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
-                    <td className="px-6 py-2">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-xl flex items-center justify-center shrink-0 border border-indigo-100/50 shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                  <tr key={user.id} className={UI_COMPONENTS.tableRow}>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 font-semibold text-lg flex items-center justify-center shrink-0 border border-primary-100 overflow-hidden group-hover:scale-105 transition-transform duration-300">
                           {user.photoURL ? (
-                            <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                            <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
                           ) : (
                             user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
                           )}
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors text-base">{user.name || t.noName}</p>
-                          <p className="text-sm text-slate-500 font-medium mt-0.5">{user.email}</p>
+                        <div className="min-w-0">
+                          <p className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1`}>
+                            {user.name || t.noName}
+                          </p>
+                          <p className={`${TYPOGRAPHY.body} text-xs mt-0.5 line-clamp-1`}>{user.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-2">
-                      <span className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest ${user.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-slate-50 text-slate-500 border border-slate-200/50'}`}>
+                    <td className="px-5 py-3">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${user.role === 'admin'
+                            ? 'bg-rose-50 text-rose-600 border-rose-200'
+                            : 'bg-slate-50 text-slate-600 border-slate-200'
+                          }`}
+                      >
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-2">
+                    <td className="px-5 py-3">
                       {(() => {
                         const validUserCourses = getValidEnrolledCourses(user.enrolledCourses);
                         if (validUserCourses.length > 0) {
                           return (
                             <div className="flex flex-wrap gap-1.5">
                               {validUserCourses.slice(0, 2).map((courseId: string) => (
-                                <span key={courseId} className="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-[11px] font-bold uppercase tracking-wider rounded-md truncate max-w-[150px] border border-indigo-100/50 shadow-sm">
+                                <span
+                                  key={courseId}
+                                  className="px-2 py-0.5 bg-primary-50 text-primary-700 text-[10px] font-medium rounded-md truncate max-w-[150px] border border-primary-100"
+                                >
                                   {getCourseTitle(courseId)}
                                 </span>
                               ))}
                               {validUserCourses.length > 2 && (
-                                <span className="px-2.5 py-1 bg-slate-100 text-slate-500 text-[11px] font-bold rounded-md cursor-help border border-slate-200/50 shadow-sm" title={validUserCourses.slice(2).map(getCourseTitle).join(', ')}>
+                                <span
+                                  className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md border border-slate-200 cursor-help"
+                                  title={validUserCourses.slice(2).map(getCourseTitle).join(', ')}
+                                >
                                   +{validUserCourses.length - 2} {t.more}
                                 </span>
                               )}
@@ -258,35 +286,40 @@ export default function AdminUsersPage() {
                           );
                         }
                         return (
-                          <span className="text-xs font-medium text-slate-400 italic bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">{t.noEnrollments}</span>
+                          <span className={`${TYPOGRAPHY.body} text-xs italic text-slate-400`}>{t.noEnrollments}</span>
                         );
                       })()}
                     </td>
                     {(canRead || canImpersonate || canDeleteUser) && (
-                      <td className="px-6 py-2 text-right">
-                        <div className="flex items-center justify-end gap-2 text-sm">
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <button
+                            type="button"
                             onClick={() => setSelectedUserId(user.id)}
-                            className="p-2.5 bg-white border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                            className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-primary-600`}
                             title={t.viewDetails}
+                            aria-label={t.viewDetails}
                           >
-                            <Eye size={18} />
+                            <Eye size={16} aria-hidden />
                           </button>
                           {canImpersonate && (
                             <button
+                              type="button"
                               onClick={() => dispatch(impersonateUserRequest(user.id))}
-                              className="px-4 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
+                              className={`${BUTTONS.primary} !px-3 !py-2 !text-xs`}
                             >
-                              <UserSquare2 size={14} /> {t.impersonate}
+                              <UserSquare2 size={14} aria-hidden /> {t.impersonate}
                             </button>
                           )}
                           {canDeleteUser && (
                             <button
+                              type="button"
                               onClick={() => handleDelete(user.id)}
-                              className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 shadow-sm hover:shadow-rose-50"
+                              className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
                               title={t.deleteUser}
+                              aria-label={t.deleteUser}
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={16} aria-hidden />
                             </button>
                           )}
                         </div>
@@ -299,117 +332,153 @@ export default function AdminUsersPage() {
           </div>
         </div>
       ) : (
-        /* Grid View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in zoom-in-95 duration-500">
+        /* ─── Grid View ─── */
+        <div className={UI_COMPONENTS.gridContainer}>
           {paginatedUsers.map((user: User) => (
-            <div key={user.id} className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-1 p-6 relative">
-              <div className="absolute top-4 right-4">
-                <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${user.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-slate-100 text-slate-500 border border-slate-200/50'}`}>
-                  {user.role}
-                </span>
-              </div>
-              <div className="flex flex-col items-center text-center mt-4 mb-6 relative">
-                <div className="w-20 h-20 rounded-[1.5rem] bg-indigo-50 text-indigo-600 font-bold text-3xl flex items-center justify-center border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500 mb-4 z-10 relative overflow-hidden">
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
-                  ) : (
-                    user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-                  )}
+            <div
+              key={user.id}
+              className={`${UI_COMPONENTS.card} !p-0 overflow-hidden relative group hover:shadow-md hover:border-slate-300 transition-all`}
+            >
+              <div className="relative h-40 bg-slate-100 overflow-hidden border-b border-slate-100">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-primary-50 text-primary-600 font-semibold text-4xl">
+                    {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                
+                <div className="absolute top-4 right-4 z-10">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border shadow-sm backdrop-blur-sm ${user.role === 'admin'
+                        ? 'bg-rose-50/90 text-rose-600 border-rose-200'
+                        : 'bg-white/90 text-slate-600 border-slate-200'
+                      }`}
+                  >
+                    {user.role}
+                  </span>
                 </div>
-                <div className="absolute top-8 w-full h-8 bg-gradient-to-b from-indigo-50/50 to-transparent blur-xl"></div>
-
-                <h3 className="font-bold text-xl text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1 w-full">{user.name || t.noName}</h3>
-                <p className="text-sm text-slate-500 mt-1 truncate w-full font-medium">{user.email}</p>
               </div>
+              
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex flex-col items-center text-center pb-4">
+                  <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1 w-full`}>
+                    {user.name || t.noName}
+                  </h3>
+                  <p className={`${TYPOGRAPHY.body} text-xs mt-0.5 truncate w-full`}>{user.email}</p>
+                </div>
 
-              <div className="mt-auto pt-5 border-t border-slate-100 flex flex-col gap-5">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5">{t.enrolledCourses}</p>
+                <div className="pt-4 border-t border-slate-100 flex flex-col gap-4 mt-auto">
+                  <div>
+                    <p className={`${TYPOGRAPHY.label} mb-2`}>{t.enrolledCourses}</p>
                   {(() => {
                     const validUserCourses = getValidEnrolledCourses(user.enrolledCourses);
                     if (validUserCourses.length > 0) {
                       return (
                         <div className="flex flex-wrap gap-1.5">
                           {validUserCourses.slice(0, 3).map((courseId: string) => (
-                            <span key={courseId} className="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-wider rounded-md truncate max-w-full border border-indigo-100/50 shadow-sm">
+                            <span
+                              key={courseId}
+                              className="px-2 py-0.5 bg-primary-50 text-primary-700 text-[10px] font-medium rounded-md truncate max-w-full border border-primary-100"
+                            >
                               {getCourseTitle(courseId)}
                             </span>
                           ))}
                           {validUserCourses.length > 3 && (
-                            <span className="px-2.5 py-1 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider rounded-md border border-slate-200/50 shadow-sm" title={validUserCourses.slice(3).map(getCourseTitle).join(', ')}>
+                            <span
+                              className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md border border-slate-200 cursor-help"
+                              title={validUserCourses.slice(3).map(getCourseTitle).join(', ')}
+                            >
                               +{validUserCourses.length - 3} {t.more}
                             </span>
                           )}
                         </div>
                       );
                     }
-                    return (
-                      <span className="text-[11px] font-bold text-slate-400 italic bg-slate-50 px-2.5 py-1 rounded-md block w-fit">{t.noEnrollments}</span>
-                    );
+                    return <p className={`${TYPOGRAPHY.body} text-xs italic text-slate-400`}>{t.noEnrollments}</p>;
                   })()}
                 </div>
 
-                <div className="flex items-center justify-between gap-2 mt-1">
+                <div className="flex items-center gap-1">
                   <button
+                    type="button"
                     onClick={() => setSelectedUserId(user.id)}
-                    className="flex-1 py-2.5 bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                    className={`${BUTTONS.ghost} flex-1 !py-2 text-slate-500 hover:text-primary-600`}
                     title={t.viewDetails}
+                    aria-label={t.viewDetails}
                   >
-                    <Eye size={18} />
+                    <Eye size={16} aria-hidden />
                   </button>
                   {canImpersonate && (
                     <button
+                      type="button"
                       onClick={() => dispatch(impersonateUserRequest(user.id))}
-                      className="flex-1 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-1.5"
+                      className={`${BUTTONS.primary} flex-1 !px-2 !py-2 !text-xs`}
                     >
-                      <UserSquare2 size={14} /> {t.impersonate}
+                      <UserSquare2 size={14} aria-hidden /> {t.impersonate}
                     </button>
                   )}
                   {canDeleteUser && (
                     <button
+                      type="button"
                       onClick={() => handleDelete(user.id)}
-                      className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 flex-shrink-0 shadow-sm hover:shadow-rose-50"
+                      className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 shrink-0`}
                       title={t.deleteUser}
+                      aria-label={t.deleteUser}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} aria-hidden />
                     </button>
                   )}
                 </div>
               </div>
             </div>
+          </div>
           ))}
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* ─── Pagination ─── */}
       {totalPages > 0 && totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-slate-100">
-          <p className="text-xs text-slate-500 font-medium">
-            {t.showing} <span className="font-bold text-slate-700">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to} <span className="font-bold text-slate-700">{endIndex}</span> {t.of} <span className="font-bold text-slate-700">{totalItems}</span>
+        <div className={UI_COMPONENTS.pagination}>
+          <p className={TYPOGRAPHY.body}>
+            {t.showing} <span className="font-semibold text-slate-900">{totalItems === 0 ? 0 : startIndex + 1}</span> {t.to}{' '}
+            <span className="font-semibold text-slate-900">{endIndex}</span> {t.of}{' '}
+            <span className="font-semibold text-slate-900">{totalItems}</span>
           </p>
-          <div className="flex items-center gap-1 overflow-x-auto">
+          <nav className="flex items-center gap-1" aria-label="Pagination">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={safeCurrentPage === 1 || totalPages === 0}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+              className={`${BUTTONS.ghost} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
-              <ChevronLeft size={14} /> <span className="hidden sm:inline">{t.prev}</span>
+              <ChevronLeft size={14} aria-hidden />
+              <span className="hidden sm:inline">{t.prev}</span>
             </button>
-
             <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(page => totalPages <= 5 || page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1)
+                .filter(
+                  (page) =>
+                    totalPages <= 5 ||
+                    page === 1 ||
+                    page === totalPages ||
+                    Math.abs(page - safeCurrentPage) <= 1
+                )
                 .map((page, index, array) => {
                   if (index > 0 && page - array[index - 1] > 1) {
                     return (
                       <div key={`ellipsis-${page}`} className="flex items-center gap-1">
-                        <span className="w-4 text-center text-slate-400 text-xs">…</span>
+                        <span className="w-4 text-center text-slate-400 text-xs" aria-hidden>
+                          …
+                        </span>
                         <button
+                          type="button"
                           onClick={() => setCurrentPage(page)}
-                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                            ? 'bg-indigo-600 text-white border border-indigo-700'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${safeCurrentPage === page
+                              ? 'bg-primary-600 text-white shadow-sm'
+                              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                             }`}
+                          aria-current={safeCurrentPage === page ? 'page' : undefined}
                         >
                           {page}
                         </button>
@@ -420,26 +489,29 @@ export default function AdminUsersPage() {
                   return (
                     <button
                       key={page}
+                      type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-bold transition-all text-xs ${safeCurrentPage === page
-                        ? 'bg-indigo-600 text-white border border-indigo-700'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      className={`min-w-[28px] h-7 px-1.5 rounded-lg font-medium transition-all text-xs ${safeCurrentPage === page
+                          ? 'bg-primary-600 text-white shadow-sm'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
+                      aria-current={safeCurrentPage === page ? 'page' : undefined}
                     >
                       {page}
                     </button>
                   );
                 })}
             </div>
-
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={safeCurrentPage === totalPages || totalPages === 0}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+              className={`${BUTTONS.ghost} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
-              <span className="hidden sm:inline">{t.next}</span> <ChevronRight size={14} />
+              <span className="hidden sm:inline">{t.next}</span>
+              <ChevronRight size={14} aria-hidden />
             </button>
-          </div>
+          </nav>
         </div>
       )}
 

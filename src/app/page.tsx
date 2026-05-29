@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { LANDING_UI } from '@/constants/ui';
 
 export type Language = 'en' | 'de' | 'fr';
 
@@ -62,55 +63,63 @@ export default function LandingPage() {
     setLangOpen(false);
   };
 
+  useEffect(() => {
+    // Strictly prevent horizontal scrolling at the body level to eliminate any side gaps
+    document.body.style.overflowX = 'hidden';
+    return () => {
+      document.body.style.overflowX = '';
+    };
+  }, []);
+
   return (
 
-    <div className="min-h-screen bg-[#fafbff] font-manrope overflow-x-hidden">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-20 flex justify-between items-center">
+    <div className={LANDING_UI.wrapper}>
+      {/* Navbar - Vercel / Linear inspired floating header */}
+      <nav className={LANDING_UI.navWrapper}>
+        <div className={LANDING_UI.navContainer}>
 
           {/* Left: Logo + Language */}
-          <div className="flex items-center gap-1.5 sm:gap-6 shrink-0">
+          <div className="flex items-center gap-6 shrink-0">
             <Link
               href="/"
-              className="text-sm xxs:text-base xs:text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent whitespace-nowrap"
+              className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 whitespace-nowrap"
             >
               {landingT.nav.mentora}
             </Link>
 
-            {/* Language Switcher — UNCHANGED LOGIC */}
+            {/* Language Switcher */}
             <div className="relative" ref={langRef}>
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1 bg-white/80 border border-slate-200 rounded-full px-2 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer focus:outline-none"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors focus:outline-none"
               >
-                <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-sm border border-slate-100">
+                <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-[2px] shadow-sm">
                   <img
                     src={currentLang.flag}
                     alt={currentLang.label}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="uppercase tracking-widest">{currentLang.short}</span>
+                <span className="uppercase tracking-wider">{currentLang.short}</span>
                 <ChevronDown
-                  size={10}
-                  className={`text-slate-400 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
+                  size={12}
+                  className={`text-zinc-400 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {langOpen && (
-                <div className="absolute left-0 mt-2 w-28 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-[60] py-1">
+                <div className="absolute left-0 mt-1 w-32 bg-white border border-zinc-200/80 rounded-lg shadow-lg overflow-hidden z-[60] py-1">
                   {LANGUAGE_OPTIONS.map((opt) => (
                     <button
                       key={opt.code}
                       onClick={() => handleLanguageChange(opt.code)}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-[10px] tracking-widest uppercase transition-all ${i18n.language === opt.code
-                          ? 'bg-blue-50 text-blue-700 font-extrabold'
-                          : 'text-slate-500 hover:bg-slate-50 font-bold'
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors ${i18n.language === opt.code
+                          ? 'bg-zinc-50 text-zinc-900 font-semibold'
+                          : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 font-medium'
                         }`}
                     >
                       <span>{opt.short}</span>
-                      <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-sm border border-slate-100">
+                      <div className="w-4 h-3 relative flex-shrink-0 overflow-hidden rounded-[2px] shadow-sm">
                         <img
                           src={opt.flag}
                           alt={opt.label}
@@ -125,16 +134,16 @@ export default function LandingPage() {
           </div>
 
           {/* Right: Login + Get Started */}
-          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-4 shrink-0">
             <Link
               href="/login"
-              className="text-[10px] xxs:text-xs sm:text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors whitespace-nowrap"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors whitespace-nowrap hidden sm:block"
             >
               {landingT.nav.login}
             </Link>
             <Link
               href="/signup"
-              className="bg-blue-700 text-white px-2.5 xxs:px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full text-[9px] xxs:text-[10px] sm:text-base font-bold hover:bg-blue-800 transition-all shadow-md shadow-blue-200 whitespace-nowrap shrink-0"
+              className="bg-zinc-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm whitespace-nowrap shrink-0 flex items-center gap-1.5"
             >
               {landingT.nav.getStarted}
             </Link>
@@ -144,111 +153,113 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-8 overflow-x-hidden">
+      <section className={LANDING_UI.heroSection}>
         <div className="flex-1 text-center lg:text-left">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-block px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs sm:text-sm font-bold tracking-wide mb-6 shadow-sm border border-purple-100"
+            className={LANDING_UI.heroBadge}
           >
+            <span className="w-2 h-2 rounded-full bg-zinc-900"></span>
             {landingT.hero.badge}
           </motion.div>
+          
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.2] lg:leading-[1.15] mb-6"
+            className={LANDING_UI.heroTitle}
           >
-            {landingT.hero.title_1} <span className="text-blue-700 italic border-b-[4px] sm:border-b-[6px] border-blue-200/50 pb-1 inline-block">{landingT.hero.title_with}</span> <span className="text-purple-600">{landingT.hero.title_2}</span>
+            {landingT.hero.title_1} <span className="text-zinc-400 italic font-medium">{landingT.hero.title_with}</span> <br className="hidden lg:block"/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-900 to-zinc-500">{landingT.hero.title_2}</span>
           </motion.h1>
+          
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-lg lg:text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+            className={LANDING_UI.heroSubtitle}
           >
             {landingT.hero.subtitle}
           </motion.p>
         </div>
 
-        {/* Dashboard Preview */}
+        {/* Dashboard Preview - Linear Style */}
         <div className="flex-1 w-full relative group mt-8 lg:mt-0 px-2 sm:px-0">
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, type: 'spring' }}
-            className="absolute -top-4 -left-2 sm:-top-10 sm:-left-10 bg-white shadow-2xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 z-10 flex items-center gap-3 sm:gap-4 animate-bounce-slow border border-slate-100"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="relative rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-zinc-50 p-2 sm:p-3 shadow-2xl"
           >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-full flex items-center justify-center shrink-0">
-              <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            <div className="relative w-full aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-zinc-100">
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop" alt="Mentora Dashboard" className="object-cover w-full h-full" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
             </div>
-            <div className="text-left">
-              <div className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest">{landingT.hero.velocity}</div>
-              <div className="text-sm sm:text-lg font-black text-slate-900 drop-shadow-sm">{landingT.hero.accuracy}</div>
-            </div>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_-15px_rgba(48,41,80,0.25)] bg-gradient-to-br from-slate-900 to-indigo-950 p-4 sm:p-8 relative"
-          >
-            {/* Using Unsplash mockup image as replacement for local asset */}
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-4 border-slate-800 shadow-2xl bg-black">
-              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay z-10 pointer-events-none" />
-              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600&auto=format&fit=crop" alt="Mentora Dashboard" className="object-cover w-full h-full opacity-90 transition-transform duration-700 group-hover:scale-105" />
-            </div>
+            {/* Floating Metric Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6, type: 'spring' }}
+              className="absolute -bottom-6 -left-4 sm:-bottom-8 sm:-left-8 bg-white border border-zinc-200/80 shadow-xl rounded-xl p-4 z-10 flex items-center gap-4 backdrop-blur-xl"
+            >
+              <div className="w-10 h-10 bg-zinc-50 rounded-lg flex items-center justify-center shrink-0 border border-zinc-200/50">
+                <BarChart3 className="w-5 h-5 text-zinc-900" />
+              </div>
+              <div className="text-left">
+                <div className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">{landingT.hero.velocity}</div>
+                <div className="text-lg font-bold tracking-tight text-zinc-900">{landingT.hero.accuracy}</div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-20 sm:py-24 bg-white px-4 sm:px-6 overflow-hidden">
+      {/* Features Grid - Clean Cards */}
+      <section className={LANDING_UI.featuresSection}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16 px-2">
-            <h2
-              className="font-black text-slate-900 mb-4 tracking-tight leading-tight sm:text-3xl lg:text-4xl"
-              style={{ fontSize: 'clamp(1.25rem, 6vw, 2.25rem)' }}
-            >
+          <div className="mb-10 sm:mb-14 text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-900 mb-6 max-w-3xl mx-auto leading-tight">
               {landingT.features.title}
             </h2>
-            <p className="text-slate-500 font-medium text-[11px] xxs:text-xs sm:text-base max-w-2xl mx-auto leading-relaxed">{landingT.features.subtitle}</p>
+            <p className="text-lg text-zinc-500 font-medium max-w-xl mx-auto leading-relaxed">
+              {landingT.features.subtitle}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {[
               { icon: BarChart3, title: landingT.features.feature_1.title, desc: landingT.features.feature_1.desc },
               { icon: Play, title: landingT.features.feature_2.title, desc: landingT.features.feature_2.desc },
               { icon: FileText, title: landingT.features.feature_3.title, desc: landingT.features.feature_3.desc },
               { icon: ShieldCheck, title: landingT.features.feature_4.title, desc: landingT.features.feature_4.desc }
             ].map((feature, i) => (
-              <div key={i} className="p-8 rounded-[2rem] bg-slate-50 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-transparent hover:border-slate-100 group">
-                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md shadow-slate-200/50 mb-6 group-hover:scale-110 group-hover:text-blue-600 transition-transform">
-                  <feature.icon className="w-6 h-6 text-slate-600 group-hover:text-blue-600 transition-colors" />
+              <div key={i} className={LANDING_UI.featureCard}>
+                <div className={LANDING_UI.featureIconWrapper}>
+                  <feature.icon className="w-5 h-5 text-zinc-600 group-hover:text-white transition-colors duration-300" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-500 leading-relaxed text-sm font-medium">{feature.desc}</p>
+                <h3 className="text-lg font-bold tracking-tight text-zinc-900 mb-2">{feature.title}</h3>
+                <p className="text-zinc-500 leading-relaxed text-sm">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Global Advantage */}
-      <section className="py-20 sm:py-32 bg-gradient-to-b from-blue-50/50 to-white px-4 sm:px-6 relative overflow-hidden text-center">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[300px] bg-blue-100/50 blur-[120px] rounded-full pointer-events-none"></div>
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-700 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-8 sm:mb-10 shadow-2xl shadow-blue-300">
-            <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+      {/* Global Advantage - Minimal Map/Chips */}
+      <section className={LANDING_UI.advantageSection}>
+        <div className="max-w-3xl mx-auto">
+          <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-sm backdrop-blur-md">
+            <Globe className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 sm:mb-8 tracking-tight">{landingT.advantage.title}</h2>
-          <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 sm:mb-14 leading-relaxed max-w-3xl mx-auto font-medium">
-            {landingT.advantage.subtitle_1} <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md">{landingT.advantage.subtitle_2}</span>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6">{landingT.advantage.title}</h2>
+          <p className="text-lg sm:text-xl text-blue-100 mb-12 leading-relaxed font-medium">
+            {landingT.advantage.subtitle_1} <span className="text-white font-semibold">{landingT.advantage.subtitle_2}</span>
           </p>
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+          
+          <div className="flex flex-wrap justify-center gap-3">
             {landingT.advantage.langs.map((lang: string) => (
-              <span key={lang} className="px-5 py-3 sm:px-6 sm:py-3.5 bg-white border border-slate-100 rounded-full text-slate-700 text-sm sm:text-base font-bold shadow-xl shadow-slate-200/40 hover:scale-105 transition-transform cursor-default">
+              <span key={lang} className={LANDING_UI.advantageChip}>
                 {lang}
               </span>
             ))}
@@ -256,26 +267,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Security Section */}
-      <section className="py-24 px-6 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
+      {/* Security Section - Enterprise Dark Mode (Linear Vibe) */}
+      <section className={LANDING_UI.securitySection}>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#0a0a0a] to-[#0a0a0a] pointer-events-none"></div>
+        <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-widest mb-6">
-              <Lock size={14} className="text-blue-400" /> {landingT.security.badge}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium tracking-wide mb-8">
+              <ShieldCheck size={14} className="text-zinc-400" /> 
+              {landingT.security.badge}
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">{landingT.security.title}</h2>
-            <p className="text-lg text-slate-400 mb-10 leading-relaxed max-w-xl">
+            
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
+              {landingT.security.title}
+            </h2>
+            <p className="text-lg text-zinc-400 mb-10 leading-relaxed font-medium max-w-xl">
               {landingT.security.subtitle}
             </p>
+            
             <ul className="space-y-5">
               {[
                 { label: landingT.security.zeroTrust },
                 { label: landingT.security.automatedScanning }
               ].map(item => (
-                <li key={item.label} className="flex items-center gap-4 text-slate-200 font-semibold text-lg">
-                  <div className="w-8 h-8 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center p-1.5 shrink-0">
-                    <ShieldCheck className="w-full h-full" />
+                <li key={item.label} className="flex items-center gap-4 text-zinc-300 font-medium">
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-zinc-300" />
                   </div>
                   {item.label}
                 </li>
@@ -283,28 +299,28 @@ export default function LandingPage() {
             </ul>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] border border-slate-700 shadow-2xl relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-[2.5rem] sm:rounded-[3rem] pointer-events-none" />
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-700 relative z-10">
-              <span className="text-white font-bold text-lg">{landingT.security.systemStatus}</span>
-              <span className="px-4 py-1.5 bg-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+          <div className={LANDING_UI.securityCard}>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
+            <div className="flex justify-between items-center pb-6 border-b border-white/10 mb-6 relative z-10">
+              <span className="text-white font-medium">{landingT.security.systemStatus}</span>
+              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full flex items-center gap-2 tracking-wide uppercase">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
                 {landingT.security.secure}
               </span>
             </div>
-            <div className="space-y-4 relative z-10">
+            <div className="space-y-3 relative z-10">
               {[
                 { icon: RefreshCcw, label: landingT.security.updates, status: landingT.security.live },
                 { icon: Lock, label: landingT.security.encryption, status: landingT.security.active }
               ].map((row, i) => (
-                <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-slate-800/80 rounded-2xl border border-slate-700 hover:bg-slate-700/50 transition-colors gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-blue-500/20 rounded-xl">
-                      <row.icon className="w-5 h-5 text-blue-400" />
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/[0.03] border border-white/5 rounded-xl gap-3 sm:gap-4 hover:bg-white/[0.05] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/5 rounded-lg border border-white/5">
+                      <row.icon className="w-4 h-4 text-zinc-400" />
                     </div>
-                    <span className="font-bold text-white tracking-wide text-sm sm:text-base">{row.label}</span>
+                    <span className="font-medium text-zinc-200 text-sm">{row.label}</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-blue-400 font-bold uppercase tracking-wider bg-blue-500/10 px-3 py-1 rounded-full">{row.status}</span>
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider bg-white/5 px-2.5 py-1 rounded-md text-center">{row.status}</span>
                 </div>
               ))}
             </div>
@@ -312,19 +328,20 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-16 bg-[#fafbff] border-t border-slate-200 px-6 text-center">
-        <div className="mb-8">
-          <div className="flex items-center justify-center gap-2 cursor-pointer hover:scale-105 transition-transform mb-3">
-            <div className="text-2xl font-black bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">{landingT.nav.mentora}.</div>
+      {/* Footer - Minimal */}
+      <footer className={LANDING_UI.footer}>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <span className="text-xl font-bold tracking-tight text-zinc-900">{landingT.nav.mentora}</span>
+            <span className="text-sm font-medium border-l border-zinc-300 pl-4">{landingT.footer.copyright}</span>
           </div>
-          <div className="text-sm text-slate-500 font-medium">{landingT.footer.copyright}</div>
-        </div>
-        <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-bold text-slate-400">
-          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.terms}</a>
-          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.privacy}</a>
-          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.twitter}</a>
-          <a href="#" className="hover:text-blue-700 transition-colors">{landingT.footer.linkedin}</a>
+          
+          <div className="flex flex-wrap justify-center gap-6 text-sm font-medium">
+            <a href="#" className="hover:text-zinc-900 transition-colors">{landingT.footer.terms}</a>
+            <a href="#" className="hover:text-zinc-900 transition-colors">{landingT.footer.privacy}</a>
+            <a href="#" className="hover:text-zinc-900 transition-colors">{landingT.footer.twitter}</a>
+            <a href="#" className="hover:text-zinc-900 transition-colors">{landingT.footer.linkedin}</a>
+          </div>
         </div>
       </footer>
     </div>

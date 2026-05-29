@@ -3,31 +3,32 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { 
-  createStaffRoleRequest, 
-  updateStaffRoleRequest, 
-  deleteStaffRoleRequest, 
+import {
+  createStaffRoleRequest,
+  updateStaffRoleRequest,
+  deleteStaffRoleRequest,
   createStaffUserRequest,
-  clearStaffRoleError 
+  clearStaffRoleError
 } from '@/store/slices/staffRoleSlice';
 import { deleteUserRequest } from '@/store/slices/userSlice';
 import { PERMISSION_GROUPS, PERMISSION_MODULES, ALL_PERMISSIONS, Permission, StaffRole } from '@/lib/permissions';
-import { 
-  ShieldCheck, 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  X, 
-  UserPlus, 
-  Users, 
-  KeyRound, 
+import {
+  ShieldCheck,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  UserPlus,
+  Users,
+  KeyRound,
   CheckCircle2,
   AlertCircle,
-  ChevronDown,
   Eye,
   EyeOff
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
+import CustomSelect from '@/components/common/CustomSelect';
 
 export default function StaffManagementPage() {
   const dispatch = useAppDispatch();
@@ -51,8 +52,6 @@ export default function StaffManagementPage() {
   const [editingRole, setEditingRole] = useState<StaffRole | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  if (currentUserRole !== 'admin') return null;
 
   // Role form
   const [roleName, setRoleName] = useState('');
@@ -106,8 +105,8 @@ export default function StaffManagementPage() {
         setIsSubmitting(false);
       } else {
         // Succeeded
-        setSuccessMessage(editingRole 
-          ? i18nT('admin.staff.roleUpdated', { name: roleName }) 
+        setSuccessMessage(editingRole
+          ? i18nT('admin.staff.roleUpdated', { name: roleName })
           : i18nT('admin.staff.roleCreated', { name: roleName })
         );
         setShowRoleModal(false);
@@ -139,8 +138,8 @@ export default function StaffManagementPage() {
 
   // Toggle permission checkbox
   const togglePermission = (perm: Permission) => {
-    setSelectedPermissions(prev => 
-      prev.includes(perm) 
+    setSelectedPermissions(prev =>
+      prev.includes(perm)
         ? prev.filter(p => p !== perm)
         : [...prev, perm]
     );
@@ -180,10 +179,10 @@ export default function StaffManagementPage() {
   // Delete role
   const handleDeleteRole = (role: StaffRole) => {
     const count = getStaffCount(role.id);
-    const msg = count > 0 
+    const msg = count > 0
       ? i18nT('admin.staff.deleteRoleWithStaff', { name: role.name, count })
       : i18nT('admin.staff.deleteRoleConfirm', { name: role.name });
-    
+
     if (window.confirm(msg)) {
       dispatch(deleteStaffRoleRequest(role.id));
       setSuccessMessage(i18nT('admin.staff.roleDeleted', { name: role.name }));
@@ -218,110 +217,101 @@ export default function StaffManagementPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-5">
-      {/* Header */}
-      <header className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 p-8 md:p-10 text-white shadow-xl shadow-violet-100">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <ShieldCheck size={32} className="text-violet-200" />
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-              {t.staff.title}
-            </h1>
+    <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
+      {/* ─── Page Header ─── */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
+            <ShieldCheck size={24} />
           </div>
-          <p className="text-violet-100 text-lg max-w-2xl opacity-90">
-            {t.staff.subtitle}
-          </p>
+          <div>
+            <h1 className={TYPOGRAPHY.h1}>{t.staff.title}</h1>
+            <p className={`${TYPOGRAPHY.body} mt-1`}>{t.staff.subtitle}</p>
+          </div>
         </div>
       </header>
 
-      {/* Success Message */}
+      {/* ─── Success/Error Banners ─── */}
       {successMessage && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl animate-in slide-in-from-top-4 duration-300">
-          <CheckCircle2 size={20} className="shrink-0" />
-          <span className="font-medium">{successMessage}</span>
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-500 text-emerald-700 rounded-lg text-sm font-medium animate-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 size={18} className="shrink-0" />
+          <span>{successMessage}</span>
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl">
-          <AlertCircle size={20} className="shrink-0" />
-          <span className="font-medium">{error}</span>
+        <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium">
+          <AlertCircle size={18} className="shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
       {/* ─── Section A: Role Definitions ─── */}
-      <section>
+      <section className="mt-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <KeyRound size={22} className="text-violet-600 md:w-6 md:h-6" />
+            <h2 className={`${TYPOGRAPHY.h2} flex items-center gap-2`}>
+              <KeyRound size={20} className="text-primary-600" />
               {t.staff.roleDefinitions}
             </h2>
-            <p className="text-sm md:text-base text-slate-500 mt-1">{t.staff.roleDefinitionsSubtitle}</p>
+            <p className={`${TYPOGRAPHY.body} mt-1`}>{t.staff.roleDefinitionsSubtitle}</p>
           </div>
-          <button
-            onClick={openCreateRole}
-            className="w-full sm:w-auto px-5 py-3 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 flex items-center justify-center gap-2 active:scale-95"
-          >
-            <Plus size={18} />
+          <button onClick={openCreateRole} className={`${BUTTONS.primary} w-full sm:w-auto`}>
+            <Plus size={16} />
             {t.staff.createRoleBtn}
           </button>
         </div>
 
         {roles.length === 0 ? (
-          <div className="py-16 text-center bg-white rounded-[32px] border border-slate-100 shadow-sm">
-            <div className="w-20 h-20 bg-violet-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <KeyRound size={36} className="text-violet-400" />
+          <div className={`${UI_COMPONENTS.card} items-center justify-center py-16 text-center`}>
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+              <KeyRound size={28} className="text-slate-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">No Roles Created Yet</h3>
-            <p className="text-slate-500 max-w-md mx-auto">Create your first role to start assigning staff members with specific admin permissions.</p>
+            <h3 className={`${TYPOGRAPHY.h3} mb-2`}>{t.noRolesCreated || "No Roles Created Yet"}</h3>
+            <p className={`${TYPOGRAPHY.body} max-w-sm mx-auto`}>Create your first role to start assigning staff members with specific admin permissions.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {roles.map(role => (
-              <div key={role.id} className="bg-white rounded-[28px] border border-slate-100 shadow-sm p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+              <div key={role.id} className={`${UI_COMPONENTS.cardInteractive} group`}>
                 <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-violet-600 transition-colors truncate max-w-[180px]">{role.name}</h3>
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">{role.description || 'No description'}</p>
+                  <div className="flex-1 min-w-0 pr-2">
+                    <h3 className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1 break-all`}>{role.name}</h3>
+                    <p className={`${TYPOGRAPHY.body} text-xs mt-1 line-clamp-2 break-all`}>{role.description || (t.noRoleDescription || 'No description')}</p>
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => openEditRole(role)}
-                      className="p-2 hover:bg-violet-50 text-slate-400 hover:text-violet-600 rounded-xl transition-all"
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openEditRole(role); }}
+                      className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-primary-600`}
                       title="Edit role"
                     >
-                      <Pencil size={16} />
+                      <Pencil size={14} />
                     </button>
-                    <button 
-                      onClick={() => handleDeleteRole(role)}
-                      className="p-2 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all"
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteRole(role); }}
+                      className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
                       title="Delete role"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
 
                 {/* Permissions Tags - Grouped by Module */}
-                <div className="space-y-2 mb-4 min-h-[40px]">
+                <div className="space-y-2.5 mb-4 flex-grow">
                   {Object.entries(PERMISSION_GROUPS).map(([groupKey, group]) => {
-                    const groupPerms = role.permissions.filter(p => 
+                    const groupPerms = role.permissions.filter(p =>
                       Object.keys(group.subPermissions).includes(p)
                     );
                     if (groupPerms.length === 0) return null;
-                    
+
                     return (
-                      <div key={groupKey} className="flex flex-wrap gap-1 items-center">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tight mr-1">
+                      <div key={groupKey} className="flex flex-wrap gap-1.5 items-center">
+                        <span className={`${TYPOGRAPHY.label} !text-[10px] mr-1`}>
                           {i18nT(group.label)}:
                         </span>
                         {groupPerms.map(perm => (
-                          <span key={perm} className="px-1.5 py-0.5 bg-violet-50 text-violet-600 text-[8px] font-black uppercase tracking-wider rounded border border-violet-100/50">
+                          <span key={perm} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md border border-slate-200">
                             {i18nT(PERMISSION_MODULES[perm]?.label) || perm}
                           </span>
                         ))}
@@ -331,9 +321,9 @@ export default function StaffManagementPage() {
                 </div>
 
                 {/* Staff Count */}
-                <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-500">
+                <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-auto">
                   <Users size={14} />
-                  <span className="font-medium">
+                  <span>
                     {i18nT('admin.staff.staffMemberCount', { count: getStaffCount(role.id) })}
                   </span>
                 </div>
@@ -344,14 +334,14 @@ export default function StaffManagementPage() {
       </section>
 
       {/* ─── Section B: Staff Members ─── */}
-      <section>
+      <section className="mt-5">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <Users size={22} className="text-violet-600 md:w-6 md:h-6" />
+            <h2 className={`${TYPOGRAPHY.h2} flex items-center gap-2`}>
+              <Users size={20} className="text-primary-600" />
               {t.staff.activeStaff}
             </h2>
-            <p className="text-sm md:text-base text-slate-500 mt-1">{t.staff.activeStaffSubtitle}</p>
+            <p className={`${TYPOGRAPHY.body} mt-1`}>{t.staff.activeStaffSubtitle}</p>
           </div>
           <button
             onClick={() => {
@@ -363,85 +353,80 @@ export default function StaffManagementPage() {
               setShowPassword(false);
             }}
             disabled={roles.length === 0}
-            className="w-full sm:w-auto px-5 py-3 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`${BUTTONS.primary} w-full sm:w-auto`}
           >
-            <UserPlus size={18} />
+            <UserPlus size={16} />
             {t.staff.createStaff}
           </button>
         </div>
 
         {staffUsers.length === 0 ? (
-          <div className="py-16 text-center bg-white rounded-[32px] border border-slate-100 shadow-sm">
-            <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <UserPlus size={36} className="text-indigo-400" />
+          <div className={`${UI_COMPONENTS.card} items-center justify-center py-16 text-center`}>
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+              <UserPlus size={28} className="text-slate-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">No Staff Members Yet</h3>
-            <p className="text-slate-500 max-w-md mx-auto">
-              {roles.length === 0 
-                ? 'Create a role first, then add staff members.' 
+            <h3 className={`${TYPOGRAPHY.h3} mb-2`}>{t.noStaffMembers || "No Staff Members Yet"}</h3>
+            <p className={`${TYPOGRAPHY.body} max-w-sm mx-auto`}>
+              {roles.length === 0
+                ? 'Create a role first, then add staff members.'
                 : 'Add your first staff member by clicking "Add Staff" above.'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className={UI_COMPONENTS.gridContainer}>
             {staffUsers.map(user => {
               const userRole = roles.find(r => r.id === user.staffRoleId);
               return (
-                <div key={user.id} className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-6 flex flex-col hover:shadow-xl hover:shadow-violet-500/5 transition-all duration-500 group relative overflow-hidden">
-                  {/* Background Decoration */}
-                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-violet-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"></div>
-                  
-                  <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-violet-50 text-violet-600 font-bold text-xl flex items-center justify-center shrink-0 border border-violet-100 shadow-sm group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                <div key={user.id} className={`${UI_COMPONENTS.card} relative overflow-hidden group`}>
+                  <div className="flex justify-between items-start mb-5">
+                    <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                      <div className="w-11 h-11 rounded-lg bg-primary-50 text-primary-600 font-semibold text-lg flex items-center justify-center shrink-0 border border-primary-100">
                         {user.photoURL ? (
-                          <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                          <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover rounded-lg" />
                         ) : (
                           user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-black text-slate-900 group-hover:text-violet-600 transition-colors truncate max-w-[150px]">{user.name || t.noName}</p>
-                        <p className="text-xs text-slate-400 font-bold truncate max-w-[150px] uppercase tracking-tight">{user.email}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className={`${TYPOGRAPHY.h3} truncate`}>{user.name || t.noName}</p>
+                        <p className={`${TYPOGRAPHY.body} text-xs truncate mt-0.5`}>{user.email}</p>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => handleRemoveStaff(user.id, user.name || user.email)}
-                      className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100"
+                      className={`${BUTTONS.ghost} shrink-0 !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity`}
                       title={t.staff.deleteStaffConfirm}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-5 mt-auto relative z-10">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.staff.staffRole}</span>
-                        <span className="px-2.5 py-1 bg-violet-50 text-violet-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-violet-100 shadow-sm">
-                          {getRoleName(user.staffRoleId)}
-                        </span>
-                      </div>
+                  <div className="flex flex-col gap-4 mt-auto">
+                    <div className="flex items-center justify-between">
+                      <span className={`${TYPOGRAPHY.label} !text-[10px]`}>{t.staff.staffRole}</span>
+                      <span className="px-2 py-1 bg-primary-50 text-primary-700 rounded-md text-[10px] font-semibold uppercase tracking-wider border border-primary-100">
+                        {getRoleName(user.staffRoleId)}
+                      </span>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-50">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">{t.staff.permissions}</p>
+                    <div className="pt-3 border-t border-slate-100">
+                      <p className={`${TYPOGRAPHY.label} !text-[10px] mb-2`}>{t.staff.permissions}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {userRole?.permissions.slice(0, 4).map(perm => {
                           const label = i18nT(PERMISSION_MODULES[perm]?.label) || perm;
                           return (
-                            <span key={perm} className="px-2 py-1 bg-slate-50 text-slate-500 text-[9px] font-bold uppercase tracking-wider rounded-md border border-slate-100 group-hover:bg-violet-50/50 group-hover:text-violet-600 group-hover:border-violet-100 transition-colors">
+                            <span key={perm} className="px-2 py-1 bg-slate-50 text-slate-600 text-[10px] font-medium rounded-md border border-slate-200">
                               {label}
                             </span>
                           );
                         })}
                         {(userRole?.permissions.length || 0) > 4 && (
-                          <span className="px-2 py-1 bg-slate-50 text-slate-400 text-[9px] font-bold rounded-md border border-slate-100">
+                          <span className="px-2 py-1 bg-slate-50 text-slate-500 text-[10px] font-medium rounded-md border border-slate-200">
                             +{(userRole?.permissions.length || 0) - 4}
                           </span>
                         )}
                         {(userRole?.permissions.length || 0) === 0 && (
-                          <span className="text-[10px] font-bold text-slate-400 italic">{t.staff.unassigned}</span>
+                          <span className="text-[10px] font-medium text-slate-400 italic">{t.staff.unassigned}</span>
                         )}
                       </div>
                     </div>
@@ -455,21 +440,22 @@ export default function StaffManagementPage() {
 
       {/* ─── Role Modal ─── */}
       {showRoleModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">
+        <div className={UI_COMPONENTS.modalBackdrop}>
+          <div className={UI_COMPONENTS.modalContent}>
+            <div className="p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+              <h2 className={TYPOGRAPHY.h2}>
                 {editingRole ? i18nT('admin.staff.editRole', { name: editingRole.name }) : t.staff.createRole}
               </h2>
-              <button onClick={() => setShowRoleModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
-                <X size={20} className="text-black" />
+              <button onClick={() => setShowRoleModal(false)} className={`${BUTTONS.ghost} !p-2`}>
+                <X size={20} />
               </button>
             </div>
 
             <div className="space-y-5">
               {/* Show Error inside Modal if submitting */}
               {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm">
                   <AlertCircle size={16} className="shrink-0" />
                   <span className="font-medium">{error}</span>
                 </div>
@@ -477,66 +463,66 @@ export default function StaffManagementPage() {
 
               {/* Role Name */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{t.staff.roleNameLabel}</label>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.staff.roleNameLabel}</label>
                 <input
                   type="text"
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
-                  placeholder="e.g. Content Manager"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 font-medium text-slate-700 transition-all"
+                  placeholder={t.roleNamePlaceholder || "e.g. Content Manager"}
+                  className={UI_COMPONENTS.input}
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{t.staff.description}</label>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.staff.description}</label>
                 <input
                   type="text"
                   value={roleDescription}
                   onChange={(e) => setRoleDescription(e.target.value)}
-                  placeholder="e.g. Can manage courses and training plans"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 font-medium text-slate-700 transition-all"
+                  placeholder={t.roleDescPlaceholder || "e.g. Can manage courses and training plans"}
+                  className={UI_COMPONENTS.input}
                 />
               </div>
 
               {/* Permissions */}
               <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="block text-sm font-bold text-slate-700">{t.staff.permissions} *</label>
-                  <button 
+                <div className="flex justify-between items-center mb-2">
+                  <label className={`${TYPOGRAPHY.label}`}>{t.staff.permissions} *</label>
+                  <button
                     onClick={toggleAllPermissions}
-                    className="text-xs font-bold text-violet-600 hover:text-violet-800 transition-colors"
+                    className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors"
                   >
                     {selectedPermissions.length === ALL_PERMISSIONS.length ? t.staff.deselectAll : t.staff.selectAll}
                   </button>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {Object.entries(PERMISSION_GROUPS).map(([groupKey, group]) => (
-                    <div key={groupKey} className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
-                      <div className="bg-slate-100/50 px-4 py-3 border-b border-slate-200">
-                        <h3 className="text-sm font-bold text-slate-800">{i18nT(group.label)}</h3>
+                    <div key={groupKey} className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                      <div className="bg-slate-100/70 px-4 py-2 border-b border-slate-200">
+                        <h3 className="text-xs font-semibold text-slate-800">{i18nT(group.label)}</h3>
                       </div>
                       <div className="p-2 space-y-1">
                         {Object.entries(group.subPermissions).map(([permKey, subPerm]) => {
                           const perm = permKey as Permission;
+                          const isSelected = selectedPermissions.includes(perm);
                           return (
-                            <label 
-                              key={perm} 
-                              className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                                selectedPermissions.includes(perm) 
-                                  ? 'bg-violet-50 border border-violet-200' 
-                                  : 'hover:bg-slate-100 border border-transparent'
-                              }`}
+                            <label
+                              key={perm}
+                              className={`flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all border ${isSelected
+                                  ? 'bg-primary-50 border-primary-200'
+                                  : 'hover:bg-slate-100 border-transparent'
+                                }`}
                             >
                               <input
                                 type="checkbox"
-                                checked={selectedPermissions.includes(perm)}
+                                checked={isSelected}
                                 onChange={() => togglePermission(perm)}
-                                className="w-4 h-4 accent-violet-600 rounded"
+                                className="w-4 h-4 mt-0.5 accent-primary-600 rounded border-slate-300"
                               />
                               <div className="flex-1">
-                                <p className="text-[13px] font-bold text-slate-700 leading-tight">{i18nT(subPerm.label)}</p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">{i18nT(subPerm.description)}</p>
+                                <p className="text-sm font-semibold text-slate-800 leading-tight">{i18nT(subPerm.label)}</p>
+                                <p className="text-xs text-slate-500 mt-1">{i18nT(subPerm.description)}</p>
                               </div>
                             </label>
                           );
@@ -551,13 +537,22 @@ export default function StaffManagementPage() {
               </div>
 
               {/* Submit */}
-              <button
-                onClick={handleSubmitRole}
-                disabled={!roleName.trim() || selectedPermissions.length === 0 || loading}
-                className="w-full py-3.5 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
-              >
-                {loading ? t.savingEllipsis : editingRole ? i18nT('admin.staff.updateRoleBtn') : t.staff.createRoleBtn}
-              </button>
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowRoleModal(false)}
+                  className={BUTTONS.secondary}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitRole}
+                  disabled={!roleName.trim() || selectedPermissions.length === 0 || loading}
+                  className={BUTTONS.primary}
+                >
+                  {loading ? t.savingEllipsis : editingRole ? i18nT('admin.staff.updateRoleBtn') : t.staff.createRoleBtn}
+                </button>
+              </div>
+              </div>
             </div>
           </div>
         </div>
@@ -565,99 +560,103 @@ export default function StaffManagementPage() {
 
       {/* ─── Add Staff Modal ─── */}
       {showUserModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in slide-in-from-bottom-4 duration-300">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">{t.staff.createStaff}</h2>
-              <button onClick={() => setShowUserModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
-                <X size={20} className="text-black" />
+              <h2 className={TYPOGRAPHY.h2}>{t.staff.createStaff}</h2>
+              <button onClick={() => setShowUserModal(false)} className={`${BUTTONS.ghost} !p-2`}>
+                <X size={20} />
               </button>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{t.fullName} *</label>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.fullName} *</label>
                 <input
                   type="text"
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
-                  placeholder="e.g. John Smith"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 font-medium text-slate-700 transition-all"
+                  placeholder={t.staffNamePlaceholder || "e.g. John Smith"}
+                  className={UI_COMPONENTS.input}
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{t.staff.emailAddress} *</label>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.staff.emailAddress} *</label>
                 <input
                   type="email"
                   value={staffEmail}
                   onChange={(e) => setStaffEmail(e.target.value)}
-                  placeholder="e.g. john@company.com"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 font-medium text-slate-700 transition-all"
+                  placeholder="name@gmail.com"
+                  className={UI_COMPONENTS.input}
                 />
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{t.staff.password} *</label>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.staff.password} *</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={staffPassword}
                     onChange={(e) => setStaffPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
-                    className="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 font-medium text-slate-700 transition-all"
+                    placeholder={t.passwordMinPlaceholder || "Min. 6 characters"}
+                    className={`${UI_COMPONENTS.input} pr-10`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
                 {staffPassword && staffPassword.length < 6 && (
-                  <p className="text-xs text-rose-500 font-medium mt-2">Password must be at least 6 characters</p>
+                  <p className="text-xs text-rose-500 font-medium mt-1.5">Password must be at least 6 characters</p>
                 )}
               </div>
 
               {/* Assign Role */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">{t.staff.staffRole} *</label>
-                <div className="relative">
-                  <select
-                    value={staffRoleId}
-                    onChange={(e) => setStaffRoleId(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 font-medium text-slate-700 cursor-pointer appearance-none transition-all"
-                  >
-                    <option value="">Select a role...</option>
-                    {roles.map(role => (
-                      <option key={role.id} value={role.id}>
-                        {role.name} — {i18nT('admin.staff.permissionsCount', { count: role.permissions.length })}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={16} />
-                </div>
+                <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.staff.staffRole} *</label>
+                <CustomSelect
+                  value={staffRoleId}
+                  onChange={(val) => setStaffRoleId(val)}
+                  options={[
+                    { value: '', label: 'Select a role...' },
+                    ...roles.map(role => ({
+                      value: role.id,
+                      label: `${role.name} — ${i18nT('admin.staff.permissionsCount', { count: role.permissions.length })}`
+                    }))
+                  ]}
+                />
               </div>
 
               {/* Info box */}
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                <p className="text-sm text-amber-700 font-medium">
-                  💡 After creating the account, share the email and password with the staff member. They will log in through the regular login page.
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mt-2">
+                <p className="text-xs text-slate-600">
+                  <span className="font-semibold text-slate-700">Note:</span> After creating the account, share the email and password with the staff member. They will log in through the regular login page.
                 </p>
               </div>
 
               {/* Submit */}
-              <button
-                onClick={handleSubmitUser}
-                disabled={!staffName.trim() || !staffEmail.trim() || staffPassword.length < 6 || !staffRoleId || loading}
-                className="w-full py-3.5 bg-violet-600 text-white rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-100 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
-              >
-                {loading ? t.savingEllipsis : t.staff.createStaffBtn}
-              </button>
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3 mt-4">
+                <button
+                  onClick={() => setShowUserModal(false)}
+                  className={BUTTONS.secondary}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitUser}
+                  disabled={!staffName.trim() || !staffEmail.trim() || staffPassword.length < 6 || !staffRoleId || loading}
+                  className={BUTTONS.primary}
+                >
+                  {loading ? t.savingEllipsis : t.staff.createStaffBtn}
+                </button>
+              </div>
             </div>
           </div>
         </div>

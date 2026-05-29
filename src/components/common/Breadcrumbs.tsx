@@ -131,7 +131,7 @@ export default function Breadcrumbs() {
   if (breadcrumbItems.length === 0) return null;
 
   return (
-    <nav className="flex mb-6 text-sm font-medium text-slate-500 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide items-center">
+    <nav className="flex text-sm font-medium text-slate-500 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide items-center">
       {breadcrumbItems.map((item, index) => (
         <div key={index} className="flex items-center">
           {index > 0 && (
