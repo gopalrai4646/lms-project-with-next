@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/', '/dashboard/'],
     },
-    sitemap: 'https://mentora.vercel.app/sitemap.xml',
+    sitemap: 'https://lms-project-with-next.vercel.app/sitemap.xml',
   };
 }
