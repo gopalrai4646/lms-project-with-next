@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://mentora.vercel.app'), // Update with actual Vercel domain later
+  metadataBase: new URL('https://lms-project-with-next.vercel.app'), // Update with actual Vercel domain later
   title: {
     default: "Mentora | Modern Learning Management System",
     template: "%s | Mentora LMS"
