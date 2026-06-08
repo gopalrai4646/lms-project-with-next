@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Course } from '@/store/slices/courseSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { enrollCourseRequest, saveCourseRequest } from '@/store/slices/authSlice';
+import { saveCourseRequest } from '@/store/slices/authSlice';
+import { initiatePaymentRequest } from '@/store/slices/paymentSlice';
 import { useTranslation } from 'react-i18next';
 import { Video, Heart, BookOpen, Play } from 'lucide-react';
 import { UI_COMPONENTS, BUTTONS, TYPOGRAPHY } from '@/constants/ui';
@@ -65,7 +66,7 @@ export default function CourseCard({ course }: CourseCardProps) {
     e.stopPropagation();
     e.preventDefault();
     if (!isEnrolled) {
-      dispatch(enrollCourseRequest(course.id));
+      dispatch(initiatePaymentRequest({ courseId: course.id, amount: course.price ?? 999 }));
     }
   };
 
@@ -161,7 +162,7 @@ export default function CourseCard({ course }: CourseCardProps) {
               disabled={authLoading}
               className={`${BUTTONS.primary} w-full`}
             >
-              {t.enroll || 'Enroll Now'}
+              {course.price === 0 ? t.enroll || 'Enroll Now' : 'Buy Now'}
             </button>
           )}
 

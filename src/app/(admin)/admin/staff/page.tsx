@@ -381,11 +381,12 @@ export default function StaffManagementPage() {
                   <div className="flex justify-between items-start mb-5">
                     <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
                       <div className="w-11 h-11 rounded-lg bg-primary-50 text-primary-600 font-semibold text-lg flex items-center justify-center shrink-0 border border-primary-100">
-                        {user.photoURL ? (
-                          <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover rounded-lg" />
-                        ) : (
-                          user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-                        )}
+                        <img 
+                          src={user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
+                          onError={(e) => { e.currentTarget.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'; }}
+                          alt={user.name || "Staff"} 
+                          className="w-full h-full object-cover rounded-lg" 
+                        />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className={`${TYPOGRAPHY.h3} truncate`}>{user.name || t.noName}</p>

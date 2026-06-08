@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTrainingPlansRequest } from '@/store/slices/trainingPlanSlice';
 import { fetchCoursesRequest } from '@/store/slices/courseSlice';
-import { enrollCourseRequest } from '@/store/slices/authSlice';
+import { initiatePaymentRequest } from '@/store/slices/paymentSlice';
 import { useTranslation } from 'react-i18next';
 import { ClipboardList, BookOpen, Target, GraduationCap, Video, Play } from 'lucide-react';
 import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
@@ -56,8 +56,9 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
   // Maintain the exact order defined in plan.courseIds
   const planCourses = plan?.courseIds?.map(cId => courses.find(c => c.id === cId)).filter(Boolean) || [];
 
-  const handleEnroll = (courseId: string) => {
-    dispatch(enrollCourseRequest(courseId));
+  const handleEnrollAndStart = (courseId: string) => {
+    const course = planCourses.find(c => c?.id === courseId);
+    dispatch(initiatePaymentRequest({ courseId, amount: course?.price ?? 999 }));
   };
 
   if ((planLoading || coursesLoading) && !plan) {
@@ -181,12 +182,11 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
                       </Link>
                     ) : (
                       <button
-                        onClick={() => handleEnroll(course.id)}
-                        disabled={authLoading}
-                        className={`${BUTTONS.primary} w-full sm:w-auto`}
-                      >
-                        {authLoading ? adminT.savingEllipsis || "..." : t.enroll || "Enroll"}
-                      </button>
+                          onClick={() => handleEnrollAndStart(course.id)}
+                          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap"
+                        >
+                          {course.price === 0 ? t.enrollNow || 'Enroll Now' : 'Buy Now'}
+                        </button>
                     )}
                   </div>
                 </div>

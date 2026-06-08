@@ -167,17 +167,12 @@ export default function Navbar() {
                   }`}
                 title="Account settings"
               >
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || "User"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 font-bold text-sm">
-                    {(user.displayName || user.email || "U")[0].toUpperCase()}
-                  </div>
-                )}
+                <img
+                  src={user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
+                  onError={(e) => { e.currentTarget.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'; }}
+                  alt={user.displayName || "User"}
+                  className="w-full h-full object-cover"
+                />
               </button>
 
               {/* User Settings Dropdown */}
