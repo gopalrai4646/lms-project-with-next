@@ -236,11 +236,12 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-primary-50 text-primary-600 font-semibold text-lg flex items-center justify-center shrink-0 border border-primary-100 overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                          {user.photoURL ? (
-                            <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-                          )}
+                          <img 
+                            src={user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
+                            onError={(e) => { e.currentTarget.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'; }}
+                            alt="" 
+                            className="w-full h-full object-cover" 
+                          />
                         </div>
                         <div className="min-w-0">
                           <p className={`${TYPOGRAPHY.h3} group-hover:text-primary-600 transition-colors line-clamp-1`}>
@@ -340,13 +341,12 @@ export default function AdminUsersPage() {
               className={`${UI_COMPONENTS.card} !p-0 overflow-hidden relative group hover:shadow-md hover:border-slate-300 transition-all`}
             >
               <div className="relative h-40 bg-slate-100 overflow-hidden border-b border-slate-100">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-primary-50 text-primary-600 font-semibold text-4xl">
-                    {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <img 
+                  src={user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
+                  onError={(e) => { e.currentTarget.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'; }}
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
                 
                 <div className="absolute top-4 right-4 z-10">
                   <span

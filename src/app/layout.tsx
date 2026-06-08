@@ -17,8 +17,45 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LMS Project",
-  description: "A comprehensive Learning Management System",
+  metadataBase: new URL('https://mentora.vercel.app'), // Update with actual Vercel domain later
+  title: {
+    default: "Mentora | Modern Learning Management System",
+    template: "%s | Mentora LMS"
+  },
+  description: "Mentora is a comprehensive Learning Management System (LMS) designed for modern education. Create courses, track progress, and learn online.",
+  keywords: ["Mentora", "LMS", "Learning Management System", "Online Courses", "Education", "E-learning", "Mentora LMS", "Training"],
+  authors: [{ name: "Mentora Team" }],
+  creator: "Mentora",
+  publisher: "Mentora",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: "Mentora | Modern Learning Management System",
+    description: "Mentora is a comprehensive Learning Management System (LMS) designed for modern education.",
+    url: "https://mentora.vercel.app",
+    siteName: "Mentora LMS",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mentora | Modern Learning Management System",
+    description: "Mentora is a comprehensive Learning Management System (LMS) designed for modern education.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({

@@ -110,11 +110,12 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
         <div className="p-5 space-y-6 overflow-y-auto no-scrollbar flex-1">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center text-3xl font-semibold shrink-0 border border-primary-100 overflow-hidden shadow-sm">
-              {user.photoURL ? (
-                <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
-              ) : (
-                user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
-              )}
+              <img 
+                src={user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
+                onError={(e) => { e.currentTarget.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'; }}
+                alt={user.name || "User"} 
+                className="w-full h-full object-cover" 
+              />
             </div>
             <div className="flex-1">
               <h3 className={TYPOGRAPHY.h3}>{user.name || t.noNameProvided}</h3>
