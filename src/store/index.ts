@@ -8,12 +8,14 @@ import userReducer from './slices/userSlice';
 import progressReducer from './slices/progressSlice';
 import trainingPlanReducer from './slices/trainingPlanSlice';
 import staffRoleReducer from './slices/staffRoleSlice';
+import paymentReducer from './slices/paymentSlice';
 import { authSaga } from './sagas/authSaga';
 import { courseSaga } from './sagas/courseSaga';
 import { userSaga } from './sagas/userSaga';
 import progressSaga from './sagas/progressSaga';
 import { trainingPlanSaga } from './sagas/trainingPlanSaga';
 import { staffRoleSaga } from './sagas/staffRoleSaga';
+import { paymentSaga } from './sagas/paymentSaga';
 
 function* rootSaga() {
   yield all([
@@ -23,6 +25,7 @@ function* rootSaga() {
     progressSaga(),
     trainingPlanSaga(),
     staffRoleSaga(),
+    paymentSaga(),
   ]);
 }
 
@@ -37,6 +40,7 @@ export const store = configureStore({
     progress: progressReducer,
     trainingPlans: trainingPlanReducer,
     staffRoles: staffRoleReducer,
+    payment: paymentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false, serializableCheck: false }).concat(sagaMiddleware),
