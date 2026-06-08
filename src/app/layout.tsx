@@ -45,6 +45,12 @@ export const metadata: Metadata = {
     title: "Mentora | Modern Learning Management System",
     description: "Mentora is a comprehensive Learning Management System (LMS) designed for modern education.",
   },
+  alternates: {
+    canonical: '/',
+  },
+  verification: {
+    google: 'JwqhQvIuKD9dk0wjgePbPRE5_cTHW3Y6vEjTkBcBwUU',
+  },
   robots: {
     index: true,
     follow: true,
@@ -63,6 +69,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Mentora LMS',
+    url: 'https://lms-project-with-next.vercel.app',
+    logo: 'https://lms-project-with-next.vercel.app/icon.png',
+    sameAs: [
+      'https://twitter.com/mentora',
+      'https://github.com/gopalrai4646/lms-project',
+    ],
+  };
+
   return (
     <html
       lang="en"
@@ -72,6 +90,10 @@ export default function RootLayout({
         className="min-h-full bg-slate-50 text-slate-900 scroll-smooth"
         suppressHydrationWarning
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ReduxProvider>
           <I18nProvider>
             <AuthProvider>
