@@ -235,9 +235,8 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
       throw new Error('Email must end with @gmail.com.');
     }
     if (phoneNumber) {
-      const digitsOnly = phoneNumber.replace(/\D/g, '');
-      if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
-        throw new Error(`Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`);
+      if (!/^\d{10}$/.test(phoneNumber)) {
+        throw new Error(`Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits only.`);
       }
     }
 
@@ -442,9 +441,8 @@ function* handleUpdateProfile(action: ReturnType<typeof updateProfileRequest>): 
     }
     
     if (phoneNumber) {
-      const digitsOnly = phoneNumber.replace(/\D/g, '');
-      if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
-        throw new Error(`Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`);
+      if (!/^\d{10}$/.test(phoneNumber)) {
+        throw new Error(`Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits only.`);
       }
     }
 
