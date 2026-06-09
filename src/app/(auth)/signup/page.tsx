@@ -109,9 +109,8 @@ export default function SignupPage() {
     }
 
     if (phoneNumber) {
-      const digitsOnly = phoneNumber.replace(/\D/g, '');
-      if (digitsOnly.length !== VALIDATION_LIMITS.AUTH.PHONE_LENGTH) {
-        errors.phoneNumber = `Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits.`;
+      if (!/^\d{10}$/.test(phoneNumber)) {
+        errors.phoneNumber = `Phone number must be exactly ${VALIDATION_LIMITS.AUTH.PHONE_LENGTH} digits only.`;
         hasError = true;
       }
     }

@@ -29,6 +29,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 import CustomSelect from '@/components/common/CustomSelect';
+import { VALIDATION_LIMITS } from '@/constants/validation';
 
 export default function StaffManagementPage() {
   const dispatch = useAppDispatch();
@@ -52,11 +53,13 @@ export default function StaffManagementPage() {
   const [editingRole, setEditingRole] = useState<StaffRole | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingStaff, setIsSubmittingStaff] = useState(false);
 
   // Role form
   const [roleName, setRoleName] = useState('');
   const [roleDescription, setRoleDescription] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
+  const [roleErrors, setRoleErrors] = useState<{name?: string; description?: string}>({});
 
   // Staff user form
   const [staffName, setStaffName] = useState('');
@@ -64,6 +67,7 @@ export default function StaffManagementPage() {
   const [staffPassword, setStaffPassword] = useState('');
   const [staffRoleId, setStaffRoleId] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [staffErrors, setStaffErrors] = useState<{name?: string; email?: string; password?: string}>({});
 
   // Filter staff users from the users list
   const staffUsers = useMemo(() => {
@@ -115,6 +119,23 @@ export default function StaffManagementPage() {
     }
   }, [isSubmitting, loading, error, editingRole, roleName]);
 
+  // Handle Staff action completion
+  useEffect(() => {
+    if (isSubmittingStaff && !loading) {
+      if (error) {
+        setIsSubmittingStaff(false);
+      } else {
+        setSuccessMessage(i18nT('admin.staff.staffCreated', { name: staffName }));
+        setShowUserModal(false);
+        setIsSubmittingStaff(false);
+        setStaffName('');
+        setStaffEmail('');
+        setStaffPassword('');
+        setStaffRoleId('');
+      }
+    }
+  }, [isSubmittingStaff, loading, error, staffName, i18nT]);
+
   // Redirect if not admin
   if (currentUserRole !== 'admin') return null;
 
@@ -154,10 +175,42 @@ export default function StaffManagementPage() {
     }
   };
 
+  const roleNameRegex = /^[A-Za-z][A-Za-z0-9\s&-]{2,49}$/;
+
+  useEffect(() => {
+    const errs: any = {};
+    const trimmed = roleName.trim();
+    if (trimmed.length > 0) {
+      if (trimmed.length < 3) errs.name = "Role name must be at least 3 characters";
+      else if (trimmed.length > 50) errs.name = "Role name cannot exceed 50 characters";
+      else if (!roleNameRegex.test(trimmed)) errs.name = "Role name must start with a letter and contain only valid characters";
+      else if (roles.some(r => r.name.toLowerCase() === trimmed.toLowerCase() && r.id !== editingRole?.id)) errs.name = "Role already exists";
+    }
+
+    const descTrimmed = roleDescription.trim();
+    if (descTrimmed.length > 0) {
+      if (descTrimmed.length < 10) errs.description = "Description must be at least 10 characters";
+      else if (descTrimmed.length > 250) errs.description = "Description cannot exceed 250 characters";
+    }
+    setRoleErrors(errs);
+  }, [roleName, roleDescription, roles, editingRole]);
+
+  useEffect(() => {
+    const errs: any = {};
+    const trimmed = staffName.trim();
+    if (trimmed.length > 0) {
+      if (trimmed.length < VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH) errs.name = `Name must be at least ${VALIDATION_LIMITS.AUTH.NAME_MIN_LENGTH} characters`;
+      else if (trimmed.length > VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH) errs.name = `Name cannot exceed ${VALIDATION_LIMITS.AUTH.NAME_MAX_LENGTH} characters`;
+    }
+    setStaffErrors(errs);
+  }, [staffName]);
+
+  const isRoleValid = roleName.trim().length > 0 && Object.keys(roleErrors).length === 0 && selectedPermissions.length > 0;
+  const isStaffValid = staffName.trim().length > 0 && staffEmail.trim().length > 0 && staffPassword.length >= 6 && staffRoleId.length > 0 && Object.keys(staffErrors).length === 0;
+
   // Submit role (create or update)
   const handleSubmitRole = () => {
-    if (!roleName.trim()) return;
-    if (selectedPermissions.length === 0) return;
+    if (!isRoleValid) return;
 
     setIsSubmitting(true);
     if (editingRole) {
@@ -191,21 +244,15 @@ export default function StaffManagementPage() {
 
   // Submit new staff user
   const handleSubmitUser = () => {
-    if (!staffName.trim() || !staffEmail.trim() || !staffPassword || !staffRoleId) return;
-    if (staffPassword.length < 6) return;
+    if (!isStaffValid) return;
 
+    setIsSubmittingStaff(true);
     dispatch(createStaffUserRequest({
       name: staffName.trim(),
       email: staffEmail.trim().toLowerCase(),
       password: staffPassword,
       staffRoleId,
     }));
-    setSuccessMessage(i18nT('admin.staff.staffCreated', { name: staffName }));
-    setShowUserModal(false);
-    setStaffName('');
-    setStaffEmail('');
-    setStaffPassword('');
-    setStaffRoleId('');
   };
 
   // Remove staff user (delete)
@@ -239,7 +286,7 @@ export default function StaffManagementPage() {
         </div>
       )}
 
-      {error && (
+      {error && !showRoleModal && !showUserModal && (
         <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm font-medium">
           <AlertCircle size={18} className="shrink-0" />
           <span>{error}</span>
@@ -403,9 +450,12 @@ export default function StaffManagementPage() {
                   </div>
 
                   <div className="flex flex-col gap-4 mt-auto">
-                    <div className="flex items-center justify-between">
-                      <span className={`${TYPOGRAPHY.label} !text-[10px]`}>{t.staff.staffRole}</span>
-                      <span className="px-2 py-1 bg-primary-50 text-primary-700 rounded-md text-[10px] font-semibold uppercase tracking-wider border border-primary-100">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`${TYPOGRAPHY.label} !text-[10px] shrink-0`}>{t.staff.staffRole}</span>
+                      <span 
+                        className="px-2 py-1 bg-primary-50 text-primary-700 rounded-md text-[10px] font-semibold uppercase tracking-wider border border-primary-100 truncate max-w-[140px] text-right"
+                        title={getRoleName(user.staffRoleId)}
+                      >
                         {getRoleName(user.staffRoleId)}
                       </span>
                     </div>
@@ -470,8 +520,16 @@ export default function StaffManagementPage() {
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
                   placeholder={t.roleNamePlaceholder || "e.g. Content Manager"}
-                  className={UI_COMPONENTS.input}
+                  className={`${UI_COMPONENTS.input} ${roleErrors.name ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                 />
+                <div className="flex justify-between items-start mt-1.5">
+                  {roleErrors.name ? (
+                    <p className="text-rose-500 text-xs font-medium">{roleErrors.name}</p>
+                  ) : <span />}
+                  <span className={`text-[11px] font-medium ${roleName.length > 50 ? 'text-rose-500' : 'text-slate-400'}`}>
+                    {roleName.length} / 50
+                  </span>
+                </div>
               </div>
 
               {/* Description */}
@@ -482,8 +540,16 @@ export default function StaffManagementPage() {
                   value={roleDescription}
                   onChange={(e) => setRoleDescription(e.target.value)}
                   placeholder={t.roleDescPlaceholder || "e.g. Can manage courses and training plans"}
-                  className={UI_COMPONENTS.input}
+                  className={`${UI_COMPONENTS.input} ${roleErrors.description ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                 />
+                <div className="flex justify-between items-start mt-1.5">
+                  {roleErrors.description ? (
+                    <p className="text-rose-500 text-xs font-medium">{roleErrors.description}</p>
+                  ) : <span />}
+                  <span className={`text-[11px] font-medium ${roleDescription.length > 250 ? 'text-rose-500' : 'text-slate-400'}`}>
+                    {roleDescription.length} / 250
+                  </span>
+                </div>
               </div>
 
               {/* Permissions */}
@@ -547,7 +613,7 @@ export default function StaffManagementPage() {
                 </button>
                 <button
                   onClick={handleSubmitRole}
-                  disabled={!roleName.trim() || selectedPermissions.length === 0 || loading}
+                  disabled={!isRoleValid || loading}
                   className={BUTTONS.primary}
                 >
                   {loading ? t.savingEllipsis : editingRole ? i18nT('admin.staff.updateRoleBtn') : t.staff.createRoleBtn}
@@ -571,6 +637,14 @@ export default function StaffManagementPage() {
             </div>
 
             <div className="space-y-4">
+              {/* Show Error inside Modal if submitting */}
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 text-rose-700 rounded-lg text-sm">
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span className="font-medium">{error}</span>
+                </div>
+              )}
+
               {/* Name */}
               <div>
                 <label className={`${TYPOGRAPHY.label} block mb-1.5`}>{t.fullName} *</label>
@@ -579,8 +653,11 @@ export default function StaffManagementPage() {
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
                   placeholder={t.staffNamePlaceholder || "e.g. John Smith"}
-                  className={UI_COMPONENTS.input}
+                  className={`${UI_COMPONENTS.input} ${staffErrors.name ? '!border-rose-500 focus:!ring-rose-500/20' : ''}`}
                 />
+                {staffErrors.name && (
+                  <p className="text-rose-500 text-xs font-medium mt-1.5">{staffErrors.name}</p>
+                )}
               </div>
 
               {/* Email */}
@@ -652,7 +729,7 @@ export default function StaffManagementPage() {
                 </button>
                 <button
                   onClick={handleSubmitUser}
-                  disabled={!staffName.trim() || !staffEmail.trim() || staffPassword.length < 6 || !staffRoleId || loading}
+                  disabled={!isStaffValid || loading}
                   className={BUTTONS.primary}
                 >
                   {loading ? t.savingEllipsis : t.staff.createStaffBtn}
