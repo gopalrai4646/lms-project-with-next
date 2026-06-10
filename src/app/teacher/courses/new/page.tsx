@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateCourseRequest, fetchCoursesRequest } from '@/store/slices/courseSlice';
-import { VideoItem } from '@/store/slices/courseSlice';
+import { createCourseRequest } from '@/store/slices/courseSlice';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Image as ImageIcon, Plus, ArrowUp, ArrowDown, X, Loader2, CheckCircle2, Video, ChevronUp, ChevronDown, Trash2, AlertCircle, Globe, Lock } from 'lucide-react';
-import { hasPermission } from '@/lib/permissions';
+
 import { TYPOGRAPHY, UI_COMPONENTS, BUTTONS } from '@/constants/ui';
 import { VALIDATION_LIMITS } from '@/constants/validation';
 
@@ -18,29 +17,45 @@ interface VideoEntry {
   uploading: boolean;
   uploaded: boolean;
   url: string;
-  isExisting: boolean;
   duration?: number;
 }
 
-export default function EditCoursePage() {
+export default function NewCoursePage() {
   const router = useRouter();
-  const params = useParams();
-  const courseId = params.id as string;
   const dispatch = useAppDispatch();
-  const { courses, updateLoading, error } = useAppSelector((state) => state.courses);
-  const { role, permissions } = useAppSelector((state) => state.auth);
+  const { createLoading, error } = useAppSelector((state) => state.courses);
+  const { user, role } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
-  
-  const canEdit = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'courses_edit'));
-  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
-  const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0, visibility: 'public' as 'public' | 'private' });
-  const [videoEntries, setVideoEntries] = useState<VideoEntry[]>([]);
+  useEffect(() => {
+    if (role && role !== 'teacher') {
+      router.push('/dashboard');
+    }
+  }, [role, router]);
+
+  useEffect(() => {
+    if (user?.displayName) {
+      setFormData(prev => ({ ...prev, instructor: user.displayName! }));
+    }
+  }, [user]);
+
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    instructor: '',
+    price: 0,
+    visibility: 'public' as 'public' | 'private',
+  });
+
+  const [videoEntries, setVideoEntries] = useState<VideoEntry[]>([
+    { title: '', file: null, uploading: false, uploaded: false, url: '' }
+  ]);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [existingThumbnail, setExistingThumbnail] = useState<string | null>(null);
-  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{title?: string; description?: string; instructor?: string; thumbnail?: string; videos?: string}>({});
@@ -60,42 +75,9 @@ export default function EditCoursePage() {
       setFormErrors(prev => ({ ...prev, thumbnail: undefined }));
     }
   };
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (role && !canEdit) {
-      router.push('/admin');
-      return;
-    }
-    if (courses.length === 0) dispatch(fetchCoursesRequest());
-  }, [dispatch, courses.length, role, canEdit, router]);
-
-  useEffect(() => {
-    if (!initialized && courses.length > 0) {
-      const course = courses.find(c => c.id === courseId);
-      if (course) {
-        setFormData({ title: course.title, description: course.description, instructor: course.instructor, price: course.price, visibility: course.visibility || 'public' });
-        if (course.thumbnail) {
-          setThumbnailPreview(course.thumbnail);
-          setExistingThumbnail(course.thumbnail);
-        }
-        
-        if (course.videos && course.videos.length > 0) {
-          setVideoEntries([...course.videos].sort((a, b) => a.order - b.order).map(v => ({
-            title: v.title, file: null, uploading: false, uploaded: true, url: v.url, isExisting: true, duration: v.duration || 0
-          })));
-        } else if (course.videoUrl) {
-          setVideoEntries([{ title: t.courseVideo, file: null, uploading: false, uploaded: true, url: course.videoUrl, isExisting: true }]);
-        } else {
-          setVideoEntries([{ title: '', file: null, uploading: false, uploaded: false, url: '', isExisting: false }]);
-        }
-        setInitialized(true);
-      }
-    }
-  }, [courses, courseId, initialized, t]);
 
   const addVideoEntry = () => {
-    setVideoEntries(prev => [...prev, { title: '', file: null, uploading: false, uploaded: false, url: '', isExisting: false }]);
+    setVideoEntries(prev => [...prev, { title: '', file: null, uploading: false, uploaded: false, url: '', duration: 0 }]);
   };
 
   const removeVideoEntry = (index: number) => {
@@ -136,10 +118,10 @@ export default function EditCoursePage() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       updateVideoEntry(index, 'file', file);
-      updateVideoEntry(index, 'isExisting', false);
-      updateVideoEntry(index, 'uploaded', false);
+      
       const duration = await getVideoDuration(file);
       updateVideoEntry(index, 'duration', duration);
+
       if (!videoEntries[index].title) {
         updateVideoEntry(index, 'title', file.name.replace(/\.[^/.]+$/, ''));
       }
@@ -149,7 +131,7 @@ export default function EditCoursePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let hasError = false;
     const errors: {title?: string; description?: string; instructor?: string; thumbnail?: string; videos?: string} = {};
 
@@ -177,18 +159,18 @@ export default function EditCoursePage() {
       hasError = true;
     }
 
-    if (!thumbnailFile && !existingThumbnail) {
+    if (!thumbnailFile) {
       errors.thumbnail = "Please upload a course thumbnail.";
       hasError = true;
     }
 
-    const hasContent = videoEntries.some(v => v.file || v.isExisting);
-    if (!hasContent) { 
-      errors.videos = t.addAtLeastOneVideo || "Please add at least one video."; 
-      hasError = true; 
-    } else if (videoEntries.some(v => (v.file || v.isExisting) && !v.title.trim())) { 
-      errors.videos = t.giveEachVideoTitle || "Please provide a title for all videos."; 
-      hasError = true; 
+    const validEntries = videoEntries.filter(v => v.file);
+    if (validEntries.length === 0) {
+      errors.videos = t.addAtLeastOneVideo || "Please add at least one video.";
+      hasError = true;
+    } else if (videoEntries.some(v => v.file && !v.title.trim())) {
+      errors.videos = t.giveEachVideoTitle || "Please provide a title for all videos.";
+      hasError = true;
     }
 
     setFormErrors(errors);
@@ -198,37 +180,39 @@ export default function EditCoursePage() {
       setSubmitting(true);
       setUploadError(null);
 
-      const finalVideos: VideoItem[] = [];
+      const thumbnailUrl = await uploadToCloudinary(thumbnailFile as File);
+
+      const uploadedVideos = [];
       for (let i = 0; i < videoEntries.length; i++) {
         const entry = videoEntries[i];
-        if (entry.isExisting && !entry.file) {
-          finalVideos.push({ title: entry.title.trim(), url: entry.url, order: finalVideos.length, duration: entry.duration || 0 });
-        } else if (entry.file) {
-          updateVideoEntry(i, 'uploading', true);
-          const videoUrl = await uploadToCloudinary(entry.file);
-          updateVideoEntry(i, 'uploading', false);
-          updateVideoEntry(i, 'uploaded', true);
-          finalVideos.push({ title: entry.title.trim(), url: videoUrl, order: finalVideos.length, duration: entry.duration || 0 });
-        }
+        if (!entry.file) continue;
+
+        updateVideoEntry(i, 'uploading', true);
+        const videoUrl = await uploadToCloudinary(entry.file);
+        updateVideoEntry(i, 'uploading', false);
+        updateVideoEntry(i, 'uploaded', true);
+        updateVideoEntry(i, 'url', videoUrl);
+
+        uploadedVideos.push({
+          title: entry.title.trim(),
+          url: videoUrl,
+          order: uploadedVideos.length,
+          duration: entry.duration || 0,
+        });
       }
 
-      const totalDuration = finalVideos.reduce((acc, v) => acc + (v.duration || 0), 0);
+      const totalDuration = uploadedVideos.reduce((acc, v) => acc + (v.duration || 0), 0);
 
-      let thumbnailUrl = existingThumbnail;
-      if (thumbnailFile) {
-        thumbnailUrl = await uploadToCloudinary(thumbnailFile);
-      }
-
-      dispatch(updateCourseRequest({
-        id: courseId,
+      dispatch(createCourseRequest({
         ...formData,
-        thumbnail: thumbnailUrl || undefined,
-        videos: finalVideos,
+        thumbnail: thumbnailUrl,
+        videos: uploadedVideos,
         totalDuration,
-        videoUrl: finalVideos[0]?.url,
+        videoUrl: uploadedVideos[0]?.url,
+        createdBy: user?.uid,
       }));
 
-      router.push('/admin/courses');
+      router.push('/teacher/courses');
     } catch (err: any) {
       setUploadError(err.message || t.failedToUploadVideos);
     } finally {
@@ -236,21 +220,13 @@ export default function EditCoursePage() {
     }
   };
 
-  if (!initialized && courses.length > 0 && !courses.find(c => c.id === courseId)) {
-    return (
-      <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
-        <div className="bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-6 rounded-r-xl font-medium">{t.courseNotFound || "Course not found."}</div>
-      </div>
-    );
-  }
 
-  if (role && !canEdit) return null;
 
   return (
     <div className={`${UI_COMPONENTS.pageContainer} animate-in fade-in duration-700`}>
       <header className="mb-6">
-        <h1 className={TYPOGRAPHY.h1}>{t.editCourseTitle || "Edit Course"}</h1>
-        <p className={`${TYPOGRAPHY.body} mt-1`}>{t.editCourseSubtitle || "Modify course details and videos."}</p>
+        <h1 className={TYPOGRAPHY.h1}>{t.createNewCourse || "New Course"}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1`}>{t.uploadVideoDetails || "Upload videos and set up course details."}</p>
       </header>
 
       <div className={UI_COMPONENTS.card}>
@@ -456,7 +432,7 @@ export default function EditCoursePage() {
                         <p className="text-xs font-medium text-slate-600 truncate px-2">
                           {entry.uploading ? (
                             <span className="text-primary-600 flex items-center justify-center gap-1.5"><Loader2 size={14} className="animate-spin" /> {t.uploadingEllipsis || "Uploading..."}</span>
-                          ) : entry.isExisting ? (
+                          ) : entry.uploaded ? (
                             <span className="text-emerald-600 flex items-center justify-center gap-1.5"><CheckCircle2 size={14} /> {t.videoAttached || "Video attached"}</span>
                           ) : entry.file ? (
                             <span className="flex items-center justify-center gap-1.5"><Video size={14} /> {entry.file.name}</span>
@@ -517,16 +493,16 @@ export default function EditCoursePage() {
             </button>
             <button
               type="submit"
-              disabled={updateLoading || submitting}
+              disabled={createLoading || submitting}
               className={`${BUTTONS.primary} w-full sm:w-auto`}
             >
-              {(submitting || updateLoading) ? (
+              {(submitting || createLoading) ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   {t.uploadingVideo || "Saving..."}
                 </>
               ) : (
-                t.saveChanges || "Save Changes"
+                t.createCourseBtn || "Create Course"
               )}
             </button>
           </div>

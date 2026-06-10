@@ -39,6 +39,18 @@ export async function POST(request: Request) {
       if (roleData && roleData.permissions && hasPermission(roleData.permissions, 'training_plans_assign')) {
         isAuthorized = true;
       }
+    } else if (callerData.role === 'teacher') {
+      let allPlansOwnedByTeacher = true;
+      for (const planId of trainingPlanIds) {
+        const planDoc = await adminDb.collection('trainingPlans').doc(planId).get();
+        if (!planDoc.exists || planDoc.data()?.createdBy !== callerUid) {
+          allPlansOwnedByTeacher = false;
+          break;
+        }
+      }
+      if (allPlansOwnedByTeacher && trainingPlanIds.length > 0) {
+        isAuthorized = true;
+      }
     }
 
     if (!isAuthorized) {

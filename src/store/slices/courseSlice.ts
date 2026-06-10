@@ -19,6 +19,7 @@ export interface Course {
   totalDuration?: number; // sum of video durations
   enrolledUsers?: string[];
   visibility?: 'public' | 'private'; // default: 'public'
+  createdBy?: string; // teacher's user ID
   createdAt: string;
 }
 

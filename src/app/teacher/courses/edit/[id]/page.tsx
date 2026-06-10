@@ -32,7 +32,7 @@ export default function EditCoursePage() {
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
   
-  const canEdit = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'courses_edit'));
+  const canEdit = role === 'admin' || role === 'teacher' || (role === 'staff' && hasPermission(permissions as any, 'courses_edit'));
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const [formData, setFormData] = useState({ title: '', description: '', instructor: '', price: 0, visibility: 'public' as 'public' | 'private' });
@@ -64,7 +64,7 @@ export default function EditCoursePage() {
 
   useEffect(() => {
     if (role && !canEdit) {
-      router.push('/admin');
+      router.push('/teacher/courses');
       return;
     }
     if (courses.length === 0) dispatch(fetchCoursesRequest());
@@ -228,7 +228,7 @@ export default function EditCoursePage() {
         videoUrl: finalVideos[0]?.url,
       }));
 
-      router.push('/admin/courses');
+      router.push('/teacher/courses');
     } catch (err: any) {
       setUploadError(err.message || t.failedToUploadVideos);
     } finally {

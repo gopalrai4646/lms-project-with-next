@@ -25,9 +25,9 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
   const { t: i18nT, i18n } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
   const language = i18n.language;
-  const { role, permissions } = useAppSelector(state => state.auth);
+  const { user: currentUser, role, permissions } = useAppSelector(state => state.auth);
 
-  const canAssignPlans = role === 'admin' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_assign'));
+  const canAssignPlans = role === 'admin' || role === 'teacher' || (role === 'staff' && hasPermission(permissions as any, 'training_plans_assign'));
   const canEnrollCourses = role === 'admin';
 
   const [isAssigning, setIsAssigning] = useState(false);
@@ -179,7 +179,10 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                   onChange={(val) => setSelectedPlanId(val)}
                   options={[
                     { value: '', label: t.selectTrainingPlan || 'Select Training Plan' },
-                    ...trainingPlans.filter(tp => !validAssignedPlans.includes(tp.id)).map(plan => ({
+                    ...trainingPlans
+                      .filter(tp => role === 'teacher' ? tp.createdBy === currentUser?.uid : true)
+                      .filter(tp => !validAssignedPlans.includes(tp.id))
+                      .map(plan => ({
                       value: plan.id,
                       label: plan.name
                     }))
@@ -203,7 +206,7 @@ export default function UserDetailsModal({ user, courses, onClose }: Props) {
                       <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span> 
                       <span className="truncate text-sm font-medium text-slate-700">{getPlanName(id)}</span>
                     </div>
-                    {canAssignPlans && (
+                    {canAssignPlans && (role !== 'teacher' || trainingPlans.find(tp => tp.id === id)?.createdBy === currentUser?.uid) && (
                       <button
                         onClick={() => handleUnassignPlan(id)}
                         className={`${BUTTONS.ghost} !p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 shrink-0`}

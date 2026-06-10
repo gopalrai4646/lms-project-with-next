@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch role from Firestore
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           const userData = userDoc.exists() ? userDoc.data() : {};
-          const role = userData.role as 'student' | 'admin' | 'staff' || null;
+          const role = userData.role as 'student' | 'admin' | 'staff' | 'teacher' || null;
 
           // If staff, resolve permissions from the staffRoles collection
           let permissions: string[] = [];
@@ -52,6 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               enrolledCourses: userData.enrolledCourses || [],
               savedCourses: userData.savedCourses || [],
               assignedTrainingPlans: userData.assignedTrainingPlans || [],
+              status: userData.status,
+              teacherProfile: userData.teacherProfile,
             },
             role,
             staffRoleId,

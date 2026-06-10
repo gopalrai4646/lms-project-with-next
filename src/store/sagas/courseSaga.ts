@@ -157,62 +157,74 @@ function* handleDeleteCourse(action: ReturnType<typeof deleteCourseRequest>): an
     yield call(deleteDoc, courseRef);
 
     // 4. Cleanup Users (enrolledCourses and savedCourses)
-    console.log(`Saga: Cleaning up user enrollments and saved courses for: ${id}`);
-    const usersRef = collection(db, 'users');
-    const enrolledQuery = query(usersRef, where('enrolledCourses', 'array-contains', id));
-    const savedQuery = query(usersRef, where('savedCourses', 'array-contains', id));
+    try {
+      console.log(`Saga: Cleaning up user enrollments and saved courses for: ${id}`);
+      const usersRef = collection(db, 'users');
+      const enrolledQuery = query(usersRef, where('enrolledCourses', 'array-contains', id));
+      const savedQuery = query(usersRef, where('savedCourses', 'array-contains', id));
 
-    const [enrolledSnap, savedSnap]: [any, any] = yield all([
-      call(getDocs, enrolledQuery),
-      call(getDocs, savedQuery)
-    ]);
+      const [enrolledSnap, savedSnap]: [any, any] = yield all([
+        call(getDocs, enrolledQuery),
+        call(getDocs, savedQuery)
+      ]);
 
-    if (!enrolledSnap.empty || !savedSnap.empty) {
-      const userBatch = writeBatch(db);
-      enrolledSnap.forEach((userDoc: any) => {
-        userBatch.update(userDoc.ref, {
-          enrolledCourses: arrayRemove(id)
+      if (!enrolledSnap.empty || !savedSnap.empty) {
+        const userBatch = writeBatch(db);
+        enrolledSnap.forEach((userDoc: any) => {
+          userBatch.update(userDoc.ref, {
+            enrolledCourses: arrayRemove(id)
+          });
         });
-      });
-      savedSnap.forEach((userDoc: any) => {
-        userBatch.update(userDoc.ref, {
-          savedCourses: arrayRemove(id)
+        savedSnap.forEach((userDoc: any) => {
+          userBatch.update(userDoc.ref, {
+            savedCourses: arrayRemove(id)
+          });
         });
-      });
-      yield call([userBatch, userBatch.commit]);
-      console.log(`Saga: Successfully cleaned up ${enrolledSnap.size + savedSnap.size} user records`);
+        yield call([userBatch, userBatch.commit]);
+        console.log(`Saga: Successfully cleaned up ${enrolledSnap.size + savedSnap.size} user records`);
+      }
+    } catch (err: any) {
+      console.warn(`Saga: Skipping user cleanup due to permission or other error: ${err.message}`);
     }
 
     // 5. Cleanup User Progress
-    console.log(`Saga: Cleaning up user progress for course: ${id}`);
-    const progressRef = collection(db, 'userProgress');
-    const progressQuery = query(progressRef, where('courseId', '==', id));
-    const progressSnap: any = yield call(getDocs, progressQuery);
-    
-    if (!progressSnap.empty) {
-      const progressBatch = writeBatch(db);
-      progressSnap.forEach((progDoc: any) => {
-        progressBatch.delete(progDoc.ref);
-      });
-      yield call([progressBatch, progressBatch.commit]);
-      console.log(`Saga: Successfully deleted ${progressSnap.size} progress records`);
+    try {
+      console.log(`Saga: Cleaning up user progress for course: ${id}`);
+      const progressRef = collection(db, 'userProgress');
+      const progressQuery = query(progressRef, where('courseId', '==', id));
+      const progressSnap: any = yield call(getDocs, progressQuery);
+      
+      if (!progressSnap.empty) {
+        const progressBatch = writeBatch(db);
+        progressSnap.forEach((progDoc: any) => {
+          progressBatch.delete(progDoc.ref);
+        });
+        yield call([progressBatch, progressBatch.commit]);
+        console.log(`Saga: Successfully deleted ${progressSnap.size} progress records`);
+      }
+    } catch (err: any) {
+      console.warn(`Saga: Skipping progress cleanup due to permission or other error: ${err.message}`);
     }
 
     // 6. Cleanup Training Plans
-    console.log(`Saga: Cleaning up training plans for course: ${id}`);
-    const plansRef = collection(db, 'trainingPlans');
-    const plansQuery = query(plansRef, where('courseIds', 'array-contains', id));
-    const plansSnap: any = yield call(getDocs, plansQuery);
+    try {
+      console.log(`Saga: Cleaning up training plans for course: ${id}`);
+      const plansRef = collection(db, 'trainingPlans');
+      const plansQuery = query(plansRef, where('courseIds', 'array-contains', id));
+      const plansSnap: any = yield call(getDocs, plansQuery);
 
-    if (!plansSnap.empty) {
-      const plansBatch = writeBatch(db);
-      plansSnap.forEach((planDoc: any) => {
-        plansBatch.update(planDoc.ref, {
-          courseIds: arrayRemove(id)
+      if (!plansSnap.empty) {
+        const plansBatch = writeBatch(db);
+        plansSnap.forEach((planDoc: any) => {
+          plansBatch.update(planDoc.ref, {
+            courseIds: arrayRemove(id)
+          });
         });
-      });
-      yield call([plansBatch, plansBatch.commit]);
-      console.log(`Saga: Successfully removed course ${id} from ${plansSnap.size} training plans`);
+        yield call([plansBatch, plansBatch.commit]);
+        console.log(`Saga: Successfully removed course ${id} from ${plansSnap.size} training plans`);
+      }
+    } catch (err: any) {
+      console.warn(`Saga: Skipping training plans cleanup due to permission or other error: ${err.message}`);
     }
 
     yield put(deleteCourseSuccess(id));

@@ -71,6 +71,28 @@ export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuard
         router.push(firstAllowed);
         return;
       }
+      // Teacher should be in /teacher/dashboard or /teacher/pending
+      if (role === 'teacher') {
+        if (user.status === 'pending') {
+          router.push('/teacher/pending');
+        } else {
+          router.push('/teacher/dashboard');
+        }
+        return;
+      }
+    }
+
+    // 4. Logic for Teacher Routes (/teacher/**)
+    if (pathname.startsWith('/teacher') && pathname !== '/teacher/pending') {
+      if (role !== 'teacher') {
+        router.push('/dashboard');
+        return;
+      }
+
+      if (user.status === 'pending') {
+        router.push('/teacher/pending');
+        return;
+      }
     }
   }, [user, role, isImpersonating, loading, router, pathname, permissions]);
 
@@ -97,7 +119,20 @@ export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuard
       if (requiredModule && !hasModuleAccess(permissions, requiredModule)) return null;
     }
   }
-  if (pathname.startsWith('/dashboard') && (role === 'admin' || role === 'staff') && !isImpersonating) return null;
+  
+  if (pathname.startsWith('/dashboard')) {
+    if (role === 'admin' && !isImpersonating) return null;
+    if (role === 'staff' && !isImpersonating) return null;
+    if (role === 'teacher') return null;
+  }
+
+  if (pathname.startsWith('/teacher') && role !== 'teacher') {
+    return null;
+  }
+
+  if (pathname.startsWith('/teacher') && role === 'teacher' && user.status === 'pending' && pathname !== '/teacher/pending') {
+    return null;
+  }
 
   return <>{children}</>;
 }

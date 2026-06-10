@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
@@ -8,30 +8,21 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { 
   LayoutDashboard, 
   BookOpen, 
-  ClipboardList, 
   Settings, 
-  BarChart3, 
-  Wrench, 
-  Users,
-  PieChart,
-  Award,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck
+  UserSquare2,
+  ClipboardList
 } from 'lucide-react';
 
-import { useTranslation } from 'react-i18next';
 import { setMobileMenuOpen, setSidebarCollapsed } from '@/store/slices/settingsSlice';
-import { hasModuleAccess, ModuleGroup } from '@/lib/permissions';
 
-export default function Sidebar() {
+export default function TeacherSidebar() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { user, role, isImpersonating, permissions } = useAppSelector((state) => state.auth);
+  const { user, role } = useAppSelector((state) => state.auth);
   const { isMobileMenuOpen, isSidebarCollapsed } = useAppSelector((state) => state.settings);
-  const { t: i18nT } = useTranslation();
 
-  // Restore collapsed state from localStorage on mount
   useEffect(() => {
     const savedCollapsed = localStorage.getItem('sidebar_collapsed');
     if (savedCollapsed === 'true') {
@@ -51,50 +42,18 @@ export default function Sidebar() {
     }
   };
 
-  const t = i18nT('nav', { returnObjects: true }) as any;
+  if (!user || role !== 'teacher') return null;
 
-  if (!user) return null;
-
-  const userMenuItems = [
-    { name: t.dashboard, href: '/dashboard', icon: <LayoutDashboard size={18} /> },
-    { name: t.courses, href: '/dashboard/courses', icon: <BookOpen size={18} /> },
-    { name: t.trainingPlans, href: '/training-plans', icon: <ClipboardList size={18} /> },
-    { name: t.accountSettings, href: '/settings', icon: <Settings size={18} /> },
+  const menuItems = [
+    { name: 'Dashboard', href: '/teacher/dashboard', icon: <LayoutDashboard size={18} /> },
+    { name: 'Manage Courses', href: '/teacher/courses', icon: <BookOpen size={18} /> },
+    { name: 'Training Plans', href: '/teacher/training-plans', icon: <ClipboardList size={18} /> },
+    { name: 'Manage Users', href: '/teacher/users', icon: <UserSquare2 size={18} /> },
+    { name: 'Account', href: '/teacher/account', icon: <Settings size={18} /> },
   ];
-
-  // Full admin menu items (all modules)
-  const allAdminMenuItems = [
-    { name: t.adminDashboard, href: '/admin', icon: <LayoutDashboard size={18} />, module: 'dashboard' as ModuleGroup },
-    { name: t.topCourses, href: '/admin/top-courses', icon: <BarChart3 size={18} />, module: 'top_courses' as ModuleGroup },
-    { name: t.topTrainingPlans, href: '/admin/top-training-plans', icon: <Award size={18} />, module: 'top_training_plans' as ModuleGroup },
-    { name: t.manageCourses, href: '/admin/courses', icon: <Wrench size={18} />, module: 'courses' as ModuleGroup },
-    { name: t.trainingPlans, href: '/admin/training-plans', icon: <ClipboardList size={18} />, module: 'training_plans' as ModuleGroup },
-    { name: t.users, href: '/admin/users', icon: <Users size={18} />, module: 'users' as ModuleGroup },
-  ];
-
-  // Build the menu based on role
-  let menuItems;
-  if (role === 'admin') {
-    // Admin sees everything + Teachers + Staff Management + Settings
-    menuItems = [
-      ...allAdminMenuItems,
-      { name: t.teachers || 'Teachers', href: '/admin/teachers', icon: <Users size={18} /> },
-      { name: t.staffRoles || 'Staff & Roles', href: '/admin/staff', icon: <ShieldCheck size={18} /> },
-      { name: t.settings, href: '/settings', icon: <Settings size={18} /> },
-    ];
-  } else if (role === 'staff') {
-    // Staff sees only modules they have permission for + Settings
-    menuItems = [
-      ...allAdminMenuItems.filter(item => hasModuleAccess(permissions as any, item.module)),
-      { name: t.settings, href: '/settings', icon: <Settings size={18} /> },
-    ];
-  } else {
-    menuItems = userMenuItems;
-  }
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
@@ -103,11 +62,10 @@ export default function Sidebar() {
       )}
       
       <aside 
-        className={`fixed left-0 ${isImpersonating ? 'top-[104px]' : 'top-16'} bottom-0 bg-slate-50 border-r border-slate-200/70 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 flex flex-col ${
+        className={`fixed left-0 top-16 bottom-0 bg-slate-50 border-r border-slate-200/70 transition-all duration-300 ease-in-out z-50 group/sidebar w-64 flex flex-col ${
           isSidebarCollapsed ? 'md:w-16' : 'md:w-64'
         } ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >
-        {/* Toggle Button */}
         <button 
           onClick={handleToggleCollapse}
           className="hidden md:flex absolute -right-3 top-5 w-6 h-6 bg-white border border-slate-200 rounded flex items-center justify-center text-xs shadow-sm hover:bg-slate-50 transition-all z-50 text-slate-400 hover:text-slate-600"
