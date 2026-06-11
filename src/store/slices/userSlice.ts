@@ -4,13 +4,19 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'admin' | 'staff';
+  role: 'student' | 'admin' | 'staff' | 'teacher';
   staffRoleId?: string;
   enrolledCourses?: string[];
   savedCourses?: string[];
   assignedTrainingPlans?: string[];
   photoURL: string | null;
   phoneNumber: string | null;
+  status?: 'pending' | 'approved';
+  teacherProfile?: {
+    experience: string;
+    videoPro: string;
+    audience: string;
+  };
   createdAt?: string;
 }
 
@@ -50,6 +56,17 @@ const userSlice = createSlice({
     deleteUserSuccess: (state, action: PayloadAction<string>) => {
       state.users = state.users.filter(u => u.id !== action.payload);
       state.error = null;
+    },
+    approveTeacherRequest: (state, _action: PayloadAction<string>) => {
+      state.loading = true;
+      state.error = null;
+    },
+    approveTeacherSuccess: (state, action: PayloadAction<string>) => {
+      const user = state.users.find(u => u.id === action.payload);
+      if (user) {
+        user.status = 'approved';
+      }
+      state.loading = false;
     },
     enrollUserRequest: (state, _action: PayloadAction<{ userId: string; courseId: string }>) => {
       state.loading = true;
@@ -120,6 +137,8 @@ export const {
   assignTrainingPlanSuccess,
   unassignTrainingPlanRequest,
   unassignTrainingPlanSuccess,
+  approveTeacherRequest,
+  approveTeacherSuccess,
   clearUsers,
 } = userSlice.actions;
 

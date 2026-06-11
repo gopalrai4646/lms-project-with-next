@@ -49,8 +49,8 @@ export function DataSyncProvider({ children }: { children: React.ReactNode }) {
       // 3. Sync training plans for everyone
       dispatch(fetchTrainingPlansRequest());
 
-      // 4. Sync users if the user is an admin OR a staff member with 'users' access
-      if (role === 'admin' || (role === 'staff' && hasModuleAccess(permissions as any, 'users'))) {
+      // 4. Sync users if the user is an admin OR a staff member with 'users' access OR a teacher
+      if (role === 'admin' || role === 'teacher' || (role === 'staff' && hasModuleAccess(permissions as any, 'users'))) {
         dispatch(fetchUsersRequest());
       }
 

@@ -286,7 +286,7 @@ export default function LessonPage() {
                         {completed ? <Check size={14} strokeWidth={3} /> : isCurrent ? <Play size={10} className="fill-current ml-0.5" /> : index + 1}
                       </span>
                       <div className="min-w-0 flex-1 pt-0.5">
-                        <p className={`text-sm font-semibold leading-snug line-clamp-2 ${isCurrent ? 'text-primary-700' : 'text-slate-700'}`}>
+                        <p className={`text-sm font-semibold leading-snug truncate ${isCurrent ? 'text-primary-700' : 'text-slate-700'}`}>
                           {video.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1.5">

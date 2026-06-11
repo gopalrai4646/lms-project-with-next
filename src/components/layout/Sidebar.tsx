@@ -75,9 +75,10 @@ export default function Sidebar() {
   // Build the menu based on role
   let menuItems;
   if (role === 'admin') {
-    // Admin sees everything + Staff Management + Settings
+    // Admin sees everything + Teachers + Staff Management + Settings
     menuItems = [
       ...allAdminMenuItems,
+      { name: t.teachers || 'Teachers', href: '/admin/teachers', icon: <Users size={18} /> },
       { name: t.staffRoles || 'Staff & Roles', href: '/admin/staff', icon: <ShieldCheck size={18} /> },
       { name: t.settings, href: '/settings', icon: <Settings size={18} /> },
     ];

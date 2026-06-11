@@ -11,8 +11,21 @@ interface AuthState {
     assignedTrainingPlans?: string[];
     photoURL: string | null;
     phoneNumber: string | null;
+    status?: 'pending' | 'approved';
+    teacherProfile?: {
+      experience: string;
+      videoPro: string;
+      audience: string;
+    };
+    purchasedCourses?: {
+      courseId: string;
+      purchaseDate: string;
+      amountPaid: number;
+      razorpayPaymentId: string;
+      razorpayOrderId: string;
+    }[];
   } | null;
-  role: 'student' | 'admin' | 'staff' | null;
+  role: 'student' | 'admin' | 'staff' | 'teacher' | null;
   staffRoleId?: string | null;
   staffRoleName?: string | null;
   permissions: Permission[];
@@ -50,7 +63,7 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    signupRequest: (state, _action: PayloadAction<{ email: string; pass: string; name: string; role: 'student' | 'admin' | 'staff'; photoURL?: string; phoneNumber?: string }>) => {
+    signupRequest: (state, _action: PayloadAction<{ email: string; pass: string; name: string; role: 'student' | 'admin' | 'staff' | 'teacher'; photoURL?: string; phoneNumber?: string; status?: 'pending' | 'approved'; teacherProfile?: { experience: string; videoPro: string; audience: string; } }>) => {
       state.loading = true;
       state.error = null;
     },
@@ -83,7 +96,7 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    authSuccess: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | 'staff' | null; isNewUser?: boolean; staffRoleId?: string | null; staffRoleName?: string | null; permissions?: Permission[] }>) => {
+    authSuccess: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | 'staff' | 'teacher' | null; isNewUser?: boolean; staffRoleId?: string | null; staffRoleName?: string | null; permissions?: Permission[] }>) => {
       state.user = action.payload.user;
       state.role = action.payload.role ?? null;
       state.staffRoleId = action.payload.staffRoleId ?? null;
@@ -138,7 +151,7 @@ const authSlice = createSlice({
         }
       }
     },
-    updateUserData: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | 'staff' | null; staffRoleId?: string | null; staffRoleName?: string | null; permissions?: Permission[] }>) => {
+    updateUserData: (state, action: PayloadAction<{ user: AuthState['user']; role?: 'student' | 'admin' | 'staff' | 'teacher' | null; staffRoleId?: string | null; staffRoleName?: string | null; permissions?: Permission[] }>) => {
       // Merges incoming Firestore data into the existing auth state ONLY if UIDs match
       if (!state.user || state.user.uid !== action.payload.user?.uid) return;
 

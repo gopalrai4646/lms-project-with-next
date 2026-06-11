@@ -114,7 +114,41 @@
     "emailPlaceholder": "nom@exemple.fr",
     "passwordPlaceholder": "••••••••",
     "namePlaceholder": "Jean Dupont",
-    "phonePlaceholder": "+33 1 23 45 67 89"
+    "phonePlaceholder": "+33 1 23 45 67 89",
+    "teacherSignup": {
+      "teachingExperienceQuestion": "Quel type d'enseignement avez-vous fait auparavant ?",
+      "experienceOptions": {
+        "In person, informally": "En personne, de manière informelle",
+        "In person, professionally": "En personne, de manière professionnelle",
+        "Online": "En ligne",
+        "Other": "Autre"
+      },
+      "videoProQuestion": "Êtes-vous un \"pro\" de la vidéo ?",
+      "videoOptions": {
+        "I am a beginner": "Je suis débutant",
+        "I have some knowledge": "J'ai quelques connaissances",
+        "I am experienced": "Je suis expérimenté",
+        "I have videos ready to upload": "J'ai des vidéos prêtes à être téléchargées"
+      },
+      "audienceQuestion": "Avez-vous un public avec qui partager votre cours ?",
+      "audienceOptions": {
+        "Not at the moment": "Pas pour le moment",
+        "I have a small following": "J'ai une petite audience",
+        "I have a sizeable following": "J'ai une audience importante"
+      },
+      "previous": "Précédent",
+      "submit": "Soumettre",
+      "submitting": "Soumission en cours..."
+    },
+    "pending": {
+      "accountApproved": "Compte approuvé !",
+      "applicationUnderReview": "Candidature en cours d'examen",
+      "accountApprovedDesc": "Votre compte a été approuvé ! Vous êtes prêt à nous rejoindre et à commencer à créer des cours.",
+      "applicationUnderReviewDesc": "Vos informations ont été transmises à l'administrateur. Vous pourrez utiliser la plateforme une fois votre compte approuvé.",
+      "goToDashboard": "Aller au tableau de bord",
+      "wantToUseDifferentAccount": "Vous souhaitez utiliser un autre compte ?",
+      "signOut": "Se déconnecter"
+    }
   },
   "settings": {
     "accountSettings": "Paramètres du Compte",
@@ -471,7 +505,24 @@
     "noRoleDescription": "Pas de description",
     "noStaffMembers": "Aucun membre du personnel pour le moment",
     "noReportsToShow": "Aucun rapport à afficher",
-    "noReportsDescription": "Votre tableau de bord d'analyse est vide car aucun cours ou plan de formation n'a encore été créé."
+    "noReportsDescription": "Votre tableau de bord d'analyse est vide car aucun cours ou plan de formation n'a encore été créé.",
+    "manageTeachers": "Gérer les professeurs",
+    "reviewTeacherApps": "Examiner et approuver les candidatures d'enseignants",
+    "pendingTab": "En attente",
+    "approvedTab": "Approuvé",
+    "searchTeachers": "Rechercher des professeurs...",
+    "loadingTeachers": "Chargement des professeurs...",
+    "noPendingApps": "Aucune candidature en attente",
+    "allCaughtUp": "Tout est à jour ! Il n'y a aucun enseignant en attente d'approbation.",
+    "unnamedTeacher": "Professeur sans nom",
+    "approveBtn": "Approuver",
+    "questionnaireAnswers": "Réponses au questionnaire",
+    "teachingExperience": "Expérience d'enseignement",
+    "videoProficiency": "Maîtrise de la vidéo",
+    "audienceSize": "Taille de l'audience",
+    "noApprovedTeachers": "Aucun professeur approuvé trouvé",
+    "teacherProfile": "Profil du professeur",
+    "contact": "Contact"
   },
   "coursePlayer": {
     "loadingCourse": "Chargement du cours...",
@@ -555,6 +606,89 @@
       "privacy": "Confidentialité",
       "twitter": "Twitter",
       "linkedin": "LinkedIn"
+    }
+  },
+  "teacher": {
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "manageCourses": "Gérer les cours",
+      "trainingPlans": "Plans de formation",
+      "manageUsers": "Gérer les utilisateurs",
+      "account": "Compte",
+      "assignedCourses": "Cours attribués",
+      "assignedPlans": "Plans attribués"
+    },
+    "dashboard": {
+      "welcomeTeacher": "Bon retour, {{name}} !",
+      "heresWhatHappening": "Voici ce qui se passe avec vos cours.",
+      "totalStudents": "Total des étudiants",
+      "studentsInYourCourses": "dans vos cours",
+      "totalCourses": "Total des cours",
+      "coursesCreated": "créés par vous",
+      "totalPlans": "Plans de formation",
+      "plansCreated": "programmes créés",
+      "recentCourses": "Cours récents",
+      "viewAll": "Voir tout",
+      "noRecentCourses": "Aucun cours récent",
+      "createYourFirstCourse": "Créez votre premier cours pour commencer",
+      "createCourseBtn": "Créer un cours",
+      "coursePopularity": "Carte de popularité des cours",
+      "noDataToDisplay": "Aucune donnée à afficher pour le moment",
+      "createCoursesToSeeAnalytics": "Créez des cours et inscrivez des étudiants pour voir les analyses"
+    },
+    "courses": {
+      "manageCourses": "Gérer les cours",
+      "manageCoursesSubtitle": "Créez et gérez votre contenu éducatif",
+      "newCourse": "Nouveau cours",
+      "searchCourses": "Recherchez vos cours...",
+      "noCoursesFound": "Aucun cours trouvé",
+      "noCoursesDesc": "Commencez par créer votre premier cours",
+      "courseInfo": "Infos sur le cours",
+      "price": "Prix",
+      "students": "Étudiants",
+      "actions": "Actions",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "preview": "Aperçu",
+      "free": "Gratuit",
+      "draft": "Brouillon",
+      "published": "Publié",
+      "deleteCourseConfirm": "Êtes-vous sûr de vouloir supprimer ce cours ?",
+      "itemsPerPage": "Éléments par page",
+      "listView": "Vue liste",
+      "gridView": "Vue grille"
+    },
+    "users": {
+      "manageStudents": "Gérer les étudiants",
+      "manageStudentsSubtitle": "Afficher et gérer les étudiants inscrits à vos cours",
+      "searchStudents": "Rechercher des étudiants...",
+      "loadingStudents": "Chargement des étudiants...",
+      "noStudentsFound": "Aucun étudiant trouvé",
+      "noStudentsDesc": "Lorsque des étudiants s'inscrivent à vos cours, ils apparaîtront ici",
+      "studentProfile": "Profil de l'étudiant",
+      "enrolledCourses": "Cours inscrits",
+      "joinDate": "Date d'inscription",
+      "viewDetails": "Voir les détails",
+      "itemsPerPage": "Éléments par page"
+    },
+    "account": {
+      "accountSettings": "Paramètres du compte",
+      "accountSettingsSubtitle": "Gérez votre profil et vos préférences",
+      "profileInfo": "Informations du profil",
+      "updatePhoto": "Mettre à jour la photo",
+      "fullName": "Nom complet",
+      "emailAddress": "Adresse e-mail",
+      "phoneNumber": "Numéro de téléphone",
+      "saveChanges": "Enregistrer les modifications",
+      "saving": "Enregistrement...",
+      "profileUpdated": "Profil mis à jour avec succès",
+      "uploadError": "Échec du téléchargement de l'image",
+      "manageProfile": "Gérez votre profil d'enseignant et vos préférences",
+      "clickToUpdateAvatar": "Cliquez pour mettre à jour l'avatar.",
+      "teachingProfileReadOnly": "Profil d'enseignement (Lecture seule)",
+      "teachingExperience": "Expérience d'enseignement",
+      "videoProficiency": "Maîtrise de la vidéo",
+      "audienceSize": "Taille de l'audience"
     }
   }
 }

@@ -437,6 +437,7 @@ export default function EditCoursePage() {
                         type="text" 
                         value={entry.title}
                         onChange={(e) => updateVideoEntry(index, 'title', e.target.value)}
+                        maxLength={80}
                         placeholder={t.videoTitle || "Video Title"}
                         className={`${UI_COMPONENTS.input} !py-1.5 !text-sm`} 
                       />

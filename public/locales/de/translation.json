@@ -114,7 +114,41 @@
     "emailPlaceholder": "name@beispiel.de",
     "passwordPlaceholder": "••••••••",
     "namePlaceholder": "Max Mustermann",
-    "phonePlaceholder": "+49 123 456 789"
+    "phonePlaceholder": "+49 123 456 789",
+    "teacherSignup": {
+      "teachingExperienceQuestion": "Welche Art von Unterricht haben Sie bisher gemacht?",
+      "experienceOptions": {
+        "In person, informally": "Persönlich, informell",
+        "In person, professionally": "Persönlich, professionell",
+        "Online": "Online",
+        "Other": "Andere"
+      },
+      "videoProQuestion": "Wie sehr sind Sie ein Video-\"Profi\"?",
+      "videoOptions": {
+        "I am a beginner": "Ich bin ein Anfänger",
+        "I have some knowledge": "Ich habe etwas Wissen",
+        "I am experienced": "Ich bin erfahren",
+        "I have videos ready to upload": "Ich habe fertige Videos zum Hochladen"
+      },
+      "audienceQuestion": "Haben Sie ein Publikum, mit dem Sie Ihren Kurs teilen können?",
+      "audienceOptions": {
+        "Not at the moment": "Im Moment nicht",
+        "I have a small following": "Ich habe eine kleine Anhängerschaft",
+        "I have a sizeable following": "Ich habe eine beachtliche Anhängerschaft"
+      },
+      "previous": "Zurück",
+      "submit": "Einreichen",
+      "submitting": "Einreichen..."
+    },
+    "pending": {
+      "accountApproved": "Konto genehmigt!",
+      "applicationUnderReview": "Antrag wird geprüft",
+      "accountApprovedDesc": "Ihr Konto wurde genehmigt! Sie können nun beitreten und mit der Erstellung von Kursen beginnen.",
+      "applicationUnderReviewDesc": "Ihre Informationen wurden an den Administrator weitergeleitet. Sie können die Plattform nutzen, sobald Ihr Konto genehmigt wurde.",
+      "goToDashboard": "Zum Dashboard gehen",
+      "wantToUseDifferentAccount": "Möchten Sie ein anderes Konto verwenden?",
+      "signOut": "Abmelden"
+    }
   },
   "settings": {
     "accountSettings": "Kontoeinstellungen",
@@ -472,7 +506,24 @@
     "noRoleDescription": "Keine Beschreibung",
     "noStaffMembers": "Noch keine Mitarbeiter",
     "noReportsToShow": "Keine Berichte anzuzeigen",
-    "noReportsDescription": "Ihr Analyse-Dashboard ist leer, da noch keine Kurse oder Trainingspläne erstellt wurden."
+    "noReportsDescription": "Ihr Analyse-Dashboard ist leer, da noch keine Kurse oder Trainingspläne erstellt wurden.",
+    "manageTeachers": "Lehrer verwalten",
+    "reviewTeacherApps": "Lehrerbewerbungen prüfen und genehmigen",
+    "pendingTab": "Ausstehend",
+    "approvedTab": "Genehmigt",
+    "searchTeachers": "Lehrer suchen...",
+    "loadingTeachers": "Lehrer werden geladen...",
+    "noPendingApps": "Keine ausstehenden Bewerbungen",
+    "allCaughtUp": "Alles erledigt! Es warten keine Lehrer auf Genehmigung.",
+    "unnamedTeacher": "Unbenannter Lehrer",
+    "approveBtn": "Genehmigen",
+    "questionnaireAnswers": "Fragebogen-Antworten",
+    "teachingExperience": "Unterrichtserfahrung",
+    "videoProficiency": "Videokenntnisse",
+    "audienceSize": "Publikumsgröße",
+    "noApprovedTeachers": "Keine genehmigten Lehrer gefunden",
+    "teacherProfile": "Lehrerprofil",
+    "contact": "Kontakt"
   },
   "coursePlayer": {
     "loadingCourse": "Kurs wird geladen...",
@@ -556,6 +607,89 @@
       "privacy": "Datenschutz",
       "twitter": "Twitter",
       "linkedin": "LinkedIn"
+    }
+  },
+  "teacher": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "manageCourses": "Kurse verwalten",
+      "trainingPlans": "Trainingspläne",
+      "manageUsers": "Benutzer verwalten",
+      "account": "Konto",
+      "assignedCourses": "Zugewiesene Kurse",
+      "assignedPlans": "Zugewiesene Pläne"
+    },
+    "dashboard": {
+      "welcomeTeacher": "Willkommen zurück, {{name}}!",
+      "heresWhatHappening": "Das passiert in Ihren Kursen.",
+      "totalStudents": "Gesamtzahl Schüler",
+      "studentsInYourCourses": "in Ihren Kursen",
+      "totalCourses": "Gesamtzahl Kurse",
+      "coursesCreated": "von Ihnen erstellt",
+      "totalPlans": "Trainingspläne",
+      "plansCreated": "Lehrpläne erstellt",
+      "recentCourses": "Aktuelle Kurse",
+      "viewAll": "Alle ansehen",
+      "noRecentCourses": "Keine aktuellen Kurse",
+      "createYourFirstCourse": "Erstellen Sie Ihren ersten Kurs, um zu beginnen",
+      "createCourseBtn": "Kurs erstellen",
+      "coursePopularity": "Kursbeliebtheits-Heatmap",
+      "noDataToDisplay": "Noch keine Daten zum Anzeigen",
+      "createCoursesToSeeAnalytics": "Erstellen Sie Kurse und melden Sie Schüler an, um Analysen zu sehen"
+    },
+    "courses": {
+      "manageCourses": "Kurse verwalten",
+      "manageCoursesSubtitle": "Erstellen und verwalten Sie Ihre Bildungsinhalte",
+      "newCourse": "Neuer Kurs",
+      "searchCourses": "Suchen Sie in Ihren Kursen...",
+      "noCoursesFound": "Keine Kurse gefunden",
+      "noCoursesDesc": "Beginnen Sie, indem Sie Ihren ersten Kurs erstellen",
+      "courseInfo": "Kursinfo",
+      "price": "Preis",
+      "students": "Schüler",
+      "actions": "Aktionen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "preview": "Vorschau",
+      "free": "Kostenlos",
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "deleteCourseConfirm": "Möchten Sie diesen Kurs wirklich löschen?",
+      "itemsPerPage": "Elemente pro Seite",
+      "listView": "Listenansicht",
+      "gridView": "Rasteransicht"
+    },
+    "users": {
+      "manageStudents": "Schüler verwalten",
+      "manageStudentsSubtitle": "Schüler in Ihren Kursen anzeigen und verwalten",
+      "searchStudents": "Schüler suchen...",
+      "loadingStudents": "Schüler werden geladen...",
+      "noStudentsFound": "Keine Schüler gefunden",
+      "noStudentsDesc": "Wenn sich Schüler in Ihre Kurse einschreiben, erscheinen sie hier",
+      "studentProfile": "Schülerprofil",
+      "enrolledCourses": "Eingeschriebene Kurse",
+      "joinDate": "Beitrittsdatum",
+      "viewDetails": "Details ansehen",
+      "itemsPerPage": "Elemente pro Seite"
+    },
+    "account": {
+      "accountSettings": "Kontoeinstellungen",
+      "accountSettingsSubtitle": "Profil und Einstellungen verwalten",
+      "profileInfo": "Profilinformationen",
+      "updatePhoto": "Foto aktualisieren",
+      "fullName": "Vollständiger Name",
+      "emailAddress": "E-Mail-Adresse",
+      "phoneNumber": "Telefonnummer",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Speichern...",
+      "profileUpdated": "Profil erfolgreich aktualisiert",
+      "uploadError": "Bild konnte nicht hochgeladen werden",
+      "manageProfile": "Verwalten Sie Ihr Lehrerprofil und Ihre Einstellungen",
+      "clickToUpdateAvatar": "Klicken Sie, um den Avatar zu aktualisieren.",
+      "teachingProfileReadOnly": "Lehrerprofil (Schreibgeschützt)",
+      "teachingExperience": "Unterrichtserfahrung",
+      "videoProficiency": "Videokenntnisse",
+      "audienceSize": "Publikumsgröße"
     }
   }
 }

@@ -83,6 +83,8 @@ function createUserChannel(uid: string) {
 
         if (role === 'admin') {
           permissions = [...ALL_PERMISSIONS];
+        } else if (role === 'teacher') {
+          permissions = ['courses_read', 'courses_create', 'courses_edit', 'courses_delete', 'users_read', 'training_plans_read', 'training_plans_create', 'training_plans_edit', 'training_plans_delete'];
         } else if (role === 'staff' && data.staffRoleId) {
           try {
             const response = await fetch(`/api/admin/roles/get?id=${data.staffRoleId}`);
@@ -104,8 +106,11 @@ function createUserChannel(uid: string) {
             enrolledCourses: data.enrolledCourses || [],
             savedCourses: data.savedCourses || [],
             assignedTrainingPlans: data.assignedTrainingPlans || [],
+            purchasedCourses: data.purchasedCourses || [],
             photoURL: data.photoURL || null,
-            phoneNumber: data.phoneNumber || null
+            phoneNumber: data.phoneNumber || null,
+            status: data.status,
+            teacherProfile: data.teacherProfile,
           },
           role,
           staffRoleId: data.staffRoleId || null,
@@ -172,8 +177,11 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
         enrolledCourses: userData.enrolledCourses || [], 
         savedCourses: userData.savedCourses || [], 
         assignedTrainingPlans: userData.assignedTrainingPlans || [],
+        purchasedCourses: userData.purchasedCourses || [],
         photoURL: userData.photoURL || null,
-        phoneNumber: userData.phoneNumber || null
+        phoneNumber: userData.phoneNumber || null,
+        status: userData.status,
+        teacherProfile: userData.teacherProfile,
       }, 
       role, 
       staffRoleId: userData.staffRoleId || null,
@@ -223,7 +231,7 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): any {
 
 function* handleSignup(action: ReturnType<typeof signupRequest>): any {
   try {
-    const { email, pass, name, role, photoURL, phoneNumber } = action.payload;
+    const { email, pass, name, role, photoURL, phoneNumber, status, teacherProfile } = action.payload;
     const normalizedEmail = email.toLowerCase();
 
     // Backend validation
@@ -267,6 +275,8 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
       role,
       photoURL: photoURL || null,
       phoneNumber: phoneNumber || null,
+      ...(status && { status }),
+      ...(teacherProfile && { teacherProfile }),
       createdAt: serverTimestamp(),
     });
 
@@ -278,8 +288,11 @@ function* handleSignup(action: ReturnType<typeof signupRequest>): any {
         enrolledCourses: [], 
         savedCourses: [], 
         assignedTrainingPlans: [],
+        purchasedCourses: [],
         photoURL: photoURL || null,
-        phoneNumber: phoneNumber || null
+        phoneNumber: phoneNumber || null,
+        status: status,
+        teacherProfile: teacherProfile,
       }, 
       role, 
       isNewUser: true 
@@ -365,8 +378,11 @@ function* handleGoogleLogin(): any {
         enrolledCourses: userData.enrolledCourses || [], 
         savedCourses: userData.savedCourses || [], 
         assignedTrainingPlans: userData.assignedTrainingPlans || [],
+        purchasedCourses: userData.purchasedCourses || [],
         photoURL: userData.photoURL || null,
-        phoneNumber: userData.phoneNumber || null
+        phoneNumber: userData.phoneNumber || null,
+        status: userData.status,
+        teacherProfile: userData.teacherProfile,
       }, 
       role, 
       staffRoleId: userData.staffRoleId || null,

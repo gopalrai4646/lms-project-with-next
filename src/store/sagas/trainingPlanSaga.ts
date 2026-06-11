@@ -1,4 +1,4 @@
-import { call, put, takeLatest, all } from 'redux-saga/effects';
+import { call, put, takeLatest, all, select } from 'redux-saga/effects';
 import {
   collection,
   getDocs,
@@ -29,6 +29,7 @@ import {
   deleteTrainingPlanSuccess,
   TrainingPlan,
 } from '../slices/trainingPlanSlice';
+import { RootState } from '../index';
 
 function createTrainingPlansChannel() {
   return eventChannel(emit => {
@@ -65,14 +66,17 @@ function* handleFetchTrainingPlans(): any {
 
 function* handleCreateTrainingPlan(action: ReturnType<typeof createTrainingPlanRequest>): any {
   try {
+    const user = yield select((state: RootState) => state.auth.user);
     const planData = {
       ...action.payload,
+      createdBy: user?.uid || null,
       createdAt: serverTimestamp(),
     };
     const docRef = yield call(addDoc, collection(db, 'trainingPlans'), planData);
     yield put(createTrainingPlanSuccess({
       id: docRef.id,
       ...action.payload,
+      createdBy: user?.uid || null,
       createdAt: new Date().toISOString(),
     }));
   } catch (error: any) {

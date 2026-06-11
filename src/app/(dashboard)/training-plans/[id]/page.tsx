@@ -138,6 +138,11 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
           {planCourses.length > 0 ? (
             planCourses.map((course: any, index) => {
               const isEnrolled = user?.enrolledCourses?.includes(course.id);
+              const isTeacher = role === 'teacher';
+              const isPaidCourse = (course.price ?? 0) > 0;
+              const hasPurchased = user?.purchasedCourses?.some((p: any) => p.courseId === course.id);
+              const requiresPurchase = isTeacher && isPaidCourse && !hasPurchased;
+              const canView = isEnrolled && !requiresPurchase;
               
               return (
                 <div key={course.id} className={UI_COMPONENTS.cardRowItem}>
@@ -173,7 +178,7 @@ export default function TrainingPlanDetailsPage({ params }: { params: Promise<{ 
                   </div>
                   
                   <div className="shrink-0 w-full sm:w-auto mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-100 flex justify-end">
-                    {isEnrolled ? (
+                    {canView ? (
                       <Link
                         href={`/dashboard/courses/${course.id}?planId=${plan.id}`}
                         className={`${BUTTONS.primary} !bg-emerald-600 hover:!bg-emerald-700 w-full sm:w-auto`}

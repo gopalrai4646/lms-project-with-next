@@ -16,7 +16,7 @@ interface CourseCardProps {
 
 export default function CourseCard({ course }: CourseCardProps) {
   const dispatch = useAppDispatch();
-  const { user, loading: authLoading } = useAppSelector((state) => state.auth);
+  const { user, loading: authLoading, role } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
   const t = i18nT('dashboard', { returnObjects: true }) as any;
 
@@ -62,10 +62,16 @@ export default function CourseCard({ course }: CourseCardProps) {
 
   const progressPercentage = calculateProgress();
 
+  const isTeacher = role === 'teacher';
+  const isPaidCourse = (course.price ?? 0) > 0;
+  const hasPurchased = user?.purchasedCourses?.some((p: any) => p.courseId === course.id);
+  const requiresPurchase = isTeacher && isPaidCourse && !hasPurchased;
+  const canView = isEnrolled && !requiresPurchase;
+
   const handleEnroll = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!isEnrolled) {
+    if (!canView) {
       dispatch(initiatePaymentRequest({ courseId: course.id, amount: course.price ?? 999 }));
     }
   };
@@ -146,7 +152,7 @@ export default function CourseCard({ course }: CourseCardProps) {
         )}
 
         <div className={`space-y-3 ${isEnrolled ? '' : 'pt-2'} mt-auto`}>
-          {isEnrolled && videoCount > 0 && (
+          {canView && videoCount > 0 && (
             <Link
               href={`/dashboard/courses/${course.id}`}
               className={`${BUTTONS.primary} w-full flex items-center justify-center gap-2`}
@@ -156,7 +162,7 @@ export default function CourseCard({ course }: CourseCardProps) {
             </Link>
           )}
 
-          {!isEnrolled && (
+          {(!canView) && (
             <button
               onClick={handleEnroll}
               disabled={authLoading}
@@ -166,7 +172,7 @@ export default function CourseCard({ course }: CourseCardProps) {
             </button>
           )}
 
-          {isEnrolled && videoCount === 0 && (
+          {canView && videoCount === 0 && (
             <button
               disabled
               className="w-full py-3.5 rounded-2xl font-semibold bg-slate-100 text-slate-400 cursor-not-allowed"

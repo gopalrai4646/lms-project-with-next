@@ -214,6 +214,35 @@ function* handleUnassignTrainingPlan(action: ReturnType<typeof unassignTrainingP
   }
 }
 
+function* handleApproveTeacher(action: ReturnType<any>): any {
+  try {
+    const userId = action.payload;
+    const auth = getAuth();
+    const token = yield call([auth.currentUser!, auth.currentUser!.getIdToken]);
+
+    if (!token) throw new Error('Not authenticated');
+
+    const response = yield call(fetch, '/api/admin/users/approve-teacher', {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = yield call([response, response.json]);
+      throw new Error(errorData.error || 'Failed to approve teacher');
+    }
+
+    yield put({ type: 'users/approveTeacherSuccess', payload: userId });
+  } catch (error: any) {
+    console.error('Saga: Error approving teacher', error.message);
+    yield put(fetchUsersFailure(error.message));
+  }
+}
+
 export function* watchUsers() {
   // Use takeLatest for the persistent listener so every request ensures a response
   yield takeLatest(fetchUsersRequest.type, handleFetchUsers);
@@ -223,6 +252,7 @@ export function* watchUsers() {
   yield takeLatest(unenrollUserRequest.type, handleUnenrollUser);
   yield takeLatest(assignTrainingPlanRequest.type, handleAssignTrainingPlan);
   yield takeLatest(unassignTrainingPlanRequest.type, handleUnassignTrainingPlan);
+  yield takeLatest('users/approveTeacherRequest', handleApproveTeacher);
 }
 
 export function* userSaga() {
