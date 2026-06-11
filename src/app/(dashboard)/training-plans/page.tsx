@@ -82,7 +82,7 @@ export default function UserTrainingPlansPage() {
             You don't have any training plans assigned yet. When an administrator assigns a learning path to you, it will appear here.
           </p>
           <div className="mt-8">
-            <Link href="/dashboard" className={BUTTONS.secondary}>
+            <Link href="/dashboard" className={BUTTONS.primary}>
               {coursePlayerT.backToDashboard || 'Back to Dashboard'}
             </Link>
           </div>

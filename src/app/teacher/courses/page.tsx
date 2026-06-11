@@ -17,7 +17,8 @@ export default function TeacherCoursesPage() {
   const { courses, loading, error } = useAppSelector((state) => state.courses);
   const { user } = useAppSelector((state) => state.auth);
   const { t: i18nT } = useTranslation();
-  const t = i18nT('admin', { returnObjects: true }) as any;
+  const tAdmin = i18nT('admin', { returnObjects: true }) as any;
+  const t = i18nT('teacher', { returnObjects: true }) as any;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -41,7 +42,7 @@ export default function TeacherCoursesPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(t.deleteConfirm)) {
+    if (window.confirm(t?.courses?.deleteCourseConfirm || 'Are you sure you want to delete this course?')) {
       dispatch(deleteCourseRequest(id));
     }
   };
@@ -87,11 +88,11 @@ export default function TeacherCoursesPage() {
     <div className="space-y-6 bg-background min-h-screen p-0 animate-in fade-in duration-700">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className={TYPOGRAPHY.h1}>Manage Your Courses</h1>
-          <p className={`${TYPOGRAPHY.body} mt-1`}>Create, edit, and manage your online courses</p>
+          <h1 className={TYPOGRAPHY.h1}>{t?.courses?.manageCourses || 'Manage Your Courses'}</h1>
+          <p className={`${TYPOGRAPHY.body} mt-1`}>{t?.courses?.manageCoursesSubtitle || 'Create, edit, and manage your online courses'}</p>
         </div>
         <Link href="/teacher/courses/new" className={BUTTONS.primary}>
-          <Plus size={16} /> New Course
+          <Plus size={16} /> {t?.courses?.newCourse || 'New Course'}
         </Link>
       </header>
 
@@ -108,7 +109,7 @@ export default function TeacherCoursesPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
               <input
                 type="search"
-                placeholder="Search your courses..."
+                placeholder={t?.courses?.searchCourses || "Search your courses..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`${UI_COMPONENTS.input} pl-10 w-full`}
@@ -130,7 +131,7 @@ export default function TeacherCoursesPage() {
           <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
             <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
               <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
-                Items per page
+                {t?.courses?.itemsPerPage || 'Items per page'}
               </span>
               <CustomSelect
                 value={itemsPerPage}
@@ -154,7 +155,7 @@ export default function TeacherCoursesPage() {
                 }`}
               >
                 <List className="w-5 h-5 lg:w-4 lg:h-4" />
-                <span className="hidden lg:inline">List</span>
+                <span className="hidden lg:inline">{t?.courses?.listView || 'List View'}</span>
               </button>
               <button
                 type="button"
@@ -164,7 +165,7 @@ export default function TeacherCoursesPage() {
                 }`}
               >
                 <LayoutGrid className="w-5 h-5 lg:w-4 lg:h-4" />
-                <span className="hidden lg:inline">Grid</span>
+                <span className="hidden lg:inline">{t?.courses?.gridView || 'Grid View'}</span>
               </button>
             </div>
           </div>
@@ -179,8 +180,8 @@ export default function TeacherCoursesPage() {
       ) : paginatedCourses.length === 0 ? (
         <div className={UI_COMPONENTS.emptyStateCard}>
           <BookOpen className="text-slate-300" size={48} />
-          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>No courses found</p>
-          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>You haven't created any courses matching your criteria.</p>
+          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t?.courses?.noCoursesFound || 'No courses found'}</p>
+          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>{t?.courses?.noCoursesDesc || "Get started by creating your first course"}</p>
         </div>
       ) : viewMode === 'list' ? (
         <div className={UI_COMPONENTS.tableWrapper}>
@@ -188,11 +189,11 @@ export default function TeacherCoursesPage() {
             <table className={UI_COMPONENTS.table}>
               <thead className={UI_COMPONENTS.tableHeader}>
                 <tr>
-                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>Course Info</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t?.courses?.courseInfo || 'Course Info'}</th>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>Visibility</th>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>Created On</th>
-                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>Students</th>
-                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-right`}>Actions</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-center`}>{t?.courses?.students || 'Students'}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-right`}>{t?.courses?.actions || 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -233,14 +234,14 @@ export default function TeacherCoursesPage() {
                         <Link
                           href={`/teacher/courses/edit/${course.id}`}
                           className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-primary-600`}
-                          title="Edit Course"
+                          title={t?.courses?.edit || "Edit Course"}
                         >
                           <Pencil size={16} />
                         </Link>
                         <button
                           onClick={() => handleDelete(course.id)}
                           className={`${BUTTONS.ghost} !p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50`}
-                          title="Delete Course"
+                          title={t?.courses?.delete || "Delete Course"}
                         >
                           <Trash2 size={16} />
                         </button>

@@ -7,11 +7,14 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { logoutRequest } from '@/store/slices/authSlice';
 import { AUTH_UI } from '@/constants/ui';
 import { CheckCircle2, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function TeacherPendingPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, role, loading } = useAppSelector((state) => state.auth);
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('auth', { returnObjects: true }) as any;
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -58,13 +61,13 @@ export default function TeacherPendingPage() {
           </div>
 
           <h1 className={AUTH_UI.title}>
-            {isApproved ? "Account Approved!" : "Application Under Review"}
+            {isApproved ? t?.pending?.accountApproved || "Account Approved!" : t?.pending?.applicationUnderReview || "Application Under Review"}
           </h1>
           
           <p className="text-[14px] text-zinc-500 leading-relaxed mt-4 px-4">
             {isApproved 
-              ? "Your account has been approved! You are ready to join and start creating courses."
-              : "Your information has been forwarded to the admin. You will be able to use the platform once your account is approved."}
+              ? t?.pending?.accountApprovedDesc || "Your account has been approved! You are ready to join and start creating courses."
+              : t?.pending?.applicationUnderReviewDesc || "Your information has been forwarded to the admin. You will be able to use the platform once your account is approved."}
           </p>
         </div>
 
@@ -74,15 +77,15 @@ export default function TeacherPendingPage() {
               onClick={() => router.push('/dashboard')}
               className={AUTH_UI.buttonPrimary}
             >
-              Go to Dashboard
+              {t?.pending?.goToDashboard || "Go to Dashboard"}
             </button>
           </div>
         )}
 
         <div className="mt-8 pt-6 border-t border-zinc-100 text-center">
           <p className={AUTH_UI.footerText}>
-            Want to use a different account? 
-            <button onClick={() => dispatch(logoutRequest())} className={`ml-1.5 bg-transparent border-0 cursor-pointer p-0 ${AUTH_UI.link}`}>Sign out</button>
+            {t?.pending?.wantToUseDifferentAccount || "Want to use a different account?"}
+            <button onClick={() => dispatch(logoutRequest())} className={`ml-1.5 bg-transparent border-0 cursor-pointer p-0 ${AUTH_UI.link}`}>{t?.pending?.signOut || "Sign out"}</button>
           </p>
         </div>
       </div>

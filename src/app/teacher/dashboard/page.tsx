@@ -15,7 +15,8 @@ export default function TeacherDashboard() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector(state => state.auth);
   const { courses, loading } = useAppSelector(state => state.courses);
-  const { t } = useTranslation();
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('teacher', { returnObjects: true }) as any;
 
   const [isMounted, setIsMounted] = useState(false);
   const [allProgress, setAllProgress] = useState<any[]>([]);
@@ -133,17 +134,17 @@ export default function TeacherDashboard() {
 
   const stats = [
     {
-      title: 'Total Students',
+      title: t?.dashboard?.totalStudents || 'Total Students',
       value: totalStudents.toString(),
       icon: <Users size={24} className="text-primary-600" />,
-      trend: 'Active learners',
+      trend: t?.dashboard?.studentsInYourCourses || 'Active learners',
       trendUp: true
     },
     {
-      title: 'Total Courses',
+      title: t?.dashboard?.totalCourses || 'Total Courses',
       value: totalCourses.toString(),
       icon: <BookOpen size={24} className="text-amber-600" />,
-      trend: 'Published courses',
+      trend: t?.dashboard?.coursesCreated || 'Published courses',
       trendUp: true
     },
     {
@@ -159,19 +160,19 @@ export default function TeacherDashboard() {
     <div className="space-y-6 bg-background animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className={TYPOGRAPHY.h1}>Welcome, {user.displayName || 'Teacher'}</h1>
-          <p className={`${TYPOGRAPHY.body} mt-1`}>Here's what's happening with your courses today.</p>
+          <h1 className={TYPOGRAPHY.h1}>{t?.dashboard?.welcomeTeacher?.replace('{{name}}', user.displayName || 'Teacher') || `Welcome, ${user.displayName || 'Teacher'}`}</h1>
+          <p className={`${TYPOGRAPHY.body} mt-1`}>{t?.dashboard?.heresWhatHappening || "Here's what's happening with your courses today."}</p>
         </div>
       </header>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
             <div key={i} className={`${UI_COMPONENTS.card} animate-pulse h-32`} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {stats.map((stat, i) => (
             <div key={i} className={`${UI_COMPONENTS.card} flex items-start justify-between group hover:shadow-md transition-shadow`}>
               <div>
@@ -191,11 +192,11 @@ export default function TeacherDashboard() {
 
       {/* ─── Integrated Advanced Analytics ─── */}
       {!loading && !loadingProgress && myCourses.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
           
           {/* Popularity Heatmap */}
           <div className={`${UI_COMPONENTS.card}`}>
-            <h2 className={`${UI_COMPONENTS.cardHeader} !mb-6 ${TYPOGRAPHY.h3}`}>Course Popularity Heatmap</h2>
+            <h2 className={`${UI_COMPONENTS.cardHeader} !mb-6 ${TYPOGRAPHY.h3}`}>{t?.dashboard?.coursePopularity || 'Course Popularity Heatmap'}</h2>
             <div className="space-y-5 flex-1">
               {reportStats.popularity.length === 0 ? (
                 <div className={`py-4 text-center ${TYPOGRAPHY.body}`}>No enrollment data yet.</div>
@@ -305,13 +306,13 @@ export default function TeacherDashboard() {
 
       {/* Recent Courses Preview */}
       <div className="mt-8">
-        <h2 className={TYPOGRAPHY.h2}>Recent Courses</h2>
+        <h2 className={TYPOGRAPHY.h2}>{t?.dashboard?.recentCourses || 'Recent Courses'}</h2>
         <div className="mt-4">
           {myCourses.length === 0 ? (
             <div className={UI_COMPONENTS.emptyStateCard}>
               <BookOpen className="text-slate-300" size={48} />
-              <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>No courses yet</p>
-              <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>Create your first course to start earning.</p>
+              <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t?.dashboard?.noRecentCourses || 'No courses yet'}</p>
+              <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>{t?.dashboard?.createYourFirstCourse || 'Create your first course to start earning.'}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

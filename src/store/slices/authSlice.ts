@@ -17,6 +17,13 @@ interface AuthState {
       videoPro: string;
       audience: string;
     };
+    purchasedCourses?: {
+      courseId: string;
+      purchaseDate: string;
+      amountPaid: number;
+      razorpayPaymentId: string;
+      razorpayOrderId: string;
+    }[];
   } | null;
   role: 'student' | 'admin' | 'staff' | 'teacher' | null;
   staffRoleId?: string | null;

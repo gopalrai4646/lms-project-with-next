@@ -21,6 +21,7 @@ export default function TeacherUsersPage() {
   const { courses } = useAppSelector(state => state.courses);
   const { t: i18nT } = useTranslation();
   const t = i18nT('admin', { returnObjects: true }) as any;
+  const tTeacher = i18nT('teacher', { returnObjects: true }) as any;
 
   useEffect(() => {
     if (role !== 'teacher') {
@@ -123,8 +124,8 @@ export default function TeacherUsersPage() {
     <div className="space-y-6 bg-background min-h-screen p-0 animate-in fade-in duration-700">
       {/* ─── Page Header ─── */}
       <header>
-        <h1 className={TYPOGRAPHY.h1}>{t.manageUsers}</h1>
-        <p className={`${TYPOGRAPHY.body} mt-1`}>{t.manageUsersSubtitle}</p>
+        <h1 className={TYPOGRAPHY.h1}>{tTeacher?.users?.manageStudents || 'Manage Students'}</h1>
+        <p className={`${TYPOGRAPHY.body} mt-1`}>{tTeacher?.users?.manageStudentsSubtitle || 'View and manage students enrolled in your courses'}</p>
       </header>
 
       {/* ─── Toolbar ─── */}
@@ -139,11 +140,11 @@ export default function TeacherUsersPage() {
               />
               <input
                 type="search"
-                placeholder={t.searchPlaceholder}
+                placeholder={tTeacher?.users?.searchStudents || 'Search students...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`${UI_COMPONENTS.input} pl-10 w-full`}
-                aria-label={t.searchPlaceholder}
+                aria-label={tTeacher?.users?.searchStudents || 'Search students...'}
               />
             </div>
             <CustomSelect
@@ -158,7 +159,7 @@ export default function TeacherUsersPage() {
           <div className="grid grid-cols-2 gap-3 w-full lg:w-auto lg:shrink-0">
             <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:gap-2 w-full min-w-0">
               <span className={`${TYPOGRAPHY.label} text-xs lg:whitespace-nowrap shrink-0`}>
-                {t.itemsPerPage}
+                {tTeacher?.users?.itemsPerPage || 'Items per page'}
               </span>
               <CustomSelect
                 value={itemsPerPage}
@@ -215,15 +216,15 @@ export default function TeacherUsersPage() {
           <div
             className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin"
             role="status"
-            aria-label={t.loadingUsers}
+            aria-label={tTeacher?.users?.loadingStudents || 'Loading students...'}
           />
-          <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{t.loadingUsers}</p>
+          <p className={`${TYPOGRAPHY.body} mt-3 animate-pulse`}>{tTeacher?.users?.loadingStudents || 'Loading students...'}</p>
         </div>
       ) : paginatedUsers.length === 0 ? (
         <div className={UI_COMPONENTS.emptyStateCard}>
           <Search className="text-slate-300" size={48} aria-hidden />
-          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{t.noUsersFound}</p>
-          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>{t.tryAdjustingFilters}</p>
+          <p className={`${TYPOGRAPHY.h3} mt-4 text-slate-400`}>{tTeacher?.users?.noStudentsFound || 'No students found'}</p>
+          <p className={`${TYPOGRAPHY.body} mt-1 text-slate-400 max-w-xs`}>{tTeacher?.users?.noStudentsDesc || 'When students enroll in your courses, they will appear here'}</p>
         </div>
       ) : viewMode === 'list' ? (
         /* ─── List View ─── */
@@ -232,9 +233,9 @@ export default function TeacherUsersPage() {
             <table className={UI_COMPONENTS.table}>
               <thead className={UI_COMPONENTS.tableHeader}>
                 <tr>
-                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.userProfile}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{tTeacher?.users?.studentProfile || 'Student Profile'}</th>
                   <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.role}</th>
-                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{t.enrolledCourses}</th>
+                  <th className={`px-5 py-3.5 ${TYPOGRAPHY.label}`}>{tTeacher?.users?.enrolledCourses || 'Enrolled Courses'}</th>
                   {(canRead || canImpersonate || canDeleteUser) && (
                     <th className={`px-5 py-3.5 ${TYPOGRAPHY.label} text-right`}>{t.actions}</th>
                   )}

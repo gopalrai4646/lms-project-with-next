@@ -73,6 +73,11 @@ export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuard
       }
       // Teacher should be in /teacher/dashboard or /teacher/pending
       if (role === 'teacher') {
+        // Allow teachers to view course players and assigned courses
+        if (pathname.startsWith('/dashboard/courses')) {
+          return; // Let them stay
+        }
+
         if (user.status === 'pending') {
           router.push('/teacher/pending');
         } else {
@@ -108,29 +113,16 @@ export default function RouteGuard({ children, allowedRole = 'any' }: RouteGuard
     );
   }
 
-  // Prevent flash of content if user is logged in but role is wrong
-  if (pathname.startsWith('/admin')) {
-    if (role !== 'admin' && role !== 'staff') return null;
-    if (isImpersonating) return null;
-    // Staff trying to access admin-only pages
-    if (role === 'staff') {
-      if (pathname === '/admin/staff' || pathname.startsWith('/admin/staff/')) return null;
-      const requiredModule = getPermissionForRoute(pathname);
-      if (requiredModule && !hasModuleAccess(permissions, requiredModule)) return null;
-    }
-  }
-  
-  if (pathname.startsWith('/dashboard')) {
-    if (role === 'admin' && !isImpersonating) return null;
-    if (role === 'staff' && !isImpersonating) return null;
-    if (role === 'teacher') return null;
-  }
-
-  if (pathname.startsWith('/teacher') && role !== 'teacher') {
-    return null;
-  }
-
-  if (pathname.startsWith('/teacher') && role === 'teacher' && user.status === 'pending' && pathname !== '/teacher/pending') {
+  // If we're redirecting, don't render children to prevent flash of content
+  if (
+    (pathname.startsWith('/admin') && role !== 'admin' && role !== 'staff') ||
+    (pathname.startsWith('/dashboard') && role === 'admin' && !isImpersonating) ||
+    (pathname.startsWith('/dashboard') && role === 'staff' && !isImpersonating) ||
+    (pathname.startsWith('/dashboard') && role === 'teacher' && !pathname.startsWith('/dashboard/courses')) ||
+    (pathname.startsWith('/teacher') && role !== 'teacher') ||
+    (pathname.startsWith('/teacher') && user.status === 'pending' && pathname !== '/teacher/pending') ||
+    (pathname.startsWith('/dashboard') && role === 'teacher' && user.status === 'pending')
+  ) {
     return null;
   }
 

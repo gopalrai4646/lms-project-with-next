@@ -197,7 +197,7 @@ export default function Navbar() {
 
                   {/* Profile Link */}
                   <Link
-                    href="/settings"
+                    href={role === 'teacher' ? '/teacher/account' : '/settings'}
                     onClick={() => setUserOpen(false)}
                     className="flex items-center gap-2.5 px-3.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
                   >

@@ -358,7 +358,7 @@ export default function SignupPage() {
           {step === 2 && role === 'teacher' && (
             <>
               <div>
-                <label className={AUTH_UI.label}>What kind of teaching have you done before?</label>
+                <label className={AUTH_UI.label}>{t?.teacherSignup?.teachingExperienceQuestion || 'What kind of teaching have you done before?'}</label>
                 <div className="space-y-2 mt-2">
                   {['In person, informally', 'In person, professionally', 'Online', 'Other'].map(opt => (
                     <label key={opt} className="flex items-center space-x-3 cursor-pointer p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
@@ -370,14 +370,14 @@ export default function SignupPage() {
                         onChange={(e) => setExperience(e.target.value)}
                         className="w-4 h-4 text-zinc-900 border-zinc-300 focus:ring-zinc-900"
                       />
-                      <span className="text-[13px] text-zinc-700 font-medium">{opt}</span>
+                      <span className="text-[13px] text-zinc-700 font-medium">{t?.teacherSignup?.experienceOptions?.[opt] || opt}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className={AUTH_UI.label}>How much of a video "pro" are you?</label>
+                <label className={AUTH_UI.label}>{t?.teacherSignup?.videoProQuestion || 'How much of a video "pro" are you?'}</label>
                 <div className="space-y-2 mt-2">
                   {['I am a beginner', 'I have some knowledge', 'I am experienced', 'I have videos ready to upload'].map(opt => (
                     <label key={opt} className="flex items-center space-x-3 cursor-pointer p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
@@ -389,14 +389,14 @@ export default function SignupPage() {
                         onChange={(e) => setVideoPro(e.target.value)}
                         className="w-4 h-4 text-zinc-900 border-zinc-300 focus:ring-zinc-900"
                       />
-                      <span className="text-[13px] text-zinc-700 font-medium">{opt}</span>
+                      <span className="text-[13px] text-zinc-700 font-medium">{t?.teacherSignup?.videoOptions?.[opt] || opt}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className={AUTH_UI.label}>Do you have an audience to share your course with?</label>
+                <label className={AUTH_UI.label}>{t?.teacherSignup?.audienceQuestion || 'Do you have an audience to share your course with?'}</label>
                 <div className="space-y-2 mt-2">
                   {['Not at the moment', 'I have a small following', 'I have a sizeable following'].map(opt => (
                     <label key={opt} className="flex items-center space-x-3 cursor-pointer p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
@@ -408,7 +408,7 @@ export default function SignupPage() {
                         onChange={(e) => setAudience(e.target.value)}
                         className="w-4 h-4 text-zinc-900 border-zinc-300 focus:ring-zinc-900"
                       />
-                      <span className="text-[13px] text-zinc-700 font-medium">{opt}</span>
+                      <span className="text-[13px] text-zinc-700 font-medium">{t?.teacherSignup?.audienceOptions?.[opt] || opt}</span>
                     </label>
                   ))}
                 </div>
@@ -420,7 +420,7 @@ export default function SignupPage() {
                   onClick={() => setStep(1)}
                   className="flex-1 py-2.5 px-4 rounded-xl text-[14px] font-semibold border border-zinc-200 text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >
-                  Previous
+                  {t?.teacherSignup?.previous || 'Previous'}
                 </button>
                 <button
                   type="submit"
@@ -433,9 +433,9 @@ export default function SignupPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Submitting...</span>
+                      <span>{t?.teacherSignup?.submitting || 'Submitting...'}</span>
                     </div>
-                  ) : "Submit"}
+                  ) : (t?.teacherSignup?.submit || "Submit")}
                 </button>
               </div>
             </>

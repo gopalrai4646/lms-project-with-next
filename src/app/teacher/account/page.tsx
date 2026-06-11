@@ -15,6 +15,7 @@ export default function TeacherAccountPage() {
   const { t: i18nT } = useTranslation();
   const t = i18nT('auth', { returnObjects: true }) as any;
   const ts = i18nT('settings', { returnObjects: true }) as any;
+  const tTeacher = i18nT('teacher', { returnObjects: true }) as any;
 
   const [name, setName] = useState(user?.displayName || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
@@ -86,8 +87,8 @@ export default function TeacherAccountPage() {
              <UserIcon size={24} />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className={`${TYPOGRAPHY.h1} truncate`}>Account Settings</h1>
-            <p className={`${TYPOGRAPHY.body} mt-1 truncate`}>Manage your teacher profile and preferences</p>
+            <h1 className={`${TYPOGRAPHY.h1} truncate`}>{tTeacher?.account?.accountSettings || 'Account Settings'}</h1>
+            <p className={`${TYPOGRAPHY.body} mt-1 truncate`}>{tTeacher?.account?.manageProfile || 'Manage your teacher profile and preferences'}</p>
           </div>
         </div>
       </header>
@@ -209,7 +210,7 @@ export default function TeacherAccountPage() {
                 <div>
                   <h3 className={`${TYPOGRAPHY.h3} mb-1 leading-tight`}>{ts.profilePhoto || "Photo"}</h3>
                   <p className={`${TYPOGRAPHY.body} text-[11px] leading-tight`}>
-                    Click to update avatar.
+                    {tTeacher?.account?.clickToUpdateAvatar || 'Click to update avatar.'}
                   </p>
                 </div>
               </div>
@@ -318,20 +319,20 @@ export default function TeacherAccountPage() {
 
           {user.teacherProfile && (
             <div className="pt-6 mt-6 border-t border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">Teaching Profile (Read Only)</h3>
+              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">{tTeacher?.account?.teachingProfileReadOnly || 'Teaching Profile (Read Only)'}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Teaching Experience</p>
-                  <p className="text-sm text-slate-800 font-medium">{user.teacherProfile.experience}</p>
+                  <p className="text-xs text-slate-500 mb-1">{tTeacher?.account?.teachingExperience || 'Teaching Experience'}</p>
+                  <p className="text-sm text-slate-800 font-medium">{t?.teacherSignup?.experienceOptions?.[user.teacherProfile.experience] || user.teacherProfile.experience}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Video Proficiency</p>
-                  <p className="text-sm text-slate-800 font-medium">{user.teacherProfile.videoPro}</p>
+                  <p className="text-xs text-slate-500 mb-1">{tTeacher?.account?.videoProficiency || 'Video Proficiency'}</p>
+                  <p className="text-sm text-slate-800 font-medium">{t?.teacherSignup?.videoOptions?.[user.teacherProfile.videoPro] || user.teacherProfile.videoPro}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Audience Size</p>
-                  <p className="text-sm text-slate-800 font-medium">{user.teacherProfile.audience}</p>
+                  <p className="text-xs text-slate-500 mb-1">{tTeacher?.account?.audienceSize || 'Audience Size'}</p>
+                  <p className="text-sm text-slate-800 font-medium">{t?.teacherSignup?.audienceOptions?.[user.teacherProfile.audience] || user.teacherProfile.audience}</p>
                 </div>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { useTranslation } from 'react-i18next';
 
 import { 
   LayoutDashboard, 
@@ -22,6 +23,8 @@ export default function TeacherSidebar() {
   const dispatch = useAppDispatch();
   const { user, role } = useAppSelector((state) => state.auth);
   const { isMobileMenuOpen, isSidebarCollapsed } = useAppSelector((state) => state.settings);
+  const { t: i18nT } = useTranslation();
+  const t = i18nT('teacher', { returnObjects: true }) as any;
 
   useEffect(() => {
     const savedCollapsed = localStorage.getItem('sidebar_collapsed');
@@ -45,12 +48,21 @@ export default function TeacherSidebar() {
   if (!user || role !== 'teacher') return null;
 
   const menuItems = [
-    { name: 'Dashboard', href: '/teacher/dashboard', icon: <LayoutDashboard size={18} /> },
-    { name: 'Manage Courses', href: '/teacher/courses', icon: <BookOpen size={18} /> },
-    { name: 'Training Plans', href: '/teacher/training-plans', icon: <ClipboardList size={18} /> },
-    { name: 'Manage Users', href: '/teacher/users', icon: <UserSquare2 size={18} /> },
-    { name: 'Account', href: '/teacher/account', icon: <Settings size={18} /> },
+    { name: t?.nav?.dashboard || 'Dashboard', href: '/teacher/dashboard', icon: <LayoutDashboard size={18} /> },
+    { name: t?.nav?.manageCourses || 'Manage Courses', href: '/teacher/courses', icon: <BookOpen size={18} /> },
+    { name: t?.nav?.trainingPlans || 'Training Plans', href: '/teacher/training-plans', icon: <ClipboardList size={18} /> },
+    { name: t?.nav?.manageUsers || 'Manage Users', href: '/teacher/users', icon: <UserSquare2 size={18} /> },
   ];
+
+  if (user?.enrolledCourses && user.enrolledCourses.length > 0) {
+    menuItems.push({ name: t?.nav?.assignedCourses || 'Assigned Courses', href: '/dashboard/courses', icon: <BookOpen size={18} /> });
+  }
+
+  if (user?.assignedTrainingPlans && user.assignedTrainingPlans.length > 0) {
+    menuItems.push({ name: t?.nav?.assignedPlans || 'Assigned Plans', href: '/training-plans', icon: <ClipboardList size={18} /> });
+  }
+
+  menuItems.push({ name: t?.nav?.account || 'Account', href: '/teacher/account', icon: <Settings size={18} /> });
 
   return (
     <>

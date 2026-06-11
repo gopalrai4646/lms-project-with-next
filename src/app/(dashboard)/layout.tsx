@@ -1,5 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
-import Sidebar from "@/components/layout/Sidebar";
+import DynamicSidebar from "@/components/layout/DynamicSidebar";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import ResponsiveLayout from "@/components/layout/ResponsiveLayout";
 import RouteGuard from "@/components/auth/RouteGuard";
@@ -13,7 +13,7 @@ export default function DashboardLayout({
     <RouteGuard allowedRole="any">
       <div className="min-h-screen bg-slate-50 relative overflow-x-hidden">
         <Navbar />
-        <Sidebar />
+        <DynamicSidebar />
         <ResponsiveLayout>
           <Breadcrumbs />
           {children}
