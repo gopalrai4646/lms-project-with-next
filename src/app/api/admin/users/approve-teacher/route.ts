@@ -11,9 +11,22 @@ export async function POST(request: Request) {
     const token = authHeader.split('Bearer ')[1];
     const decodedToken = await adminAuth.verifyIdToken(token);
 
-    // Verify caller is admin
+    // Verify caller is admin or authorized staff
     const callerDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
-    if (!callerDoc.exists || callerDoc.data()?.role !== 'admin') {
+    const callerData = callerDoc.data();
+    
+    const isAdmin = callerData?.role === 'admin';
+    let isAuthorizedStaff = false;
+
+    if (callerData?.role === 'staff' && callerData.staffRoleId) {
+      const roleDoc = await adminDb.collection('staffRoles').doc(callerData.staffRoleId).get();
+      const roleData = roleDoc.data();
+      if (roleData && Array.isArray(roleData.permissions) && roleData.permissions.includes('teachers_approve')) {
+        isAuthorizedStaff = true;
+      }
+    }
+
+    if (!callerDoc.exists || (!isAdmin && !isAuthorizedStaff)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
